@@ -60,6 +60,7 @@ export const EditRequestDialog = ({
   const [transferAmount, setTransferAmount] = useState<string>("");
   const [isTotalTransfer, setIsTotalTransfer] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("מעבד");
+  const [selectedStanding, setSelectedStanding] = useState("");
 
   const lastInitializedRequestTypeIdRef = useRef<string | null>(null);
 
@@ -130,6 +131,7 @@ export const EditRequestDialog = ({
     setChoiceDuration(request.choiceDuration ?? "");
     setTransferType(request.transferType ?? "");
     setKerenName(request.kerenName ?? "");
+    setSelectedStanding(request.standing ?? "");
 
     // Tracks
     if (request.tracks) {
@@ -206,6 +208,7 @@ export const EditRequestDialog = ({
           isTotalTransfer,
           transferAmount: isTotalTransfer ? undefined : transferAmount.trim(),
           tracks: tracksObj,
+          standing: (selectedStanding === "-" || selectedStanding === "") ? undefined : selectedStanding as any,
         },
       });
 
@@ -369,6 +372,23 @@ export const EditRequestDialog = ({
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">%</span>
               </div>
+            </div>
+
+            {/* Standing */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-foreground">מעמד</Label>
+              <Select value={selectedStanding || "-"} onValueChange={setSelectedStanding} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="מוצר במעמד שכיר">מוצר במעמד שכיר</SelectItem>
+                  <SelectItem value="מוצר במעמד עצמאי">מוצר במעמד עצמאי</SelectItem>
+                  <SelectItem value="מוצר במעמד שכיר בעל שליטה">מוצר במעמד שכיר בעל שליטה</SelectItem>
+                  <SelectItem value="מוצר במעמד עצמאי באמצעות מעסיק">מוצר במעמד עצמאי באמצעות מעסיק</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
