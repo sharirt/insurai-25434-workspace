@@ -383,10 +383,10 @@ export const EditRequestDialog = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="-">ללא</SelectItem>
-                  <SelectItem value="מוצר במעמד שכיר">מוצר במעמד שכיר</SelectItem>
-                  <SelectItem value="מוצר במעמד עצמאי">מוצר במעמד עצמאי</SelectItem>
-                  <SelectItem value="מוצר במעמד שכיר בעל שליטה">מוצר במעמד שכיר בעל שליטה</SelectItem>
-                  <SelectItem value="מוצר במעמד עצמאי באמצעות מעסיק">מוצר במעמד עצמאי באמצעות מעסיק</SelectItem>
+                  <SelectItem value="שכיר">שכיר</SelectItem>
+                  <SelectItem value="עצמאי">עצמאי</SelectItem>
+                  <SelectItem value="שכיר בעל שליטה">שכיר בעל שליטה</SelectItem>
+                  <SelectItem value="עצמאי באמצעות מעסיק">עצמאי באמצעות מעסיק</SelectItem>
                 </SelectContent>
               </Select>
             </div>
