@@ -466,6 +466,12 @@ export type RequestsEntityTransferTypeEnum =
  */
 export interface IRequestsEntityTracksObject {}
 
+export type RequestsEntityStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק";
+
 export type RequestsEntityChoiceDurationEnum = "" | "6" | "12" | "24";
 
 /**
@@ -500,6 +506,8 @@ export interface IRequestsEntity {
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IRequestsEntityTracksObject;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: RequestsEntityStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: RequestsEntityChoiceDurationEnum;
 }
@@ -857,6 +865,12 @@ export type AutoProcessNewRequestActionOutputTransferTypeEnum =
  */
 export interface IAutoProcessNewRequestActionOutputTracksObject {}
 
+export type AutoProcessNewRequestActionOutputStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק";
+
 export type AutoProcessNewRequestActionOutputChoiceDurationEnum =
   | ""
   | "6"
@@ -909,6 +923,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IAutoProcessNewRequestActionOutputTracksObject;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: AutoProcessNewRequestActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: AutoProcessNewRequestActionOutputChoiceDurationEnum;
 }
@@ -1302,6 +1318,12 @@ export type ProcessRequestFormsActionOutputTransferTypeEnum =
  */
 export interface IProcessRequestFormsActionOutputTracksObject {}
 
+export type ProcessRequestFormsActionOutputStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק";
+
 export type ProcessRequestFormsActionOutputChoiceDurationEnum =
   | ""
   | "6"
@@ -1354,6 +1376,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IProcessRequestFormsActionOutputTracksObject;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: ProcessRequestFormsActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: ProcessRequestFormsActionOutputChoiceDurationEnum;
 }
@@ -1702,4 +1726,36 @@ export const SyncRoetoClientsAction = {
 
   inputInstanceType: {} as ISyncRoetoClientsActionInput,
   outputInstanceType: {} as ISyncRoetoClientsActionOutput,
+} as const;
+
+/**
+ * TestRoetoConnection input payload
+ */
+export interface ITestRoetoConnectionActionInput {}
+
+/**
+ * TestRoetoConnection output payload
+ */
+export interface ITestRoetoConnectionActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Summary message  */
+  message?: string;
+  /** List of Roeto _id values for all active clients  */
+  clientIds?: string[];
+  /** Total number of unique active clients found  */
+  clientCount?: number;
+  /** Total number of agents fetched  */
+  agentCount?: number;
+}
+
+/**
+ * TestRoetoConnectionAction
+ * Execute code action
+ */
+export const TestRoetoConnectionAction = {
+  actionBlockId: "69ee05df10b251ac6e219afa",
+
+  inputInstanceType: {} as ITestRoetoConnectionActionInput,
+  outputInstanceType: {} as ITestRoetoConnectionActionOutput,
 } as const;

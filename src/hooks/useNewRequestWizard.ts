@@ -42,6 +42,7 @@ export function useNewRequestWizard({
     undefined
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [standing, setStanding] = useState("");
 
   const { data: providers, isLoading: isLoadingProviders } =
     useEntityGetAll(ProvidersEntity);
@@ -114,6 +115,7 @@ export function useNewRequestWizard({
       setManagementFee(undefined);
       setTracksValues({});
       setIsSubmitting(false);
+      setStanding("");
     }
   }, [open]);
 
@@ -156,6 +158,7 @@ export function useNewRequestWizard({
           tracks: tracksValues,
           fundId: selectedFundId || undefined,
           managementFee: managementFee ?? undefined,
+          standing: standing || undefined,
         },
       });
 
@@ -177,6 +180,7 @@ export function useNewRequestWizard({
     selectedRequestTypeId,
     selectedFundId,
     managementFee,
+    standing,
     isStandalone,
     clientId,
     tracksValues,
@@ -210,5 +214,7 @@ export function useNewRequestWizard({
     sortedProviders,
     sortedRequestTypes,
     sortedFunds,
+    standing,
+    setStanding,
   };
 }

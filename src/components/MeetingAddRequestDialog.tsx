@@ -80,6 +80,7 @@ export const MeetingAddRequestDialog = ({
   const [isTotalTransfer, setIsTotalTransfer] = useState(true);
   const [requestTypeSearch, setRequestTypeSearch] = useState("");
   const [providerSearch, setProviderSearch] = useState("");
+  const [standing, setStanding] = useState("");
 
   const lastInitializedRequestTypeIdRef = useRef<string | null>(null);
 
@@ -137,6 +138,7 @@ export const MeetingAddRequestDialog = ({
       setIsTotalTransfer(true);
       setRequestTypeSearch("");
       setProviderSearch("");
+      setStanding("");
     } else if (open && editingRequest) {
       lastInitializedRequestTypeIdRef.current = editingRequest.requestTypeId ?? "";
       setSelectedFundId(editingRequest.fundId ?? "");
@@ -147,6 +149,7 @@ export const MeetingAddRequestDialog = ({
       setChoiceDuration(editingRequest.choiceDuration ?? "");
       setTransferType(editingRequest.transferType || "צבירה והפקדות");
       setKerenName(editingRequest.kerenName ?? "");
+      setStanding(editingRequest.standing ?? "");
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -226,6 +229,7 @@ export const MeetingAddRequestDialog = ({
       kerenName: kerenName === "-" ? "" : kerenName,
       isTotalTransfer,
       transferAmount: isTotalTransfer ? undefined : transferAmount.trim(),
+      standing: standing || undefined,
     };
 
     onAdd(newRequest);
@@ -250,6 +254,7 @@ export const MeetingAddRequestDialog = ({
     kerenName,
     transferAmount,
     isTotalTransfer,
+    standing,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -469,6 +474,23 @@ export const MeetingAddRequestDialog = ({
                   %
                 </span>
               </div>
+            </div>
+
+            {/* מעמד */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">מעמד</Label>
+              <Select value={standing || "-"} onValueChange={(val) => setStanding(val === "-" ? "" : val)} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="שכיר">שכיר</SelectItem>
+                  <SelectItem value="עצמאי">עצמאי</SelectItem>
+                  <SelectItem value="שכיר בעל שליטה">שכיר בעל שליטה</SelectItem>
+                  <SelectItem value="עצמאי באמצעות מעסיק">עצמאי באמצעות מעסיק</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

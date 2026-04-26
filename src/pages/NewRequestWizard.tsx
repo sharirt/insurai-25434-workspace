@@ -112,6 +112,8 @@ export default function NewRequestWizard() {
     sortedProviders,
     sortedRequestTypes,
     sortedFunds,
+    standing,
+    setStanding,
   } = useNewRequestWizard({
     open: true,
     clientId,
@@ -236,6 +238,8 @@ export default function NewRequestWizard() {
               setKerenName={setKerenName}
               transferAmount={transferAmount}
               setTransferAmount={setTransferAmount}
+              standing={standing}
+              setStanding={setStanding}
                 isLoadingProviders={isLoadingProviders}
                 isLoadingRequestTypes={isLoadingRequestTypes}
                 isLoadingFunds={isLoadingFunds}

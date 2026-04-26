@@ -73,6 +73,10 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "שם הקרן היא אומגה", expression: "requests.kerenName === 'אומגה'" },
   { label: "העברת סכום מלא", expression: "requests.isTotalTransfer === true" },
   { label: "העברת סכום חלקי", expression: "requests.isTotalTransfer === false" },
+  { label: "מוצר במעמד שכיר", expression: "requests.standing === 'שכיר'" },
+  { label: "מוצר במעמד עצמאי", expression: "requests.standing === 'עצמאי'" },
+  { label: "מוצר במעמד שכיר בעל שליטה", expression: "requests.standing === 'שכיר בעל שליטה'" },
+  { label: "מוצר במעמד עצמאי באמצעות מעסיק", expression: "requests.standing === 'עצמאי באמצעות מעסיק'" },
 ];
 
 /**

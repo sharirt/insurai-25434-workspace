@@ -28,6 +28,8 @@ interface WizardStep1ContentProps {
   setKerenName: (val: string) => void;
   transferAmount: string;
   setTransferAmount: (val: string) => void;
+  standing: string;
+  setStanding: (val: string) => void;
   isLoadingProviders: boolean;
   isLoadingRequestTypes: boolean;
   isLoadingFunds: boolean;
@@ -53,6 +55,8 @@ export const WizardStep1Content = ({
   setKerenName,
   transferAmount,
   setTransferAmount,
+  standing,
+  setStanding,
   isLoadingProviders,
   isLoadingRequestTypes,
   isLoadingFunds,
@@ -252,6 +256,22 @@ export const WizardStep1Content = ({
             <SelectItem value="-">ללא</SelectItem>
             <SelectItem value="כללי">כללי</SelectItem>
             <SelectItem value="אומגה">אומגה</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-base font-medium">מעמד</Label>
+        <Select value={standing || "-"} onValueChange={(val) => setStanding(val === "-" ? "" : val)} dir="rtl">
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="ללא" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="-">ללא</SelectItem>
+            <SelectItem value="שכיר">שכיר</SelectItem>
+            <SelectItem value="עצמאי">עצמאי</SelectItem>
+            <SelectItem value="שכיר בעל שליטה">שכיר בעל שליטה</SelectItem>
+            <SelectItem value="עצמאי באמצעות מעסיק">עצמאי באמצעות מעסיק</SelectItem>
           </SelectContent>
         </Select>
       </div>
