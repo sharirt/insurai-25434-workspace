@@ -7,12 +7,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { AlertCircle, LayoutGrid, List, Plus, Search as SearchIcon, Upload } from "lucide-react";
+import { AlertCircle, LayoutGrid, List, Plus, RefreshCw, Search as SearchIcon, Upload } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { ClientFormDialog } from "@/components/ClientFormDialog";
 import { DeleteClientDialog } from "@/components/DeleteClientDialog";
 import { ImportClientsDialog } from "@/components/ImportClientsDialog";
 import { ImportAllClientsFundsDialog } from "@/components/ImportAllClientsFundsDialog";
+import { SyncRoetoDialog } from "@/components/SyncRoetoDialog";
 import { filterClients } from "@/utils/filterClients";
 
 type ViewMode = "cards" | "list";
@@ -22,6 +23,7 @@ export default function ClientsManager() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isImportFundsOpen, setIsImportFundsOpen] = useState(false);
+  const [isSyncOpen, setIsSyncOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<typeof ClientsEntity['instanceType'] | null>(null);
   const [deletingClient, setDeletingClient] = useState<typeof ClientsEntity['instanceType'] | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -150,6 +152,10 @@ export default function ClientsManager() {
                 <List className="h-4 w-4" />
               </ToggleGroupItem>
             </ToggleGroup>
+            <Button variant="outline" onClick={() => setIsSyncOpen(true)}>
+              <RefreshCw data-icon="inline-start" />
+              סנכרן עם Roeto
+            </Button>
             <Button variant="outline" onClick={() => setIsImportFundsOpen(true)}>
               <Upload className="ml-2 h-4 w-4" />ייבוא מוצרים</Button>
             <Button variant="outline" onClick={() => setIsImportOpen(true)}>
@@ -223,6 +229,12 @@ export default function ClientsManager() {
           open={isImportOpen}
           onClose={handleImportClose}
           onSuccess={handleImportSuccess}
+        />
+
+        <SyncRoetoDialog
+          open={isSyncOpen}
+          onClose={() => setIsSyncOpen(false)}
+          onSuccess={() => refetch()}
         />
 
         <ImportAllClientsFundsDialog

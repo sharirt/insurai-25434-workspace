@@ -933,6 +933,27 @@ export const AutoProcessNewRequestAction = {
 } as const;
 
 /**
+ * createClientContext input payload
+ */
+export interface ICreateClientContextActionInput {
+  /** The ID of the request from the Requests table to build context for  */
+  requestId: string;
+}
+
+export type CreateClientContextActionOutput = any;
+
+/**
+ * createClientContextAction
+ * Builds a complete clientContext object for a given requestId. Fetches the request, then in parallel fetches the specific client, agent, provider, the specific fund linked to the request, and the agency. Outputs the full clientContext object: clients (specific client data), agents (specific agent data), providers (specific provider data), funds (specific fund data), requests (full request data), agency (agency data).
+ */
+export const CreateClientContextAction = {
+  actionBlockId: "69db99ac7d23f0bc9a2950e5",
+
+  inputInstanceType: {} as ICreateClientContextActionInput,
+  outputInstanceType: {} as ICreateClientContextActionOutput,
+} as const;
+
+/**
  * The specific client data
  */
 export interface IFillSingleFormWithMappingActionInputClientsObject {}
@@ -1641,4 +1662,44 @@ export const SendSignedDocsToProviderEmailAction = {
 
   inputInstanceType: {} as ISendSignedDocsToProviderEmailActionInput,
   outputInstanceType: {} as ISendSignedDocsToProviderEmailActionOutput,
+} as const;
+
+export type SyncRoetoClientsActionInputSyncModeEnum =
+  | "active"
+  | "tromYeutz"
+  | "all";
+
+/**
+ * SyncRoetoClients input payload
+ */
+export interface ISyncRoetoClientsActionInput {
+  /** Which client types to sync: active, tromYeutz, or all (default: "all") */
+  syncMode?: SyncRoetoClientsActionInputSyncModeEnum;
+}
+
+/**
+ * SyncRoetoClients output payload
+ */
+export interface ISyncRoetoClientsActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Summary message  */
+  message?: string;
+  /** Number of clients synced/upserted  */
+  syncedCount?: number;
+  /** Number of clients skipped  */
+  skippedCount?: number;
+  /** List of error messages  */
+  errors?: string[];
+}
+
+/**
+ * SyncRoetoClientsAction
+ * Execute code action
+ */
+export const SyncRoetoClientsAction = {
+  actionBlockId: "69ede6b3f00bb8e7d9cec47e",
+
+  inputInstanceType: {} as ISyncRoetoClientsActionInput,
+  outputInstanceType: {} as ISyncRoetoClientsActionOutput,
 } as const;
