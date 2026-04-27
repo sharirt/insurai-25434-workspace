@@ -210,7 +210,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
           </DialogHeader>
           {previewDoc?.url && (
             <iframe
-              src={previewDoc.url}
+              src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDoc.url)}&embedded=true`}
               title={previewDoc.name}
               className="w-full h-[80vh] rounded border-0"
             />

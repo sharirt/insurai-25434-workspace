@@ -222,14 +222,6 @@ export interface IFormsEntityFileDataObject {
 }
 
 /**
- * User-defined PDF annotation boxes for the form. Each box defines a fillable field to be added to the PDF at generation time via AnnotatePdfFormFields. Stores position (x, y in points from bottom-left), size, page (0-indexed), field type, name (used as the field key in fieldMapping), and text styling options.
- */
-export interface IFormsEntityPdfAnnotationsObject {
-  /** List of annotated field boxes placed on the PDF  */
-  fields: IFormsEntityFormsEntityFieldsItemObject[];
-}
-
-/**
  * Stores insurance form templates including PDF files with dynamic fields, field mappings, associated providers and request types for automated form processing
  */
 export interface IFormsEntity {
@@ -259,8 +251,6 @@ export interface IFormsEntity {
   fileData?: IFormsEntityFileDataObject;
   /** Form title in Hebrew  */
   formTitleHebrew?: string;
-  /** User-defined PDF annotation boxes for the form. Each box defines a fillable field to be added to the PDF at generation time via AnnotatePdfFormFields. Stores position (x, y in points from bottom-left), size, page (0-indexed), field type, name (used as the field key in fieldMapping), and text styling options.  */
-  pdfAnnotations?: IFormsEntityPdfAnnotationsObject;
 }
 
 export const FormsEntity = {
@@ -959,137 +949,6 @@ export const AutoProcessNewRequestAction = {
 } as const;
 
 /**
- * BakeAnnotationsIntoPdf input payload
- */
-export interface IBakeAnnotationsIntoPdfActionInput {
-  /** The ID of the form template in the Forms table whose pdfAnnotations should be baked into the PDF file  */
-  formId: string;
-}
-
-export type BakeAnnotationsIntoPdfActionOutputFormStatusEnum =
-  | "לפני מיפוי"
-  | "חסרות אפשרויות מיפוי"
-  | "לפני בדיקה"
-  | "צריך לערוך קופסאות"
-  | "מוכן (ללא מקרי קצה)"
-  | "טיוטא ישנה"
-  | "מוכן (100%)";
-
-/**
- * JSON object with key-value pairs where key is the document field name and value is the mapping rule
- */
-export interface IBakeAnnotationsIntoPdfActionOutputFieldMappingObject {}
-
-/**
- * undefined
- */
-export interface IBakeAnnotationsIntoPdfActionOutputBakeAnnotationsIntoPdfActionOutputFieldsItemObject {
-  /** Unique field identifier  */
-  id: string;
-  /** Field type: signature, date, text, checkbox, initials  */
-  type: string;
-  /** Signer role: Agent or Client  */
-  role: string;
-  /** X coordinate as ratio (0-1) of page width  */
-  x: number;
-  /** Y coordinate as ratio (0-1) of page height  */
-  y: number;
-  /** Width as ratio (0-1) of page width  */
-  w: number;
-  /** Height as ratio (0-1) of page height  */
-  h: number;
-  /** Page number (1-indexed, compatible with DocuSeal API)  */
-  page: number;
-}
-
-/**
- * Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.
- */
-export interface IBakeAnnotationsIntoPdfActionOutputSignatureFieldsObject {
-  /** List of signature fields placed on the PDF with DocuSeal-compatible ratio-based coordinates  */
-  fields: IBakeAnnotationsIntoPdfActionOutputBakeAnnotationsIntoPdfActionOutputFieldsItemObject[];
-}
-
-/**
- * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
- */
-export interface IBakeAnnotationsIntoPdfActionOutputFileDataObject {
-  /** The original file name  */
-  name: string;
-  /** File size in bytes  */
-  size?: number;
-  /** MIME type of the file  */
-  type?: string;
-  /** The URL where the file is stored  */
-  url: string;
-}
-
-/**
- * The item inserted into the table, keys are the column names, values are the column values
- */
-export interface IBakeAnnotationsIntoPdfActionOutputBakeAnnotationsIntoPdfActionOutputItemsItemObject {
-  /** Item id  */
-  id?: string;
-  /** Item created at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  createdAt?: string;
-  /** Item updated at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  updatedAt?: string;
-  /** Item created by user id  */
-  createdBy?: string;
-  /** Item updated by user id  */
-  updatedBy?: string;
-  /** Item updated by agent id  */
-  updatedByAgentId?: string;
-  /** Item tenant id  */
-  tenantId?: string;
-  /** Current status of the form template indicating its readiness or lifecycle stage  */
-  formStatus?: BakeAnnotationsIntoPdfActionOutputFormStatusEnum;
-  /** List of Provider IDs from the Providers table  */
-  providers?: string[];
-  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
-  fieldMapping?: IBakeAnnotationsIntoPdfActionOutputFieldMappingObject;
-  /** Form title in English  */
-  formTitle?: string;
-  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
-  imageAttachment?: string;
-  /** Number of pages in the form  */
-  pages?: number;
-  /** Unique form identifier number  */
-  formNumber?: string;
-  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
-  notes?: string;
-  /** Optional purpose description for the form, can be null  */
-  purpose?: string;
-  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
-  signatureFields?: IBakeAnnotationsIntoPdfActionOutputSignatureFieldsObject;
-  /** List of request type IDs from the RequestSchemes table  */
-  requests?: string[];
-  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
-  fileData?: IBakeAnnotationsIntoPdfActionOutputFileDataObject;
-  /** Form title in Hebrew  */
-  formTitleHebrew?: string;
-}
-
-/**
- * BakeAnnotationsIntoPdf output payload
- */
-export interface IBakeAnnotationsIntoPdfActionOutput {
-  /** The items inserted into the table  */
-  items: IBakeAnnotationsIntoPdfActionOutputBakeAnnotationsIntoPdfActionOutputItemsItemObject[];
-}
-
-/**
- * BakeAnnotationsIntoPdfAction
- * Takes a form's pdfAnnotations from the Forms table, calls AnnotatePdfFormFields to embed them as real AcroForm fields into the PDF file, then saves the new annotated PDF URL back to the form's fileData column and clears pdfAnnotations. This makes the PDF itself the source of truth for form fields.
- */
-export const BakeAnnotationsIntoPdfAction = {
-  actionBlockId: "69ef7bc2e15e1eccb44dd930",
-
-  inputInstanceType: {} as IBakeAnnotationsIntoPdfActionInput,
-  outputInstanceType: {} as IBakeAnnotationsIntoPdfActionOutput,
-} as const;
-
-/**
  * CleanClientPhoneNumbers input payload
  */
 export interface ICleanClientPhoneNumbersActionInput {}
@@ -1138,6 +997,94 @@ export const CreateClientContextAction = {
 
   inputInstanceType: {} as ICreateClientContextActionInput,
   outputInstanceType: {} as ICreateClientContextActionOutput,
+} as const;
+
+/**
+ * The specific client data
+ */
+export interface IFillSingleFormWithMappingActionInputClientsObject {}
+
+/**
+ * The specific agent data
+ */
+export interface IFillSingleFormWithMappingActionInputAgentsObject {}
+
+/**
+ * The specific provider data
+ */
+export interface IFillSingleFormWithMappingActionInputProviderObject {}
+
+/**
+ * The specific fund data (single object, not array)
+ */
+export interface IFillSingleFormWithMappingActionInputFundsObject {}
+
+/**
+ * undefined
+ */
+export interface IFillSingleFormWithMappingActionInputTracksObject {}
+
+/**
+ * Request data containing managementFee and tracks
+ */
+export interface IFillSingleFormWithMappingActionInputRequestsObject {
+  managementFee?: number;
+  tracks?: IFillSingleFormWithMappingActionInputTracksObject;
+}
+
+/**
+ * All data needed to fill the form. Structure: { clients: {client data}, agents: {agent data}, provider: {provider data}, funds: {single fund object}, requests: { managementFee: number, tracks: {track field values} } }
+ */
+export interface IFillSingleFormWithMappingActionInputClientContextObject {
+  /** The specific client data  */
+  clients?: IFillSingleFormWithMappingActionInputClientsObject;
+  /** The specific agent data  */
+  agents?: IFillSingleFormWithMappingActionInputAgentsObject;
+  /** The specific provider data  */
+  provider?: IFillSingleFormWithMappingActionInputProviderObject;
+  /** The specific fund data (single object, not array)  */
+  funds?: IFillSingleFormWithMappingActionInputFundsObject;
+  /** Request data containing managementFee and tracks  */
+  requests?: IFillSingleFormWithMappingActionInputRequestsObject;
+}
+
+/**
+ * FillSingleFormWithMapping input payload
+ */
+export interface IFillSingleFormWithMappingActionInput {
+  /** The ID of the form template to fill from the Forms table  */
+  formId: string;
+  /** All data needed to fill the form. Structure: { clients: {client data}, agents: {agent data}, provider: {provider data}, funds: {single fund object}, requests: { managementFee: number, tracks: {track field values} } }  */
+  clientContext: IFillSingleFormWithMappingActionInputClientContextObject;
+}
+
+/**
+ * FillSingleFormWithMapping output payload
+ */
+export interface IFillSingleFormWithMappingActionOutput {
+  /** The protected internal URL of the filled PDF (ending with /redirect)  */
+  protectedUrl?: string;
+  /** The file name of the filled PDF  */
+  fileName?: string;
+  /** The size of the filled PDF in bytes  */
+  fileSize?: number;
+  /** Number of fields that were successfully filled  */
+  fieldsFilled?: number;
+  /** List of field names that were successfully filled  */
+  filledFieldNames?: string[];
+  /** List of field names that were not found in the PDF  */
+  notFoundFields?: string[];
+}
+
+/**
+ * FillSingleFormWithMappingAction
+ * Fills a single PDF form using a formId and a clientContext object. Fetches the form's fieldMapping from the Forms table, uses VariablesPopulate to map clientContext data to the fieldMapping keys producing a fieldValues object, then calls FillPdfForm to produce the filled PDF. Returns the filled PDF URL and metadata. clientContext structure: { clients, agents, provider, funds (single object), requests: { managementFee, tracks } }
+ */
+export const FillSingleFormWithMappingAction = {
+  actionBlockId: "69db99a97d23f0bc9a294f4e",
+
+  inputInstanceType: {} as IFillSingleFormWithMappingActionInput,
+  outputInstanceType: {} as IFillSingleFormWithMappingActionOutput,
 } as const;
 
 /**

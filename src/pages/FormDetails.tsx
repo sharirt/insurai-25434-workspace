@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useEntityGetOne, useEntityGetAll, useEntityUpdate, useExecuteAction, useFileUpload } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction, BakeAnnotationsIntoPdfAction } from "@/product-types";
+import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction } from "@/product-types";
 import type { IAnalyzePdfFormFieldsActionOutputAnalyzePdfFormFieldsActionOutputFieldsItemObject } from "@/product-types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { PdfViewer } from "@/components/ui/pdf-viewer";
 import { FieldMappingEditor } from "@/components/FieldMappingEditor";
 import { SignatureFieldsEditor, PdfDropZone } from "@/components/SignatureFieldsEditor";
-import { PdfAnnotationOverlay } from "@/components/PdfAnnotationOverlay";
-import { AnnotationPropertiesPanel } from "@/components/AnnotationPropertiesPanel";
-import type { AnnotationField } from "@/components/PdfAnnotationOverlay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -54,13 +51,6 @@ export default function FormDetails() {
   const [fieldSearchTerm, setFieldSearchTerm] = useState("");
   const [activeTypeFilter, setActiveTypeFilter] = useState("הכל");
 
-  // Annotation state
-  const [annotationFields, setAnnotationFields] = useState<AnnotationField[]>([]);
-  const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
-  const [isAnnotationDirty, setIsAnnotationDirty] = useState(false);
-  const [isSavingAnnotations, setIsSavingAnnotations] = useState(false);
-  const [annotationsInitialized, setAnnotationsInitialized] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFunction, isLoading: isUploading } = useFileUpload();
 
@@ -77,7 +67,6 @@ export default function FormDetails() {
   const { data: allProviders } = useEntityGetAll(ProvidersEntity);
   const { updateFunction, isLoading: isUpdating } = useEntityUpdate(FormsEntity);
   const { executeFunction: analyzeFields, isLoading: isAnalyzing } = useExecuteAction(AnalyzePdfFormFieldsAction);
-  const { executeFunction: bakeAnnotations, isLoading: isBaking } = useExecuteAction(BakeAnnotationsIntoPdfAction);
 
   // Track wrapper width so PdfViewer canvas fits inside the container
   const [pdfWidth, setPdfWidth] = useState(0);
@@ -302,122 +291,6 @@ export default function FormDetails() {
         fileInputRef.current.value = "";
       }
     }
-  };
-
-  // Load annotation fields from form data (points → pixels)
-  useEffect(() => {
-    if (!form?.pdfAnnotations?.fields || !pdfNativeSize || pdfWidth <= 0 || annotationsInitialized) return;
-    const renderedPdfHeight = pdfWidth * (pdfNativeSize.pdfH / pdfNativeSize.pdfW);
-    const scaleX = pdfWidth / pdfNativeSize.pdfW;
-    const scaleY = renderedPdfHeight / pdfNativeSize.pdfH;
-
-    const loaded: AnnotationField[] = (form.pdfAnnotations.fields as any[]).map((f: any) => ({
-      id: f.id || crypto.randomUUID(),
-      name: f.name || f.type || "שדה",
-      type: f.type || "text",
-      page: f.page ?? 0,
-      x: (f.x ?? 0) * scaleX,
-      y: renderedPdfHeight - ((f.y ?? 0) + (f.height ?? 0)) * scaleY,
-      width: (f.width ?? f.w ?? 50) * scaleX,
-      height: (f.height ?? f.h ?? 20) * scaleY,
-      options: f.options,
-      fontSize: f.fontSize ?? 10,
-      fontFamily: f.fontFamily ?? "Helvetica",
-      textDirection: f.textDirection ?? "rtl",
-      required: f.required ?? false,
-      readOnly: f.readOnly ?? false,
-    }));
-
-    setAnnotationFields(loaded);
-    setAnnotationsInitialized(true);
-  }, [form?.pdfAnnotations, pdfNativeSize, pdfWidth, annotationsInitialized]);
-
-  const handleSaveAnnotations = async () => {
-    if (!form?.id || !pdfNativeSize || pdfWidth <= 0) return;
-    setIsSavingAnnotations(true);
-    try {
-      const renderedPdfHeight = pdfWidth * (pdfNativeSize.pdfH / pdfNativeSize.pdfW);
-      const scaleX = pdfNativeSize.pdfW / pdfWidth;
-      const scaleY = pdfNativeSize.pdfH / renderedPdfHeight;
-
-      const pointFields = annotationFields.map((f) => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        page: f.page,
-        x: f.x * scaleX,
-        y: (renderedPdfHeight - f.y - f.height) * scaleY,
-        width: f.width * scaleX,
-        height: f.height * scaleY,
-        options: f.options,
-        fontSize: f.fontSize,
-        fontFamily: f.fontFamily,
-        textDirection: f.textDirection,
-        required: f.required,
-        readOnly: f.readOnly,
-      }));
-
-      // Merge fieldMapping: add missing annotation field names
-      const currentMapping = form.fieldMapping || {};
-      const mergedMapping = { ...currentMapping };
-      for (const af of annotationFields) {
-        if (af.name && !(af.name in mergedMapping)) {
-          (mergedMapping as any)[af.name] = "";
-        }
-      }
-
-      // Step 1: Save annotations to DB
-      await updateFunction({
-        id: form.id,
-        data: {
-          pdfAnnotations: { fields: pointFields } as any,
-          fieldMapping: mergedMapping,
-        },
-      });
-
-      // Step 2: Bake annotations into the PDF
-      await bakeAnnotations({ formId: form.id });
-
-      // Success
-      setIsAnnotationDirty(false);
-      setAnnotationsInitialized(false);
-      setAnnotationFields([]);
-      setSelectedAnnotationId(null);
-      toast.success("שדות ה-PDF נאפו לתוך הקובץ בהצלחה");
-    } catch {
-      toast.error("שגיאה באפיית שדות ה-PDF");
-    } finally {
-      setIsSavingAnnotations(false);
-    }
-  };
-
-  const handleAnnotationTabChange = (newTab: string) => {
-    if (activeTab === "pdfAnnotations" && isAnnotationDirty) {
-      const confirmed = window.confirm("יש שינויים שלא נשמרו בשדות ההערות. האם לעזוב בלי לשמור?");
-      if (!confirmed) return;
-    }
-    setActiveTab(newTab);
-  };
-
-  const handleUpdateAnnotationField = (id: string, updates: Partial<AnnotationField>) => {
-    setAnnotationFields((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, ...updates } : f))
-    );
-    setIsAnnotationDirty(true);
-  };
-
-  const handleDeleteAnnotationField = (id: string) => {
-    setAnnotationFields((prev) => prev.filter((f) => f.id !== id));
-    if (selectedAnnotationId === id) setSelectedAnnotationId(null);
-    setIsAnnotationDirty(true);
-  };
-
-  const handleClearAllAnnotations = () => {
-    const confirmed = window.confirm("האם למחוק את כל השדות?");
-    if (!confirmed) return;
-    setAnnotationFields([]);
-    setSelectedAnnotationId(null);
-    setIsAnnotationDirty(true);
   };
 
   const handleBack = () => {
@@ -805,22 +678,6 @@ export default function FormDetails() {
               </div>
             )}
 
-            {activeTab === "pdfAnnotations" && form.fileData?.url && (
-              <PdfAnnotationOverlay
-                annotationFields={annotationFields}
-                currentPage={currentPage}
-                pdfWidth={pdfWidth}
-                pdfNativeSize={pdfNativeSize}
-                selectedAnnotationId={selectedAnnotationId}
-                onSelectField={setSelectedAnnotationId}
-                onUpdateFields={(fields) => {
-                  setAnnotationFields(fields);
-                }}
-                onMarkDirty={() => setIsAnnotationDirty(true)}
-                pdfContainerRef={sigDragDrop.pdfContainerRef}
-              />
-            )}
-
             {activeTab === "signatureFields" && form.fileData?.url && (
               <PdfDropZone
                 isDragOver={sigDragDrop.isDragOver}
@@ -843,7 +700,7 @@ export default function FormDetails() {
 
           {/* Right: Tabbed Panel */}
           <div className="border rounded-lg bg-card overflow-hidden h-[calc(100vh-200px)] flex flex-col">
-            <Tabs value={activeTab} onValueChange={handleAnnotationTabChange} className="flex flex-col h-full" dir="rtl">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full" dir="rtl">
               <div className="p-2 border-b shrink-0">
                 <TabsList className="w-full">
                   <TabsTrigger value="fieldMapping" className="flex-1 gap-1.5">
@@ -853,10 +710,6 @@ export default function FormDetails() {
                   <TabsTrigger value="signatureFields" className="flex-1 gap-1.5">
                     שדות חתימה
                     <Badge variant="outline" className="text-[10px] px-1.5 py-0">{signatureFieldsCount}</Badge>
-                  </TabsTrigger>
-                  <TabsTrigger value="pdfAnnotations" className="flex-1 gap-1.5">
-                    עריכת שדות PDF
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{annotationFields.length}</Badge>
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -1004,23 +857,6 @@ export default function FormDetails() {
                   updateFieldSigner={sigDragDrop.updateFieldSigner}
                   pdfContainerRef={sigDragDrop.pdfContainerRef}
                   pdfNativeSize={pdfNativeSize}
-                />
-              </TabsContent>
-
-              <TabsContent value="pdfAnnotations" className="flex-1 min-h-0 flex flex-col mt-0 data-[state=inactive]:hidden">
-                <AnnotationPropertiesPanel
-                  annotationFields={annotationFields}
-                  selectedAnnotationId={selectedAnnotationId}
-                  isAnnotationDirty={isAnnotationDirty}
-                  isSaving={isSavingAnnotations || isBaking}
-                  isBaking={isBaking}
-                  onUpdateField={handleUpdateAnnotationField}
-                  onDeleteField={handleDeleteAnnotationField}
-                  onSave={handleSaveAnnotations}
-                  onClearAll={handleClearAllAnnotations}
-                  onSelectField={setSelectedAnnotationId}
-                  currentPage={currentPage}
-                  onNavigateToPage={setCurrentPage}
                 />
               </TabsContent>
             </Tabs>
