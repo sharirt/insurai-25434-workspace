@@ -44,6 +44,7 @@ interface AnnotationPropertiesPanelProps {
   selectedAnnotationId: string | null;
   isAnnotationDirty: boolean;
   isSaving: boolean;
+  isBaking?: boolean;
   onUpdateField: (id: string, updates: Partial<AnnotationField>) => void;
   onDeleteField: (id: string) => void;
   onSave: () => void;
@@ -58,6 +59,7 @@ export const AnnotationPropertiesPanel = ({
   selectedAnnotationId,
   isAnnotationDirty,
   isSaving,
+  isBaking,
   onUpdateField,
   onDeleteField,
   onSave,
@@ -105,7 +107,7 @@ export const AnnotationPropertiesPanel = ({
           ) : (
             <Save data-icon="inline-start" />
           )}
-          {isSaving ? "שומר..." : "שמור שינויים"}
+          {isBaking ? "אופה PDF..." : isSaving ? "שומר..." : "שמור שינויים"}
         </Button>
         <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
           {annotationFields.length} שדות
@@ -121,6 +123,13 @@ export const AnnotationPropertiesPanel = ({
             נקה הכל
           </Button>
         )}
+      </div>
+
+      {/* Info banner */}
+      <div className="px-3 py-2 border-b bg-blue-50/50 dark:bg-blue-950/20 shrink-0">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          💡 לחיצה על שמור תטמיע את השדות ישירות בקובץ ה-PDF כשדות אינטראקטיביים אמיתיים
+        </p>
       </div>
 
       <ScrollArea className="flex-1 min-h-0">

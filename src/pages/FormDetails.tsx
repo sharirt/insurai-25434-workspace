@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useEntityGetOne, useEntityGetAll, useEntityUpdate, useExecuteAction, useFileUpload } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction } from "@/product-types";
+import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction, BakeAnnotationsIntoPdfAction } from "@/product-types";
 import type { IAnalyzePdfFormFieldsActionOutputAnalyzePdfFormFieldsActionOutputFieldsItemObject } from "@/product-types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +77,7 @@ export default function FormDetails() {
   const { data: allProviders } = useEntityGetAll(ProvidersEntity);
   const { updateFunction, isLoading: isUpdating } = useEntityUpdate(FormsEntity);
   const { executeFunction: analyzeFields, isLoading: isAnalyzing } = useExecuteAction(AnalyzePdfFormFieldsAction);
+  const { executeFunction: bakeAnnotations, isLoading: isBaking } = useExecuteAction(BakeAnnotationsIntoPdfAction);
 
   // Track wrapper width so PdfViewer canvas fits inside the container
   const [pdfWidth, setPdfWidth] = useState(0);
@@ -365,6 +366,7 @@ export default function FormDetails() {
         }
       }
 
+      // Step 1: Save annotations to DB
       await updateFunction({
         id: form.id,
         data: {
@@ -372,10 +374,18 @@ export default function FormDetails() {
           fieldMapping: mergedMapping,
         },
       });
+
+      // Step 2: Bake annotations into the PDF
+      await bakeAnnotations({ formId: form.id });
+
+      // Success
       setIsAnnotationDirty(false);
-      toast.success("שדות הערות PDF נשמרו בהצלחה");
+      setAnnotationsInitialized(false);
+      setAnnotationFields([]);
+      setSelectedAnnotationId(null);
+      toast.success("שדות ה-PDF נאפו לתוך הקובץ בהצלחה");
     } catch {
-      toast.error("שגיאה בשמירת שדות הערות");
+      toast.error("שגיאה באפיית שדות ה-PDF");
     } finally {
       setIsSavingAnnotations(false);
     }
@@ -1002,7 +1012,8 @@ export default function FormDetails() {
                   annotationFields={annotationFields}
                   selectedAnnotationId={selectedAnnotationId}
                   isAnnotationDirty={isAnnotationDirty}
-                  isSaving={isSavingAnnotations}
+                  isSaving={isSavingAnnotations || isBaking}
+                  isBaking={isBaking}
                   onUpdateField={handleUpdateAnnotationField}
                   onDeleteField={handleDeleteAnnotationField}
                   onSave={handleSaveAnnotations}
