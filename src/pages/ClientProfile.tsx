@@ -1,12 +1,12 @@
 import { useEntityGetAll, useEntityGetOne, useEntityDelete, useExecuteAction, useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, NewMeetingWizardPage, NewRequestWizardPage, ParseMeetingSummaryAndCreateAction } from "@/product-types";
+import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, NewMeetingWizardPage, NewRequestWizardPage, ParseMeetingSummaryAndCreateAction, SyncSingleClientAction } from "@/product-types";
 import { useSearchParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, AlertCircle, Calendar, Sparkles, Loader2, FileUp, Plus, Pencil } from "lucide-react";
+import { ArrowLeft, AlertCircle, Calendar, Sparkles, Loader2, FileUp, Plus, Pencil, RefreshCw } from "lucide-react";
 import { getPageUrl } from "@/lib/utils";
 import { FundsTable, FundsTableSkeleton } from "@/components/FundsTable";
 import { ClientProfileMeetingsSection } from "@/components/ClientProfileMeetingsSection";
@@ -33,6 +33,7 @@ export default function ClientProfile() {
 
   const user = useUser();
   const { executeFunction: executeParseSummary, isLoading: isParsingSummary } = useExecuteAction(ParseMeetingSummaryAndCreateAction);
+  const { executeFunction: executeSyncClient, isLoading: isSyncing } = useExecuteAction(SyncSingleClientAction);
 
   const { data: client, isLoading: isLoadingClient, error: clientError, refetch: refetchClient } = useEntityGetOne(
     ClientsEntity,
@@ -150,6 +151,27 @@ export default function ClientProfile() {
     refetchClient();
   }, [refetchClient]);
 
+  const handleSyncFromRoeto = async () => {
+    if (!client?.national_id) {
+      toast.error("לא ניתן לסנכרן - חסר מספר תעודת זהות ללקוח");
+      return;
+    }
+    try {
+      const result = await executeSyncClient({
+        userID: client.national_id,
+        clientStatus: client.clientStatus || "פעיל",
+      });
+      if (result?.status === "success" || result?.clientUpdated === true) {
+        const fundsDetail = result?.fundsUpserted ? ` (${result.fundsUpserted} מוצרים עודכנו)` : "";
+        toast.success("הלקוח סונכרן בהצלחה מ-Roeto" + fundsDetail);
+        refetchClient();
+        refetchFunds();
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "שגיאה בסנכרון הלקוח מ-Roeto");
+    }
+  };
+
   if (!clientId) {
     return (
       <div className="min-h-screen bg-background p-6">
@@ -227,6 +249,14 @@ export default function ClientProfile() {
                 <Plus data-icon="inline-start" />
                 צור בקשה חדשה
               </Link>
+            </Button>
+            <Button variant="outline" onClick={handleSyncFromRoeto} disabled={isSyncing}>
+              {isSyncing ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="ml-2 h-4 w-4" />
+              )}
+              {isSyncing ? "מסנכרן..." : "סנכרון מ-Roeto"}
             </Button>
             <Button variant="outline" onClick={() => setIsSummaryDialogOpen(true)}>
               <Sparkles className="ml-2 h-4 w-4" />

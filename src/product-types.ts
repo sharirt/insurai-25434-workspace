@@ -949,6 +949,36 @@ export const AutoProcessNewRequestAction = {
 } as const;
 
 /**
+ * CleanClientPhoneNumbers input payload
+ */
+export interface ICleanClientPhoneNumbersActionInput {}
+
+/**
+ * CleanClientPhoneNumbers output payload
+ */
+export interface ICleanClientPhoneNumbersActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Number of records updated  */
+  updatedCount?: number;
+  /** Number of records skipped (no change needed)  */
+  skippedCount?: number;
+  /** List of error messages  */
+  errors?: string[];
+}
+
+/**
+ * CleanClientPhoneNumbersAction
+ * Execute code action
+ */
+export const CleanClientPhoneNumbersAction = {
+  actionBlockId: "69ef26bd4988dbf55f506c65",
+
+  inputInstanceType: {} as ICleanClientPhoneNumbersActionInput,
+  outputInstanceType: {} as ICleanClientPhoneNumbersActionOutput,
+} as const;
+
+/**
  * createClientContext input payload
  */
 export interface ICreateClientContextActionInput {
@@ -1730,6 +1760,45 @@ export const SyncRoetoClientsAction = {
 
   inputInstanceType: {} as ISyncRoetoClientsActionInput,
   outputInstanceType: {} as ISyncRoetoClientsActionOutput,
+} as const;
+
+export type SyncSingleClientActionInputClientStatusEnum = "פעיל" | "טרום יעוץ";
+
+/**
+ * SyncSingleClient input payload
+ */
+export interface ISyncSingleClientActionInput {
+  /** The client's 9-digit Israeli personal ID number  */
+  userID: string;
+  /** The client's status - determines which portfolio endpoint to call  */
+  clientStatus: SyncSingleClientActionInputClientStatusEnum;
+}
+
+/**
+ * SyncSingleClient output payload
+ */
+export interface ISyncSingleClientActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Summary message  */
+  message?: string;
+  /** Whether the client record was updated  */
+  clientUpdated?: boolean;
+  /** Number of fund records created or updated  */
+  fundsUpserted?: number;
+  /** List of error messages  */
+  errors?: string[];
+}
+
+/**
+ * SyncSingleClientAction
+ * Execute code action
+ */
+export const SyncSingleClientAction = {
+  actionBlockId: "69ef6053cb086eeb0de18672",
+
+  inputInstanceType: {} as ISyncSingleClientActionInput,
+  outputInstanceType: {} as ISyncSingleClientActionOutput,
 } as const;
 
 /**
