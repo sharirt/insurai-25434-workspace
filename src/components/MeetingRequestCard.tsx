@@ -109,7 +109,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
               <p className="text-xs text-muted-foreground">אין טפסים מעובדים עדיין</p>
             ) : (
               forms.map((form, idx) => (
-                <FormRow key={form.formId || idx} formId={form.formId} url={form.url} />
+                <FormRow key={form.formId || idx} formId={form.formId} url={form.url} onPreview={(name, previewUrl) => setPreviewDoc({ name, url: previewUrl })} />
               ))
             )}
           </div>
@@ -210,7 +210,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
           </DialogHeader>
           {previewDoc?.url && (
             <iframe
-              src={`https://docs.google.com/viewer?url=${encodeURIComponent(previewDoc.url)}&embedded=true`}
+              src={previewDoc.url}
               title={previewDoc.name}
               className="w-full h-[80vh] rounded border-0"
             />
@@ -221,7 +221,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
   );
 };
 
-const FormRow = ({ formId, url }: { formId?: string; url?: string }) => {
+const FormRow = ({ formId, url, onPreview }: { formId?: string; url?: string; onPreview?: (name: string, url: string) => void }) => {
   const { data: form } = useEntityGetOne(FormsEntity, { id: formId || "" }, { enabled: !!formId });
   const title = form?.formTitleHebrew || form?.formTitle || "טופס";
 
@@ -234,6 +234,16 @@ const FormRow = ({ formId, url }: { formId?: string; url?: string }) => {
         </a>
       ) : (
         <span className="truncate">{title}</span>
+      )}
+      {url && onPreview && (
+        <button
+          type="button"
+          onClick={() => onPreview(title, url)}
+          title="תצוגה מקדימה"
+          className="p-1 rounded text-primary hover:bg-muted transition-colors shrink-0"
+        >
+          <Eye className="size-4" />
+        </button>
       )}
     </div>
   );
