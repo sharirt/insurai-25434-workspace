@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { FileText, FileCheck, Download, Eye, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, FileCheck, Download, Eye } from "lucide-react";
+import { BlocksFilePreviewContent } from "@/components/BlocksFilePreviewContent";
 import { SendToProviderSection } from "@/components/SendToProviderSection";
 import { Link } from "react-router";
 import { getPageUrl } from "@/lib/utils";
@@ -208,13 +209,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
           <DialogHeader>
             <DialogTitle>{previewDoc?.name || "תצוגת מסמך"}</DialogTitle>
           </DialogHeader>
-          {previewDoc?.url && (
-            <iframe
-              src={previewDoc.url}
-              title={previewDoc.name}
-              className="w-full h-[80vh] rounded border-0"
-            />
-          )}
+          {previewDoc?.url && <BlocksFilePreviewContent uri={previewDoc.url} />}
         </DialogContent>
       </Dialog>
     </>

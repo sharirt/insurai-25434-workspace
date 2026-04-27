@@ -23,6 +23,7 @@ import {
   FundsEntity,
 } from "@/product-types";
 import type { ISignedDocumentsEntity, IRequestsEntity } from "@/product-types";
+import { BlocksFilePreviewContent } from "@/components/BlocksFilePreviewContent";
 import { toast } from "sonner";
 
 interface UploadedFile {
@@ -367,15 +368,7 @@ export const SendToProviderSection = ({
           <DialogHeader>
             <DialogTitle>{previewDoc?.name}</DialogTitle>
           </DialogHeader>
-          {previewDoc?.url && (
-            <iframe
-              src={previewDoc.url}
-              title={previewDoc.name}
-              className="w-full rounded-md border border-border"
-              height="80vh"
-              style={{ height: "80vh" }}
-            />
-          )}
+          {previewDoc?.url && <BlocksFilePreviewContent uri={previewDoc.url} />}
         </DialogContent>
       </Dialog>
     </>
