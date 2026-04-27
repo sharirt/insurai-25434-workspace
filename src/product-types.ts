@@ -222,6 +222,14 @@ export interface IFormsEntityFileDataObject {
 }
 
 /**
+ * User-defined PDF annotation boxes for the form. Each box defines a fillable field to be added to the PDF at generation time via AnnotatePdfFormFields. Stores position (x, y in points from bottom-left), size, page (0-indexed), field type, name (used as the field key in fieldMapping), and text styling options.
+ */
+export interface IFormsEntityPdfAnnotationsObject {
+  /** List of annotated field boxes placed on the PDF  */
+  fields: IFormsEntityFormsEntityFieldsItemObject[];
+}
+
+/**
  * Stores insurance form templates including PDF files with dynamic fields, field mappings, associated providers and request types for automated form processing
  */
 export interface IFormsEntity {
@@ -251,6 +259,8 @@ export interface IFormsEntity {
   fileData?: IFormsEntityFileDataObject;
   /** Form title in Hebrew  */
   formTitleHebrew?: string;
+  /** User-defined PDF annotation boxes for the form. Each box defines a fillable field to be added to the PDF at generation time via AnnotatePdfFormFields. Stores position (x, y in points from bottom-left), size, page (0-indexed), field type, name (used as the field key in fieldMapping), and text styling options.  */
+  pdfAnnotations?: IFormsEntityPdfAnnotationsObject;
 }
 
 export const FormsEntity = {
@@ -997,94 +1007,6 @@ export const CreateClientContextAction = {
 
   inputInstanceType: {} as ICreateClientContextActionInput,
   outputInstanceType: {} as ICreateClientContextActionOutput,
-} as const;
-
-/**
- * The specific client data
- */
-export interface IFillSingleFormWithMappingActionInputClientsObject {}
-
-/**
- * The specific agent data
- */
-export interface IFillSingleFormWithMappingActionInputAgentsObject {}
-
-/**
- * The specific provider data
- */
-export interface IFillSingleFormWithMappingActionInputProviderObject {}
-
-/**
- * The specific fund data (single object, not array)
- */
-export interface IFillSingleFormWithMappingActionInputFundsObject {}
-
-/**
- * undefined
- */
-export interface IFillSingleFormWithMappingActionInputTracksObject {}
-
-/**
- * Request data containing managementFee and tracks
- */
-export interface IFillSingleFormWithMappingActionInputRequestsObject {
-  managementFee?: number;
-  tracks?: IFillSingleFormWithMappingActionInputTracksObject;
-}
-
-/**
- * All data needed to fill the form. Structure: { clients: {client data}, agents: {agent data}, provider: {provider data}, funds: {single fund object}, requests: { managementFee: number, tracks: {track field values} } }
- */
-export interface IFillSingleFormWithMappingActionInputClientContextObject {
-  /** The specific client data  */
-  clients?: IFillSingleFormWithMappingActionInputClientsObject;
-  /** The specific agent data  */
-  agents?: IFillSingleFormWithMappingActionInputAgentsObject;
-  /** The specific provider data  */
-  provider?: IFillSingleFormWithMappingActionInputProviderObject;
-  /** The specific fund data (single object, not array)  */
-  funds?: IFillSingleFormWithMappingActionInputFundsObject;
-  /** Request data containing managementFee and tracks  */
-  requests?: IFillSingleFormWithMappingActionInputRequestsObject;
-}
-
-/**
- * FillSingleFormWithMapping input payload
- */
-export interface IFillSingleFormWithMappingActionInput {
-  /** The ID of the form template to fill from the Forms table  */
-  formId: string;
-  /** All data needed to fill the form. Structure: { clients: {client data}, agents: {agent data}, provider: {provider data}, funds: {single fund object}, requests: { managementFee: number, tracks: {track field values} } }  */
-  clientContext: IFillSingleFormWithMappingActionInputClientContextObject;
-}
-
-/**
- * FillSingleFormWithMapping output payload
- */
-export interface IFillSingleFormWithMappingActionOutput {
-  /** The protected internal URL of the filled PDF (ending with /redirect)  */
-  protectedUrl?: string;
-  /** The file name of the filled PDF  */
-  fileName?: string;
-  /** The size of the filled PDF in bytes  */
-  fileSize?: number;
-  /** Number of fields that were successfully filled  */
-  fieldsFilled?: number;
-  /** List of field names that were successfully filled  */
-  filledFieldNames?: string[];
-  /** List of field names that were not found in the PDF  */
-  notFoundFields?: string[];
-}
-
-/**
- * FillSingleFormWithMappingAction
- * Fills a single PDF form using a formId and a clientContext object. Fetches the form's fieldMapping from the Forms table, uses VariablesPopulate to map clientContext data to the fieldMapping keys producing a fieldValues object, then calls FillPdfForm to produce the filled PDF. Returns the filled PDF URL and metadata. clientContext structure: { clients, agents, provider, funds (single object), requests: { managementFee, tracks } }
- */
-export const FillSingleFormWithMappingAction = {
-  actionBlockId: "69db99a97d23f0bc9a294f4e",
-
-  inputInstanceType: {} as IFillSingleFormWithMappingActionInput,
-  outputInstanceType: {} as IFillSingleFormWithMappingActionOutput,
 } as const;
 
 /**
