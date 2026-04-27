@@ -1709,8 +1709,12 @@ export interface ISyncRoetoClientsActionOutput {
   status?: string;
   /** Summary message  */
   message?: string;
-  /** Number of clients synced/upserted  */
+  /** Total number of clients synced (created + updated)  */
   syncedCount?: number;
+  /** Number of new clients created  */
+  createdCount?: number;
+  /** Number of existing clients updated  */
+  updatedCount?: number;
   /** Number of clients skipped  */
   skippedCount?: number;
   /** List of error messages  */

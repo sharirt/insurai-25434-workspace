@@ -4,7 +4,7 @@ import { SyncRoetoClientsAction } from "@/product-types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { RefreshCw, Loader2, CheckCircle, AlertCircle, UserPlus } from "lucide-react";
 import { FieldGroup, Field, FieldLabel } from "@/components/ui/field";
 
 type SyncMode = "all" | "active" | "tromYeutz";
@@ -21,6 +21,8 @@ export const SyncRoetoDialog = ({ open, onClose, onSuccess }: SyncRoetoDialogPro
   const [syncMode, setSyncMode] = useState<SyncMode>("all");
   const [syncState, setSyncState] = useState<SyncState>("idle");
   const [syncedCount, setSyncedCount] = useState(0);
+  const [createdCount, setCreatedCount] = useState(0);
+  const [updatedCount, setUpdatedCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
   const { executeFunction } = useExecuteAction(SyncRoetoClientsAction);
@@ -29,6 +31,8 @@ export const SyncRoetoDialog = ({ open, onClose, onSuccess }: SyncRoetoDialogPro
     if (syncState !== "syncing") {
       setSyncState("idle");
       setSyncedCount(0);
+      setCreatedCount(0);
+      setUpdatedCount(0);
       setErrorMessage("");
       onClose();
     }
@@ -40,6 +44,8 @@ export const SyncRoetoDialog = ({ open, onClose, onSuccess }: SyncRoetoDialogPro
       const result = await executeFunction({ syncMode });
       if (result?.status === "success") {
         setSyncedCount(result.syncedCount ?? 0);
+        setCreatedCount(result.createdCount ?? 0);
+        setUpdatedCount(result.updatedCount ?? 0);
         setSyncState("success");
         onSuccess();
       } else {
@@ -96,8 +102,21 @@ export const SyncRoetoDialog = ({ open, onClose, onSuccess }: SyncRoetoDialogPro
         {syncState === "success" && (
           <div className="flex flex-col items-center gap-4 py-6">
             <CheckCircle className="text-chart-3 size-12" />
-            <p className="text-foreground font-medium">
-              סונכרנו {syncedCount} לקוחות בהצלחה
+            <p className="text-foreground font-medium text-lg">
+              הסנכרון הושלם בהצלחה
+            </p>
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex items-center gap-3 rounded-md bg-chart-3/10 px-4 py-2.5">
+                <UserPlus className="text-chart-3 size-5 shrink-0" />
+                <span className="text-chart-3 font-medium">נוצרו: {createdCount} לקוחות חדשים</span>
+              </div>
+              <div className="flex items-center gap-3 rounded-md bg-accent px-4 py-2.5">
+                <RefreshCw className="text-muted-foreground size-5 shrink-0" />
+                <span className="text-muted-foreground font-medium">עודכנו: {updatedCount} לקוחות קיימים</span>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              סה״כ סונכרנו {syncedCount} לקוחות
             </p>
             <Button variant="outline" onClick={handleClose}>סגור</Button>
           </div>
