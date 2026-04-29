@@ -351,12 +351,13 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
         "transition-all duration-150 overflow-hidden",
         isHighlighted
           ? "border-l-4 border-l-primary shadow-md bg-primary/5"
-          : "hover:border-primary/50"
+          : "hover:border-primary/50",
+        isEditing && "max-h-[480px]"
       )}
       onMouseEnter={() => !isEditing && onHover?.(fieldName)}
       onMouseLeave={() => !isEditing && onHoverEnd?.()}
     >
-      <CardContent className="p-4 flex flex-col">
+      <CardContent className={cn("p-4 flex flex-col", isEditing && "overflow-hidden h-full")}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -394,8 +395,10 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
             </div>
           </div>
         ) : (
+          <>
+          <div className="border-t shrink-0" />
           <div
-            className="space-y-3 pt-3 border-t max-h-[420px] overflow-y-auto"
+            className="space-y-3 pt-3 flex-1 overflow-y-auto px-0.5"
             dir="rtl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -551,7 +554,8 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
               </div>
             )}
 
-            <div className="flex gap-2 pt-2 border-t bg-card mt-2 sticky bottom-0">
+            </div>
+            <div className="flex gap-2 pt-2 border-t shrink-0" dir="rtl">
               <Button
                 size="sm"
                 onClick={handleSave}
@@ -571,7 +575,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
                 ביטול
               </Button>
             </div>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>
