@@ -579,6 +579,8 @@ export interface ISignatureRequestsEntity {
   docusealMergedTemplateId?: number;
   /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   sentAt?: string;
+  /** Reference to the Requests table record this signature request belongs to  */
+  requestId?: string;
   /** Title of the form that was sent for signature, stored for display purposes  */
   formTitle?: string;
   /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
@@ -587,20 +589,18 @@ export interface ISignatureRequestsEntity {
   status?: SignatureRequestsEntityStatusEnum;
   /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   completedAt?: string;
+  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
+  meetingId?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** Reference to the Requests table record this signature request belongs to  */
-  requestId?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISignatureRequestsEntityFormMappingObject;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
   /** The Docuseal submission ID for this signature request (integer).  */
   docusealSubmissionId?: number;
-  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
-  meetingId?: string;
   /** The Docuseal submitter ID for the client signer (integer).  */
   clientSubmitterId?: number;
   /** Reference to the Forms table record (form template) that was sent for signature  */
@@ -1475,6 +1475,8 @@ export interface ISendAllFormsForSignatureDocuSealActionOutputSendAllFormsForSig
   docusealMergedTemplateId?: number;
   /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   sentAt?: string;
+  /** Reference to the Requests table record this signature request belongs to  */
+  requestId?: string;
   /** Title of the form that was sent for signature, stored for display purposes  */
   formTitle?: string;
   /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
@@ -1483,20 +1485,18 @@ export interface ISendAllFormsForSignatureDocuSealActionOutputSendAllFormsForSig
   status?: SendAllFormsForSignatureDocuSealActionOutputStatusEnum;
   /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   completedAt?: string;
+  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
+  meetingId?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** Reference to the Requests table record this signature request belongs to  */
-  requestId?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISendAllFormsForSignatureDocuSealActionOutputFormMappingObject;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
   /** The Docuseal submission ID for this signature request (integer).  */
   docusealSubmissionId?: number;
-  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
-  meetingId?: string;
   /** The Docuseal submitter ID for the client signer (integer).  */
   clientSubmitterId?: number;
   /** Reference to the Forms table record (form template) that was sent for signature  */
@@ -1619,6 +1619,8 @@ export interface ISendMeetingFormsForSignatureActionOutputSendMeetingFormsForSig
   docusealMergedTemplateId?: number;
   /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   sentAt?: string;
+  /** Reference to the Requests table record this signature request belongs to  */
+  requestId?: string;
   /** Title of the form that was sent for signature, stored for display purposes  */
   formTitle?: string;
   /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
@@ -1627,20 +1629,18 @@ export interface ISendMeetingFormsForSignatureActionOutputSendMeetingFormsForSig
   status?: SendMeetingFormsForSignatureActionOutputStatusEnum;
   /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   completedAt?: string;
+  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
+  meetingId?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** Reference to the Requests table record this signature request belongs to  */
-  requestId?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISendMeetingFormsForSignatureActionOutputFormMappingObject;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
   /** The Docuseal submission ID for this signature request (integer).  */
   docusealSubmissionId?: number;
-  /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
-  meetingId?: string;
   /** The Docuseal submitter ID for the client signer (integer).  */
   clientSubmitterId?: number;
   /** Reference to the Forms table record (form template) that was sent for signature  */

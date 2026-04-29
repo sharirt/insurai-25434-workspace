@@ -348,7 +348,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
   return (
     <Card
       className={cn(
-        "transition-all duration-150",
+        "transition-all duration-150 overflow-hidden",
         isHighlighted
           ? "border-l-4 border-l-primary shadow-md bg-primary/5"
           : "hover:border-primary/50"
@@ -395,7 +395,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
           </div>
         ) : (
           <div
-            className="space-y-3 pt-3 border-t"
+            className="space-y-3 pt-3 border-t max-h-[420px] overflow-y-auto"
             dir="rtl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -551,7 +551,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
               </div>
             )}
 
-            <div className="flex gap-2 pt-2 border-t bg-card mt-2">
+            <div className="flex gap-2 pt-2 border-t bg-card mt-2 sticky bottom-0">
               <Button
                 size="sm"
                 onClick={handleSave}
