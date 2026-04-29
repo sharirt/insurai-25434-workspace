@@ -16,10 +16,10 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.4.2(@types/react@19.2.14)(react@19.2.4)
+        version: 1.4.3(@types/react@19.2.14)(react@19.2.4)
       '@blocksdiy/react-common':
         specifier: latest
-        version: 1.7.0(@types/react@19.2.14)
+        version: 1.8.0(@types/react@19.2.14)
       '@cyntler/react-doc-viewer':
         specifier: 1.17.1
         version: 1.17.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -444,14 +444,14 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@blocksdiy/blocks-client-api@1.7.0':
-    resolution: {integrity: sha512-uwnCPsE8LGegpkk+DtHdTmgeJN1qTyzbPX/SFLV6IVyIuJMrnBLqTBrJDKGuQtyfgVeFlY1v/TrGJRdYP2q+zQ==}
+  '@blocksdiy/blocks-client-api@1.8.0':
+    resolution: {integrity: sha512-/q1JGzrVP4nhIJtDqc5WxTWdpFzPRtpOEckIqfnnkyqmKq1fRBEWg7eoiNk5a2FB4yJbMjdq7dTyR7lj8FlbrQ==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.4.2':
-    resolution: {integrity: sha512-et1SnISGBqv2/pxQdaVCSwUudRIiRH+YYIq/U0LJUeillEijw3DZy1wrL4X39BN2AL5BAK0i4AIiiABsLfdvoA==}
+  '@blocksdiy/blocks-client-sdk@1.4.3':
+    resolution: {integrity: sha512-RWkGU4ELU1z9o+v96pTU9pISut4gz5iC3xjbIDcTJf4/9pSKZILgfvRJFvT8zLlJX+BQ9xatq074g3mLqZSAeA==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -462,8 +462,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@blocksdiy/react-common@1.7.0':
-    resolution: {integrity: sha512-/lxWxrtOoCNjAdsjhy+jU4RCD0MKL9vjwyNhVbmLO+YxV0395/VVDRwVi9ckPd/KUiKTOXwBi8z3Z72o9Ot7RQ==}
+  '@blocksdiy/react-common@1.8.0':
+    resolution: {integrity: sha512-3F19ju2N912WBrvA7V1ivTrubxVzsWt14YK3sI4P8C7beDO4a1LEaOU0zuf3o0ccWv9hqV6pWz1Zm3E29NB9Ng==}
     engines: {node: '>=24.11.0'}
 
   '@csstools/color-helpers@5.1.0':
@@ -2011,11 +2011,11 @@ packages:
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders || >=4.0.0-alpha.20 || >=4.0.0-beta.1'
 
-  '@tanstack/query-core@5.100.5':
-    resolution: {integrity: sha512-t20KrhKkf0HXzqQkPbJ5erhFesup68BAbwFgYmTrS7bxMF7O5MdmL8jUkik4thsG7Hg00fblz30h6yF1d5TxGg==}
+  '@tanstack/query-core@5.100.6':
+    resolution: {integrity: sha512-Os2CPUr98to98RYm+D4qGqGkiffn7MGSyl2547a4MljVkHE30AMJRqTiyCqBfMwzAx/I91vCkAxp5tHSla6Twg==}
 
-  '@tanstack/react-query@5.100.5':
-    resolution: {integrity: sha512-aNwj1mi2v2bQ9IxkyR1grLOUkv3BYWoykHy9KDyLNbjC3tsahbOHJibK+Wjtr1wRhG59/AvJhiJG5OlthaCgJA==}
+  '@tanstack/react-query@5.100.6':
+    resolution: {integrity: sha512-uVSrps0PV16Cxmcn2rvL+dUhwTpTUtiRW347AEeYxMZXO2pZe9ja7E24PAMGoQ5u2g89DD8u4QhOviBk+RN8RA==}
     peerDependencies:
       react: 19.2.4
 
@@ -2609,8 +2609,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.10.23:
-    resolution: {integrity: sha512-xwVXGqevyKPsiuQdLj+dZMVjidjJV508TBqexND5HrF89cGdCYCJFB3qhcxRHSeMctdCfbR1jrxBajhDy7o29g==}
+  baseline-browser-mapping@2.10.24:
+    resolution: {integrity: sha512-I2NkZOOrj2XuguvWCK6OVh9GavsNjZjK908Rq3mIBK25+GD8vPX5w2WdxVqnQ7xx3SrZJiCiZFu+/Oz50oSYSA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -4789,8 +4789,8 @@ packages:
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
-  tinyexec@1.1.1:
-    resolution: {integrity: sha512-VKS/ZaQhhkKFMANmAOhhXVoIfBXblQxGX1myCQ2faQrfmobMftXeJPcZGp0gS07ocvGJWDLZGyOZDadDBqYIJg==}
+  tinyexec@1.1.2:
+    resolution: {integrity: sha512-dAqSqE/RabpBKI8+h26GfLq6Vb3JVXs30XYQjdMjaj/c2tS8IYYMbIzP599KtRj7c57/wYApb3QjgRgXmrCukA==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.16:
@@ -5289,17 +5289,17 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@blocksdiy/blocks-client-api@1.7.0(react@19.2.4)':
+  '@blocksdiy/blocks-client-api@1.8.0(react@19.2.4)':
     dependencies:
       lodash: 4.17.21
       pusher-js: 8.4.0-rc2
       react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.4.2(@types/react@19.2.14)(react@19.2.4)':
+  '@blocksdiy/blocks-client-sdk@1.4.3(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
-      '@blocksdiy/blocks-client-api': 1.7.0(react@19.2.4)
-      '@blocksdiy/react-common': 1.7.0(@types/react@19.2.14)
-      '@tanstack/react-query': 5.100.5(react@19.2.4)
+      '@blocksdiy/blocks-client-api': 1.8.0(react@19.2.4)
+      '@blocksdiy/react-common': 1.8.0(@types/react@19.2.14)
+      '@tanstack/react-query': 5.100.6(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
       - '@types/react'
@@ -5313,9 +5313,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@blocksdiy/react-common@1.7.0(@types/react@19.2.14)':
+  '@blocksdiy/react-common@1.8.0(@types/react@19.2.14)':
     dependencies:
-      '@blocksdiy/blocks-client-api': 1.7.0(react@19.2.4)
+      '@blocksdiy/blocks-client-api': 1.8.0(react@19.2.4)
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.4)
       '@vapi-ai/web': 2.5.2
       penpal: 7.0.6
@@ -6769,11 +6769,11 @@ snapshots:
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.4.17
 
-  '@tanstack/query-core@5.100.5': {}
+  '@tanstack/query-core@5.100.6': {}
 
-  '@tanstack/react-query@5.100.5(react@19.2.4)':
+  '@tanstack/react-query@5.100.6(react@19.2.4)':
     dependencies:
-      '@tanstack/query-core': 5.100.5
+      '@tanstack/query-core': 5.100.6
       react: 19.2.4
 
   '@tanstack/react-virtual@3.13.6(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
@@ -7457,7 +7457,7 @@ snapshots:
   base64-js@1.5.1:
     optional: true
 
-  baseline-browser-mapping@2.10.23: {}
+  baseline-browser-mapping@2.10.24: {}
 
   binary-extensions@2.3.0: {}
 
@@ -7485,7 +7485,7 @@ snapshots:
 
   browserslist@4.28.2:
     dependencies:
-      baseline-browser-mapping: 2.10.23
+      baseline-browser-mapping: 2.10.24
       caniuse-lite: 1.0.30001791
       electron-to-chromium: 1.5.344
       node-releases: 2.0.38
@@ -9848,7 +9848,7 @@ snapshots:
 
   tinybench@2.9.0: {}
 
-  tinyexec@1.1.1: {}
+  tinyexec@1.1.2: {}
 
   tinyglobby@0.2.16:
     dependencies:
@@ -10086,7 +10086,7 @@ snapshots:
       picomatch: 4.0.4
       std-env: 4.1.0
       tinybench: 2.9.0
-      tinyexec: 1.1.1
+      tinyexec: 1.1.2
       tinyglobby: 0.2.16
       tinyrainbow: 3.1.0
       vite: 8.0.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@types/node@24.9.2)(jiti@2.6.1)(sass@1.86.3)(yaml@2.8.3)

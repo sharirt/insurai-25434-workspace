@@ -350,23 +350,22 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
       className={cn(
         "transition-all duration-150 overflow-hidden",
         isHighlighted
-          ? "border-s-4 border-s-primary shadow-md bg-primary/5"
-          : "hover:border-primary/50",
-        isEditing && "max-h-[480px]"
+          ? "border-l-4 border-l-primary shadow-md bg-primary/5"
+          : "hover:border-primary/50"
       )}
       onMouseEnter={() => !isEditing && onHover?.(fieldName)}
       onMouseLeave={() => !isEditing && onHoverEnd?.()}
     >
-      <CardContent className={cn("p-4 flex flex-col", isEditing && "overflow-hidden h-full")}>
-        <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
+      <CardContent className="p-4 flex flex-col">
+        <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
-            <div className="flex min-w-0 w-full items-center gap-2 mb-1">
-              <h3 className="min-w-0 flex-1 truncate font-semibold text-sm">{fieldName}</h3>
-              <Badge variant="outline" className="shrink-0 text-xs">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-sm truncate">{fieldName}</h3>
+              <Badge variant="outline" className="text-xs">
                 {fieldType}
               </Badge>
             </div>
-            <p className="min-w-0 truncate text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Page: {(typeof mapping === "object" && mapping?.page) || "Unknown"}
             </p>
           </div>
@@ -387,21 +386,16 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
 
         {!isEditing ? (
           <div className="space-y-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <span className="shrink-0 text-xs text-muted-foreground">מיפוי:</span>
-              <Badge
-                variant={displayBadgeVariant}
-                className="min-w-0 flex-1 truncate text-xs max-w-[min(200px,100%)]"
-              >
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">מיפוי:</span>
+              <Badge variant={displayBadgeVariant} className="text-xs truncate max-w-[200px]">
                 {displayValue}
               </Badge>
             </div>
           </div>
         ) : (
-          <>
-          <div className="border-t shrink-0" />
           <div
-            className="space-y-3 pt-3 flex-1 overflow-y-auto px-0.5"
+            className="space-y-3 pt-3 border-t max-h-[420px] overflow-y-auto"
             dir="rtl"
             onClick={(e) => e.stopPropagation()}
           >
@@ -557,8 +551,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
               </div>
             )}
 
-            </div>
-            <div className="flex gap-2 pt-2 border-t shrink-0" dir="rtl">
+            <div className="flex gap-2 pt-2 border-t bg-card mt-2 sticky bottom-0">
               <Button
                 size="sm"
                 onClick={handleSave}
@@ -578,7 +571,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
                 ביטול
               </Button>
             </div>
-          </>
+          </div>
         )}
       </CardContent>
     </Card>

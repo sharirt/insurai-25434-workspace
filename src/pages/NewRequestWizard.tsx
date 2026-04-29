@@ -99,7 +99,6 @@ export default function NewRequestWizard() {
     transferAmount,
     setTransferAmount,
     tracksValues,
-    tracksKeys,
     handleTrackValue,
     isStep2Valid,
     handleNext,
@@ -249,7 +248,6 @@ export default function NewRequestWizard() {
               />
             ) : (
               <WizardStep2Content
-                tracksKeys={tracksKeys}
                 tracksValues={tracksValues}
                 handleTrackValue={handleTrackValue}
               />

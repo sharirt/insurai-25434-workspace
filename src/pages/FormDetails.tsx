@@ -818,8 +818,8 @@ export default function FormDetails() {
                       )}
                     </div>
 
-                    <ScrollArea className="min-h-0 min-w-0 flex-1 overflow-hidden">
-                      <div className="min-w-0 space-y-3 p-4" dir="rtl">
+                    <div className="flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" dir="rtl">
+                      <div className="min-w-0 space-y-3 px-4 py-7">
                         {fieldsCount === 0 ? (
                           <div className="text-center py-8 text-muted-foreground">
                             <p>No field mappings found</p>
@@ -843,7 +843,7 @@ export default function FormDetails() {
                           </div>
                         )}
                       </div>
-                    </ScrollArea>
+                    </div>
                   </>
                 )}
               </TabsContent>

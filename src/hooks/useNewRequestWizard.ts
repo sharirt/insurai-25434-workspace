@@ -11,6 +11,7 @@ import {
   ProcessRequestFormsAction,
   FundsEntity,
 } from "@/product-types";
+import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 
 // Use ProcessRequestFormsAction as the auto-process action for new requests
 const AutoProcessNewRequestAction = ProcessRequestFormsAction;
@@ -80,30 +81,7 @@ export function useNewRequestWizard({
     [funds]
   );
 
-  const selectedScheme = useMemo(
-    () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
-    [requestSchemes, selectedRequestTypeId]
-  );
-
-  const tracksKeys = useMemo(() => {
-    if (!selectedScheme?.tracks) return [];
-    const changesObj = selectedScheme.tracks as Record<string, any>;
-    return Object.keys(changesObj);
-  }, [selectedScheme]);
-
-  // Initialize tracks values from the selected scheme's defaults
-  useEffect(() => {
-    if (selectedScheme?.tracks) {
-      const changesObj = selectedScheme.tracks as Record<string, any>;
-      const initial: Record<string, string> = {};
-      for (const [key, value] of Object.entries(changesObj)) {
-        initial[key] = String(value ?? "");
-      }
-      setTracksValues(initial);
-    } else {
-      setTracksValues({});
-    }
-  }, [selectedScheme]);
+  const tracksKeys = STATIC_TRACK_KEYS;
 
   // Reset all state when dialog closes
   useEffect(() => {

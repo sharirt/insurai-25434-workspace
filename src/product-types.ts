@@ -957,14 +957,14 @@ export interface ICleanClientPhoneNumbersActionInput {}
  * CleanClientPhoneNumbers output payload
  */
 export interface ICleanClientPhoneNumbersActionOutput {
-  /** success or error  */
-  status?: string;
-  /** Number of records updated  */
-  updatedCount?: number;
-  /** Number of records skipped (no change needed)  */
-  skippedCount?: number;
   /** List of error messages  */
   errors?: string[];
+  /** success or error  */
+  status?: string;
+  /** Number of records skipped (no change needed)  */
+  skippedCount?: number;
+  /** Number of records updated  */
+  updatedCount?: number;
 }
 
 /**
@@ -1735,6 +1735,8 @@ export interface ISyncRoetoClientsActionInput {
  * SyncRoetoClients output payload
  */
 export interface ISyncRoetoClientsActionOutput {
+  /** List of error messages  */
+  errors?: string[];
   /** success or error  */
   status?: string;
   /** Summary message  */
@@ -1743,12 +1745,10 @@ export interface ISyncRoetoClientsActionOutput {
   syncedCount?: number;
   /** Number of new clients created  */
   createdCount?: number;
-  /** Number of existing clients updated  */
-  updatedCount?: number;
   /** Number of clients skipped  */
   skippedCount?: number;
-  /** List of error messages  */
-  errors?: string[];
+  /** Number of existing clients updated  */
+  updatedCount?: number;
 }
 
 /**
@@ -1778,6 +1778,8 @@ export interface ISyncSingleClientActionInput {
  * SyncSingleClient output payload
  */
 export interface ISyncSingleClientActionOutput {
+  /** List of error messages  */
+  errors?: string[];
   /** success or error  */
   status?: string;
   /** Summary message  */
@@ -1786,8 +1788,6 @@ export interface ISyncSingleClientActionOutput {
   clientUpdated?: boolean;
   /** Number of fund records created or updated  */
   fundsUpserted?: number;
-  /** List of error messages  */
-  errors?: string[];
 }
 
 /**
@@ -1816,10 +1816,10 @@ export interface ITestRoetoConnectionActionOutput {
   message?: string;
   /** List of Roeto _id values for all active clients  */
   clientIds?: string[];
-  /** Total number of unique active clients found  */
-  clientCount?: number;
   /** Total number of agents fetched  */
   agentCount?: number;
+  /** Total number of unique active clients found  */
+  clientCount?: number;
 }
 
 /**

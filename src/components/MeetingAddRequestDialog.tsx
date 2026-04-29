@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
-import { getFieldLabel } from "@/utils/fieldTranslations";
+import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search } from "lucide-react";
 
@@ -82,8 +82,6 @@ export const MeetingAddRequestDialog = ({
   const [providerSearch, setProviderSearch] = useState("");
   const [standing, setStanding] = useState("");
 
-  const lastInitializedRequestTypeIdRef = useRef<string | null>(null);
-
   const selectedScheme = useMemo(
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
     [requestSchemes, selectedRequestTypeId]
@@ -101,27 +99,7 @@ export const MeetingAddRequestDialog = ({
       .includes(providerSearch.toLowerCase())
   );
 
-  const tracksKeys = useMemo(() => {
-    if (!selectedScheme?.tracks) return [];
-    return Object.keys(selectedScheme.tracks as Record<string, any>);
-  }, [selectedScheme]);
-
-  useEffect(() => {
-    if (lastInitializedRequestTypeIdRef.current === selectedRequestTypeId) {
-      return;
-    }
-    lastInitializedRequestTypeIdRef.current = selectedRequestTypeId;
-    if (selectedScheme?.tracks) {
-      const changesObj = selectedScheme.tracks as Record<string, any>;
-      const initial: Record<string, string> = {};
-      for (const [key, value] of Object.entries(changesObj)) {
-        initial[key] = String(value ?? "");
-      }
-      setTracksValues(initial);
-    } else {
-      setTracksValues({});
-    }
-  }, [selectedScheme, selectedRequestTypeId]);
+  const tracksKeys = STATIC_TRACK_KEYS;
 
   useEffect(() => {
     if (!open) {
@@ -130,7 +108,6 @@ export const MeetingAddRequestDialog = ({
       setSelectedProviderId("");
       setTracksValues({});
       setManagementFee(undefined);
-      lastInitializedRequestTypeIdRef.current = null;
       setChoiceDuration("");
       setTransferType("צבירה והפקדות");
       setKerenName("");
@@ -140,7 +117,6 @@ export const MeetingAddRequestDialog = ({
       setProviderSearch("");
       setStanding("");
     } else if (open && editingRequest) {
-      lastInitializedRequestTypeIdRef.current = editingRequest.requestTypeId ?? "";
       setSelectedFundId(editingRequest.fundId ?? "");
       setSelectedRequestTypeId(editingRequest.requestTypeId ?? "");
       setSelectedProviderId(editingRequest.providerId ?? "");
@@ -181,9 +157,7 @@ export const MeetingAddRequestDialog = ({
   }, 0);
 
   const TRACKS_SUM_EPSILON = 0.01;
-  const isTracksSumValid =
-    tracksKeys.length === 0 ||
-    Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
+  const isTracksSumValid = tracksSum < TRACKS_SUM_EPSILON || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
 
   const isPartialAmountValid =
     isTotalTransfer ||
@@ -584,7 +558,7 @@ export const MeetingAddRequestDialog = ({
                     if (!isNaN(n) && n < 0) return;
                     setTransferAmount(v);
                   }}
-                  placeholder="הכנס סכום"
+                  placeholder="הכנס סכום (בשקלים)"
                   dir="rtl"
                   className="mt-2"
                 />
@@ -611,7 +585,7 @@ export const MeetingAddRequestDialog = ({
           </div>}
 
           {/* Tracks Section */}
-          {selectedRequestTypeId && tracksKeys.length > 0 && (
+          {selectedRequestTypeId && (
             <div className="mt-6">
               <Separator className="mb-5" />
               <div
@@ -714,7 +688,7 @@ export const MeetingAddRequestDialog = ({
         <DialogFooter className="px-10 py-6 border-t border-border bg-muted/30">
           <div className="flex items-center justify-between w-full gap-3">
             {/* Total percentage pill — always visible in footer */}
-            {selectedRequestTypeId && tracksKeys.length > 0 ? (
+            {selectedRequestTypeId ? (
               <span
                 className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors ${
                   isTracksSumValid
