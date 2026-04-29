@@ -81,6 +81,7 @@ export const MeetingAddRequestDialog = ({
   const [requestTypeSearch, setRequestTypeSearch] = useState("");
   const [providerSearch, setProviderSearch] = useState("");
   const [standing, setStanding] = useState("");
+  const [trackSearch, setTrackSearch] = useState("");
 
   const selectedScheme = useMemo(
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
@@ -116,6 +117,7 @@ export const MeetingAddRequestDialog = ({
       setRequestTypeSearch("");
       setProviderSearch("");
       setStanding("");
+      setTrackSearch("");
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
       setSelectedRequestTypeId(editingRequest.requestTypeId ?? "");
@@ -621,9 +623,33 @@ export const MeetingAddRequestDialog = ({
                   </Button>
                 </div>
 
+                {/* Track search */}
+                <div className="relative">
+                  <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={trackSearch}
+                    onChange={(e) => setTrackSearch(e.target.value)}
+                    placeholder="חפש מסלול..."
+                    dir="rtl"
+                    className="pr-8 h-8 text-sm"
+                  />
+                </div>
+
                 {/* Tracks — 2-column grid on md+ */}
+                {(() => {
+                  const filteredTracksKeys = tracksKeys.filter(key =>
+                    getFieldLabel(key)?.toLowerCase().includes(trackSearch.toLowerCase())
+                  );
+                  if (filteredTracksKeys.length === 0) {
+                    return (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        לא נמצאו מסלולים התואמים לחיפוש
+                      </p>
+                    );
+                  }
+                  return (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {tracksKeys.map((key) => (
+                  {filteredTracksKeys.map((key) => (
                     <div key={key} className="space-y-1.5">
                       <Label className="text-sm font-semibold text-foreground">
                         {getFieldLabel(key)}
@@ -663,6 +689,8 @@ export const MeetingAddRequestDialog = ({
                     </div>
                   ))}
                 </div>
+                  );
+                })()}
 
                 {/* Inline error only — sum moved to footer */}
                 {!isTracksSumValid && (
