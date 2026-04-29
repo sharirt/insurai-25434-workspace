@@ -818,8 +818,8 @@ export default function FormDetails() {
                       )}
                     </div>
 
-                    <ScrollArea className="flex-1 min-h-0 overflow-hidden">
-                      <div className="p-4 space-y-3" dir="rtl">
+                    <ScrollArea className="min-h-0 min-w-0 flex-1 overflow-hidden">
+                      <div className="min-w-0 space-y-3 p-4" dir="rtl">
                         {fieldsCount === 0 ? (
                           <div className="text-center py-8 text-muted-foreground">
                             <p>No field mappings found</p>
