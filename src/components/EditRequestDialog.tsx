@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
-import { getFieldLabel } from "@/utils/fieldTranslations";
+import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import {
   useEntityGetAll,
   useEntityUpdate,
@@ -62,8 +62,6 @@ export const EditRequestDialog = ({
   const [selectedStatus, setSelectedStatus] = useState("מעבד");
   const [selectedStanding, setSelectedStanding] = useState("");
 
-  const lastInitializedRequestTypeIdRef = useRef<string | null>(null);
-
   const { data: providers, isLoading: isLoadingProviders } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes, isLoading: isLoadingRequestTypes } = useEntityGetAll(RequestSchemesEntity);
   const { data: allFunds, isLoading: isLoadingFunds } = useEntityGetAll(FundsEntity, {
@@ -89,40 +87,14 @@ export const EditRequestDialog = ({
     return [...allFunds].sort((a, b) => (a.planName || "").localeCompare(b.planName || ""));
   }, [allFunds]);
 
-  const selectedScheme = useMemo(
-    () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
-    [requestSchemes, selectedRequestTypeId]
-  );
-
-  const tracksKeys = useMemo(() => {
-    if (!selectedScheme?.tracks) return [];
-    return Object.keys(selectedScheme.tracks as Record<string, any>);
-  }, [selectedScheme]);
-
-  // Initialize tracks when request type changes (but not on initial load from request data)
-  useEffect(() => {
-    if (lastInitializedRequestTypeIdRef.current === selectedRequestTypeId) return;
-    lastInitializedRequestTypeIdRef.current = selectedRequestTypeId;
-    if (selectedScheme?.tracks) {
-      const changesObj = selectedScheme.tracks as Record<string, any>;
-      const initial: Record<string, string> = {};
-      for (const [key, value] of Object.entries(changesObj)) {
-        initial[key] = String(value ?? "");
-      }
-      setTracksValues(initial);
-    } else {
-      setTracksValues({});
-    }
-  }, [selectedScheme, selectedRequestTypeId]);
+  const tracksKeys = STATIC_TRACK_KEYS;
 
   // Populate form with request data when dialog opens
   useEffect(() => {
     if (!open) {
-      lastInitializedRequestTypeIdRef.current = null;
       return;
     }
     // Pre-populate from request
-    lastInitializedRequestTypeIdRef.current = request.requestTypeId ?? "";
     setSelectedFundId(request.fundId ?? "");
     setSelectedRequestTypeId(request.requestTypeId ?? "");
     setSelectedProviderId(request.providerId ?? "");
@@ -170,7 +142,7 @@ export const EditRequestDialog = ({
   }, 0);
 
   const TRACKS_SUM_EPSILON = 0.01;
-  const isTracksSumValid = tracksKeys.length === 0 || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
+  const isTracksSumValid = tracksSum === 0 || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
 
   const isPartialAmountValid =
     isTotalTransfer ||
