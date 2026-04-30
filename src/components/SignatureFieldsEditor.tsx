@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import type { PlacedField, ResizeDirection } from "@/hooks/useSignatureFieldsDragDrop";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -99,13 +100,32 @@ export const SignatureFieldsEditor = ({
 
       clearInterval(intervalId);
 
-      const scaledFields: PlacedField[] = initialFields.map((f) => ({
-        ...f,
-        x: f.x * canvasWidth,
-        y: f.y * canvasHeight,
-        width: f.width * canvasWidth,
-        height: f.height * canvasHeight,
-      }));
+      const scaledFields: PlacedField[] = initialFields.map((f) => {
+        let condition = "true";
+        const raw = (f as any).condition;
+        if (raw === false) {
+          condition = "false";
+        } else if (typeof raw === "string") {
+          const trimmed = raw.trim();
+          if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+            condition = trimmed.slice(1, -1);
+          } else if (trimmed === "true" || trimmed === "") {
+            condition = "true";
+          } else {
+            condition = trimmed;
+          }
+        } else if (raw === true || raw == null) {
+          condition = "true";
+        }
+        return {
+          ...f,
+          x: f.x * canvasWidth,
+          y: f.y * canvasHeight,
+          width: f.width * canvasWidth,
+          height: f.height * canvasHeight,
+          condition,
+        };
+      });
 
       setFields(scaledFields);
       setInitialized(true);
@@ -150,6 +170,7 @@ export const SignatureFieldsEditor = ({
         w: f.width / canvasWidth,
         h: f.height / canvasHeight,
         page: f.page > 0 ? f.page : 1,
+        condition: (!f.condition || f.condition === "true") ? true : `{${f.condition}}`,
       }));
 
       await updateFunction({
@@ -219,51 +240,68 @@ export const SignatureFieldsEditor = ({
                 return (
                   <div
                     key={field.id}
-                    className="flex items-center justify-between rounded border px-3 py-1.5 text-xs gap-2"
+                    className="flex flex-col rounded border px-3 py-1.5 text-xs gap-1.5"
                   >
-                    <span className={cn("font-medium shrink-0", config.colorClass)}>
-                      {config.label}
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => updateFieldSigner?.(field.id, 0)}
-                        className={cn(
-                          "text-xs py-0.5 px-2 rounded-full transition-colors",
-                          signerNum === 0
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        )}
-                      >
-                        לקוח
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => updateFieldSigner?.(field.id, 1)}
-                        className={cn(
-                          "text-xs py-0.5 px-2 rounded-full transition-colors",
-                          signerNum === 1
-                            ? "bg-accent text-accent-foreground border border-accent-foreground/30"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        )}
-                      >
-                        סוכן
-                      </button>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={cn("font-medium shrink-0", config.colorClass)}>
+                        {config.label}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => updateFieldSigner?.(field.id, 0)}
+                          className={cn(
+                            "text-xs py-0.5 px-2 rounded-full transition-colors",
+                            signerNum === 0
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          )}
+                        >
+                          לקוח
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateFieldSigner?.(field.id, 1)}
+                          className={cn(
+                            "text-xs py-0.5 px-2 rounded-full transition-colors",
+                            signerNum === 1
+                              ? "bg-accent text-accent-foreground border border-accent-foreground/30"
+                              : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          )}
+                        >
+                          סוכן
+                        </button>
+                      </div>
+                      <span className="text-muted-foreground shrink-0">
+                        {(() => {
+                          const canvas = pdfContainerRef.current?.querySelector("canvas.react-pdf__Page__canvas") as HTMLCanvasElement | null;
+                          const cw = canvas?.offsetWidth;
+                          const ch = canvas?.offsetHeight;
+                          if (cw && ch) {
+                            return `(${(field.x / cw).toFixed(2)}, ${(field.y / ch).toFixed(2)})`;
+                          }
+                          return `(${field.x.toFixed(2)}, ${field.y.toFixed(2)})`;
+                        })()}
+                      </span>
+                      <span className="text-muted-foreground shrink-0 text-[10px]">
+                        עמוד {field.page > 0 ? field.page : 1}
+                      </span>
                     </div>
-                    <span className="text-muted-foreground shrink-0">
-                      {(() => {
-                        const canvas = pdfContainerRef.current?.querySelector("canvas.react-pdf__Page__canvas") as HTMLCanvasElement | null;
-                        const cw = canvas?.offsetWidth;
-                        const ch = canvas?.offsetHeight;
-                        if (cw && ch) {
-                          return `(${(field.x / cw).toFixed(2)}, ${(field.y / ch).toFixed(2)})`;
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground shrink-0">תנאי:</span>
+                      <Input
+                        value={field.condition ?? "true"}
+                        onChange={(e) =>
+                          setFields((prev) =>
+                            prev.map((f) =>
+                              f.id === field.id ? { ...f, condition: e.target.value } : f
+                            )
+                          )
                         }
-                        return `(${field.x.toFixed(2)}, ${field.y.toFixed(2)})`;
-                      })()}
-                    </span>
-                    <span className="text-muted-foreground shrink-0 text-[10px]">
-                      עמוד {field.page > 0 ? field.page : 1}
-                    </span>
+                        placeholder="true"
+                        className="h-6 text-xs px-2 py-0"
+                      />
+                    </div>
                   </div>
                 );
               })}

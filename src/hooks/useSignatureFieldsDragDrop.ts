@@ -11,6 +11,7 @@ export interface PlacedField {
   width: number;
   height: number;
   signer: number;
+  condition?: string;
 }
 
 export type ResizeDirection = "n" | "s" | "e" | "w" | "ne" | "nw" | "se" | "sw";
@@ -96,6 +97,7 @@ export function useSignatureFieldsDragDrop(initialFields?: PlacedField[]) {
         width: config.defaultWidth,
         height: config.defaultHeight,
         signer: 0,
+        condition: "true",
       };
 
       setFields((prev) => [...prev, newField]);

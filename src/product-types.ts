@@ -1668,7 +1668,7 @@ export type SendMeetingFormsForSignatureActionOutput =
 
 /**
  * SendMeetingFormsForSignatureAction
- * Sends ALL filled forms from ALL requests in a meeting as ONE single DocuSeal envelope. Fetches the meeting, then for each request fetches its forms. Fetches form details to get real form titles. Creates one DocuSeal template per form (via CreateDocuSealTemplateForForm), merges ALL templates into one combined template, creates ONE submission with client+agent signers, then saves ONE SignatureRequest row PER REQUEST using forEach (each with its own requestId), all sharing the same DocuSeal submission and formMapping.
+ * Sends ALL filled forms from ALL requests in a meeting as ONE single DocuSeal envelope. Fetches the meeting, then for each request fetches its forms. Fetches form details to get real form titles. Builds a clientContext from the first request (for evaluating signature field conditions). Creates one DocuSeal template per form (via CreateDocuSealTemplateForForm), merges ALL templates into one combined template, creates ONE submission with client+agent signers, then saves ONE SignatureRequest row PER REQUEST using forEach (each with its own requestId), all sharing the same DocuSeal submission and formMapping.
  */
 export const SendMeetingFormsForSignatureAction = {
   actionBlockId: "69db99b07d23f0bc9a295327",
