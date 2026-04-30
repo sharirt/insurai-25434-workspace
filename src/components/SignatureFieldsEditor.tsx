@@ -20,7 +20,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 import type { PlacedField, ResizeDirection } from "@/hooks/useSignatureFieldsDragDrop";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -100,32 +99,13 @@ export const SignatureFieldsEditor = ({
 
       clearInterval(intervalId);
 
-      const scaledFields: PlacedField[] = initialFields.map((f) => {
-        let condition = "true";
-        const raw = (f as any).condition;
-        if (raw === false) {
-          condition = "false";
-        } else if (typeof raw === "string") {
-          const trimmed = raw.trim();
-          if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
-            condition = trimmed.slice(1, -1);
-          } else if (trimmed === "true" || trimmed === "") {
-            condition = "true";
-          } else {
-            condition = trimmed;
-          }
-        } else if (raw === true || raw == null) {
-          condition = "true";
-        }
-        return {
-          ...f,
-          x: f.x * canvasWidth,
-          y: f.y * canvasHeight,
-          width: f.width * canvasWidth,
-          height: f.height * canvasHeight,
-          condition,
-        };
-      });
+      const scaledFields: PlacedField[] = initialFields.map((f) => ({
+        ...f,
+        x: f.x * canvasWidth,
+        y: f.y * canvasHeight,
+        width: f.width * canvasWidth,
+        height: f.height * canvasHeight,
+      }));
 
       setFields(scaledFields);
       setInitialized(true);
@@ -170,7 +150,7 @@ export const SignatureFieldsEditor = ({
         w: f.width / canvasWidth,
         h: f.height / canvasHeight,
         page: f.page > 0 ? f.page : 1,
-        condition: (!f.condition || f.condition === "true") ? true : `{${f.condition}}`,
+        condition: f.condition?.trim() || "true",
       }));
 
       await updateFunction({
@@ -240,7 +220,7 @@ export const SignatureFieldsEditor = ({
                 return (
                   <div
                     key={field.id}
-                    className="flex flex-col rounded border px-3 py-1.5 text-xs gap-1.5"
+                    className="rounded border px-3 py-1.5 text-xs space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className={cn("font-medium shrink-0", config.colorClass)}>
@@ -287,19 +267,17 @@ export const SignatureFieldsEditor = ({
                         עמוד {field.page > 0 ? field.page : 1}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-muted-foreground shrink-0">תנאי:</span>
-                      <Input
-                        value={field.condition ?? "true"}
-                        onChange={(e) =>
-                          setFields((prev) =>
-                            prev.map((f) =>
-                              f.id === field.id ? { ...f, condition: e.target.value } : f
-                            )
-                          )
-                        }
+                    <div className="flex items-center gap-1.5" dir="rtl">
+                      <span className="text-muted-foreground text-[10px] shrink-0">תנאי:</span>
+                      <input
+                        type="text"
                         placeholder="true"
-                        className="h-6 text-xs px-2 py-0"
+                        value={field.condition ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setFields((prev) => prev.map((f) => f.id === field.id ? { ...f, condition: val } : f));
+                        }}
+                        className="flex-1 min-w-0 text-[10px] border rounded px-1.5 py-0.5 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       />
                     </div>
                   </div>

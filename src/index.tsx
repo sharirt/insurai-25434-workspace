@@ -1,12 +1,12 @@
 import './index.css';
-import AgentDashboard2Component from './pages/AgentDashboard2';
-const AgentDashboard2 = { id: '69db99b27d23f0bc9a295478', name: 'AgentDashboard2', component: AgentDashboard2Component };
-export { AgentDashboard2 };
 import Layout from './layout';
 import { Toaster} from '@/components/ui/sonner';
 const LayoutComponent = ({ children }: { children: React.ReactNode }) => (<><Layout children={children} /><Toaster /></>);
 const AppLayout = { id: '69db99a87d23f0bc9a294e99', name: 'AppLayout', component: LayoutComponent };
 export { AppLayout };
+import AgentDashboard2Component from './pages/AgentDashboard2';
+const AgentDashboard2 = { id: '69db99b27d23f0bc9a295478', name: 'AgentDashboard2', component: AgentDashboard2Component };
+export { AgentDashboard2 };
 import AgentProfileComponent from './pages/AgentProfile';
 const AgentProfile = { id: '69db99b37d23f0bc9a295509', name: 'AgentProfile', component: AgentProfileComponent };
 export { AgentProfile };
