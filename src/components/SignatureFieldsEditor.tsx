@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ConditionBuilderPopover } from "@/components/ConditionBuilderPopover";
 import type { PlacedField, ResizeDirection } from "@/hooks/useSignatureFieldsDragDrop";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -267,19 +268,12 @@ export const SignatureFieldsEditor = ({
                         עמוד {field.page > 0 ? field.page : 1}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5" dir="rtl">
-                      <span className="text-muted-foreground text-[10px] shrink-0">תנאי:</span>
-                      <input
-                        type="text"
-                        placeholder="true"
-                        value={field.condition ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setFields((prev) => prev.map((f) => f.id === field.id ? { ...f, condition: val } : f));
-                        }}
-                        className="flex-1 min-w-0 text-[10px] border rounded px-1.5 py-0.5 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      />
-                    </div>
+                    <ConditionBuilderPopover
+                      condition={field.condition ?? ""}
+                      onConditionChange={(val) => {
+                        setFields((prev) => prev.map((f) => f.id === field.id ? { ...f, condition: val } : f));
+                      }}
+                    />
                   </div>
                 );
               })}
