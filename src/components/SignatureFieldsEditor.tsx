@@ -150,7 +150,7 @@ export const SignatureFieldsEditor = ({
         w: f.width / canvasWidth,
         h: f.height / canvasHeight,
         page: f.page > 0 ? f.page : 1,
-        condition: f.condition?.trim() || "true",
+        condition: f.condition || "true",
       }));
 
       await updateFunction({
