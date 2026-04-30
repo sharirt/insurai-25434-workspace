@@ -19,6 +19,9 @@ function parseConditionToSelections(condition: string): {
 } {
   if (!condition || condition === "true") return { expressions: [], operators: [], isNegated: false };
   let trimmed = condition.trim();
+  if (trimmed.startsWith('{{') && trimmed.endsWith('}}')) {
+    trimmed = trimmed.slice(2, -2).trim();
+  }
   let isNegated = false;
   if (trimmed.startsWith("!(") && trimmed.endsWith(")")) {
     isNegated = true;
@@ -93,7 +96,11 @@ export function getConditionSummary(condition: string): { text: string; isMuted:
   if (!condition || condition === "true") {
     return { text: "ללא תנאי", isMuted: true };
   }
-  const { expressions, operators, isNegated } = parseConditionToSelections(condition);
+  let conditionToParse = condition;
+  if (conditionToParse?.startsWith('{{') && conditionToParse?.endsWith('}}')) {
+    conditionToParse = conditionToParse.slice(2, -2).trim();
+  }
+  const { expressions, operators, isNegated } = parseConditionToSelections(conditionToParse);
   const validExpressions = expressions.filter((e) => e && e !== "true");
   if (validExpressions.length === 0) {
     return { text: "ללא תנאי", isMuted: true };
@@ -148,7 +155,7 @@ export const InlineConditionBuilder = ({ condition, onSave, onCancel }: InlineCo
     }
     const raw = buildConditionString(valid, filteredOps);
     const result = thenAction === "hidden" ? `!(${raw})` : raw;
-    onSave(result);
+    onSave(result ? '{{' + result + '}}' : '');
   };
 
   const addCondition = () => {
