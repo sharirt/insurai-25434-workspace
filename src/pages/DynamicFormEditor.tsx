@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useEntityGetOne, useExecuteAction } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { FormsEntity, AnalyzePdfFormFieldsAction, EditDynamicFormFieldsAction, FormsManagerPage } from "@/product-types";
 import { getPageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2, Save } from "lucide-react";
+import { ArrowRight, Loader2, Save, ScanSearch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PdfFieldEditor } from "@/components/PdfFieldEditor";
 import { FieldPropertiesPanel } from "@/components/FieldPropertiesPanel";
@@ -24,40 +24,33 @@ export default function DynamicFormEditor() {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [fieldsLoaded, setFieldsLoaded] = useState(false);
 
-  // Load fields when form is available
-  useEffect(() => {
-    if (!form?.fileData?.url || fieldsLoaded) return;
-
-    const loadFields = async () => {
-      try {
-        const result = await analyzeFields({ pdfUrl: form.fileData!.url });
-        if (result?.fields) {
-          const editorFields: EditorField[] = result.fields.map((f, i) => ({
-            id: `field-${i}-${Date.now()}`,
-            name: f.name || `field_${i}`,
-            type: f.type || "text",
-            page: f.page ?? 0,
-            x: f.x ?? 0,
-            y: f.y ?? 0,
-            width: f.width ?? 100,
-            height: f.height ?? 20,
-            fontSize: undefined,
-            fontFamily: undefined,
-            textDirection: undefined,
-            multiline: false,
-            readOnly: f.readOnly ?? false,
-          }));
-          setFields(editorFields);
-        }
-        setFieldsLoaded(true);
-      } catch {
-        toast.error("שגיאה בטעינת שדות הטופס");
-        setFieldsLoaded(true);
+  const handleAnalyze = async () => {
+    if (!form?.fileData?.url) return;
+    try {
+      const result = await analyzeFields({ pdfUrl: form.fileData.url });
+      if (result?.fields) {
+        const editorFields: EditorField[] = result.fields.map((f: any, i: number) => ({
+          id: `field-${i}-${Date.now()}`,
+          name: f.name || `field_${i}`,
+          type: f.type || "text",
+          page: f.page ?? 0,
+          x: f.x ?? 0,
+          y: f.y ?? 0,
+          width: f.width ?? 100,
+          height: f.height ?? 20,
+          fontSize: undefined,
+          fontFamily: undefined,
+          textDirection: undefined,
+          multiline: false,
+          readOnly: f.readOnly ?? false,
+        }));
+        setFields(editorFields);
       }
-    };
-
-    loadFields();
-  }, [form?.fileData?.url, fieldsLoaded]);
+      setFieldsLoaded(true);
+    } catch {
+      toast.error("שגיאה בניתוח שדות הטופס");
+    }
+  };
 
   const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
 
@@ -177,40 +170,61 @@ export default function DynamicFormEditor() {
           </Button>
           <h1 className="text-lg font-semibold truncate max-w-[300px]">{formTitle}</h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? (
-            <>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleAnalyze} disabled={isAnalyzing}>
+            {isAnalyzing ? (
               <Loader2 className="animate-spin" data-icon="inline-start" />
-              שומר...
-            </>
-          ) : (
-            <>
-              <Save data-icon="inline-start" />
-              שמור
-            </>
-          )}
-        </Button>
+            ) : (
+              <ScanSearch data-icon="inline-start" />
+            )}
+            נתח שדות PDF
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? (
+              <>
+                <Loader2 className="animate-spin" data-icon="inline-start" />
+                שומר...
+              </>
+            ) : (
+              <>
+                <Save data-icon="inline-start" />
+                שמור
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden" dir="ltr">
         {/* PDF Editor - left */}
-        <div className="flex-1 min-w-0">
-          {isAnalyzing ? (
-            <div className="flex flex-col items-center justify-center h-full gap-3">
-              <Loader2 className="size-8 animate-spin text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">מנתח שדות טופס...</p>
+        <div className="flex-1 min-w-0 relative">
+          <PdfFieldEditor
+            fileUrl={form.fileData.url}
+            fields={fields}
+            selectedFieldId={selectedFieldId}
+            onSelectField={setSelectedFieldId}
+            onDeleteField={handleDeleteField}
+            onMoveField={handleMoveField}
+            onResizeField={handleResizeField}
+          />
+          {fields.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+              {isAnalyzing ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">מנתח שדות טופס...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3 text-center px-4">
+                  <p className="text-sm text-muted-foreground">לא נמצאו שדות. לחץ על &apos;נתח שדות PDF&apos; כדי לטעון שדות מהקובץ</p>
+                  <Button variant="outline" onClick={handleAnalyze}>
+                    <ScanSearch data-icon="inline-start" />
+                    נתח שדות PDF
+                  </Button>
+                </div>
+              )}
             </div>
-          ) : (
-            <PdfFieldEditor
-              fileUrl={form.fileData.url}
-              fields={fields}
-              selectedFieldId={selectedFieldId}
-              onSelectField={setSelectedFieldId}
-              onDeleteField={handleDeleteField}
-              onMoveField={handleMoveField}
-              onResizeField={handleResizeField}
-            />
           )}
         </div>
 
