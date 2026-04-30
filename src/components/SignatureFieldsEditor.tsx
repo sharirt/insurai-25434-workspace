@@ -18,9 +18,10 @@ import {
   X,
   Save,
   AlertTriangle,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ConditionBuilderPopover } from "@/components/ConditionBuilderPopover";
+import { getConditionSummary, InlineConditionBuilder } from "@/components/ConditionBuilderPopover";
 import type { PlacedField, ResizeDirection } from "@/hooks/useSignatureFieldsDragDrop";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -35,11 +36,6 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const ROLE_MAP: Record<number, string> = {
   0: "Client",
   1: "Agent",
-};
-
-const ROLE_LABEL: Record<number, string> = {
-  0: "לקוח",
-  1: "סוכן",
 };
 
 interface SignatureFieldsEditorProps {
@@ -63,6 +59,7 @@ export const SignatureFieldsEditor = ({
 }: SignatureFieldsEditorProps) => {
   const { updateFunction, isLoading: isSaving } = useEntityUpdate(FormsEntity);
   const [initialized, setInitialized] = useState(false);
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!initialFields || initialFields.length === 0 || initialized) return;
@@ -77,7 +74,6 @@ export const SignatureFieldsEditor = ({
       if (!container) {
         if (retryCount >= maxRetries) {
           clearInterval(intervalId);
-          console.warn("SignatureFieldsEditor: PDF canvas not found after retries, using raw values");
           setFields(initialFields);
           setInitialized(true);
         }
@@ -91,7 +87,6 @@ export const SignatureFieldsEditor = ({
       if (canvasWidth === 0 || canvasHeight === 0) {
         if (retryCount >= maxRetries) {
           clearInterval(intervalId);
-          console.warn("SignatureFieldsEditor: Canvas dimensions are 0, using raw values");
           setFields(initialFields);
           setInitialized(true);
         }
@@ -132,7 +127,6 @@ export const SignatureFieldsEditor = ({
         return;
       }
 
-      // Find the actual rendered PDF page canvas
       const canvas = container.querySelector("canvas.react-pdf__Page__canvas") as HTMLCanvasElement | null;
       const canvasWidth = canvas?.offsetWidth || container.offsetWidth;
       const canvasHeight = canvas?.offsetHeight || container.offsetHeight;
@@ -218,10 +212,12 @@ export const SignatureFieldsEditor = ({
               {fields.map((field) => {
                 const config = getFieldConfig(field.type);
                 const signerNum = field.signer ?? 0;
+                const isEditingThis = editingFieldId === field.id;
+                const summary = getConditionSummary(field.condition ?? "");
                 return (
                   <div
                     key={field.id}
-                    className="rounded border px-3 py-1.5 text-xs space-y-1"
+                    className="rounded border px-3 py-1.5 text-xs flex flex-col gap-1"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className={cn("font-medium shrink-0", config.colorClass)}>
@@ -268,12 +264,34 @@ export const SignatureFieldsEditor = ({
                         עמוד {field.page > 0 ? field.page : 1}
                       </span>
                     </div>
-                    <ConditionBuilderPopover
-                      condition={field.condition ?? ""}
-                      onConditionChange={(val) => {
-                        setFields((prev) => prev.map((f) => f.id === field.id ? { ...f, condition: val } : f));
-                      }}
-                    />
+                    {/* Condition summary + edit button when not editing */}
+                    {!isEditingThis && (
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn("text-[10px] shrink-0", summary.isMuted ? "text-muted-foreground" : "text-foreground")}>
+                          {summary.text}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-5 w-5 p-0 text-muted-foreground shrink-0"
+                          onClick={() => setEditingFieldId(field.id)}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                    {/* Inline condition builder when editing */}
+                    {isEditingThis && (
+                      <InlineConditionBuilder
+                        condition={field.condition ?? ""}
+                        onSave={(val) => {
+                          setFields((prev) => prev.map((f) => f.id === field.id ? { ...f, condition: val } : f));
+                          setEditingFieldId(null);
+                        }}
+                        onCancel={() => setEditingFieldId(null)}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -324,9 +342,7 @@ interface PdfDropZoneProps {
   onDrop?: (e: DragEvent<HTMLDivElement>) => void;
 }
 
-/** Compute the pixel offset of the PDF canvas relative to its scrollable wrapper.
- *  Uses offsetLeft/offsetTop walk instead of getBoundingClientRect to avoid
- *  border-box vs padding-box mismatches (absolute positioning uses padding box). */
+/** Compute the pixel offset of the PDF canvas relative to its scrollable wrapper. */
 function useCanvasOffset(containerRef: React.RefObject<HTMLDivElement | null>) {
   const [offset, setOffset] = useState({ top: 0, left: 0, width: 0, height: 0 });
 
@@ -338,7 +354,6 @@ function useCanvasOffset(containerRef: React.RefObject<HTMLDivElement | null>) {
       const canvas = container.querySelector("canvas.react-pdf__Page__canvas") as HTMLCanvasElement | null;
       if (!canvas) return;
 
-      // Walk offsetParent chain from canvas to wrapper to get content-space offset
       let top = 0;
       let left = 0;
       let el: HTMLElement | null = canvas;
@@ -468,7 +483,6 @@ export const PdfDropZone = ({
             >
               <X className="h-3 w-3 text-destructive" />
             </button>
-            {/* Resize handles */}
             {onResizeStart && RESIZE_HANDLES.map((handle) => (
               <div
                 key={handle.dir}
