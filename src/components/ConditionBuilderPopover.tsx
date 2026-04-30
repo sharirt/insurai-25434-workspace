@@ -7,24 +7,25 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SlidersHorizontal, Eye, EyeOff, Search, X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { SlidersHorizontal, Eye, EyeOff, X, Plus, ChevronDown } from "lucide-react";
 import { SIMPLE_CONDITIONS } from "@/utils/simpleExpressionConfig";
+import { SearchableConditionSelect } from "@/components/SearchableConditionSelect";
 import { cn } from "@/lib/utils";
 
 const MAX_CONDITIONS = 3;
 
+const conditionOptions = SIMPLE_CONDITIONS.map((c) => ({
+  value: c.expression,
+  label: c.label,
+}));
+
 function parseConditionToSelections(condition: string): {
   expressions: string[];
-  operator: "AND" | "OR";
+  operators: ("AND" | "OR")[];
   isNegated: boolean;
 } {
-  if (!condition || condition === "true") return { expressions: [], operator: "AND", isNegated: false };
+  if (!condition || condition === "true") return { expressions: [], operators: [], isNegated: false };
   let trimmed = condition.trim();
-
-  // Detect negation: !(expression)
   let isNegated = false;
   if (trimmed.startsWith("!(") && trimmed.endsWith(")")) {
     isNegated = true;
@@ -33,21 +34,61 @@ function parseConditionToSelections(condition: string): {
 
   if (trimmed.startsWith("(") && trimmed.endsWith(")")) {
     const inner = trimmed.slice(1, -1);
-    if (inner.includes(" && ")) {
-      return { expressions: inner.split(" && ").map((s) => s.trim()), operator: "AND", isNegated };
+    const expressions: string[] = [];
+    const operators: ("AND" | "OR")[] = [];
+    let current = "";
+    let parenDepth = 0;
+    let inQuote = false;
+    let i = 0;
+
+    while (i < inner.length) {
+      const ch = inner[i];
+      if (ch === "'") {
+        inQuote = !inQuote;
+        current += ch;
+        i++;
+      } else if (!inQuote && ch === "(") {
+        parenDepth++;
+        current += ch;
+        i++;
+      } else if (!inQuote && ch === ")") {
+        parenDepth--;
+        current += ch;
+        i++;
+      } else if (!inQuote && parenDepth === 0 && inner.slice(i, i + 4) === " && ") {
+        expressions.push(current.trim());
+        operators.push("AND");
+        current = "";
+        i += 4;
+      } else if (!inQuote && parenDepth === 0 && inner.slice(i, i + 4) === " || ") {
+        expressions.push(current.trim());
+        operators.push("OR");
+        current = "";
+        i += 4;
+      } else {
+        current += ch;
+        i++;
+      }
     }
-    if (inner.includes(" || ")) {
-      return { expressions: inner.split(" || ").map((s) => s.trim()), operator: "OR", isNegated };
-    }
+    if (current.trim()) expressions.push(current.trim());
+    if (expressions.length > 1) return { expressions, operators, isNegated };
   }
-  return { expressions: [trimmed], operator: "AND", isNegated };
+
+  return { expressions: [trimmed], operators: [], isNegated };
 }
 
-function buildConditionString(expressions: string[], operator: "AND" | "OR"): string {
-  if (expressions.length === 0) return "";
-  if (expressions.length === 1) return expressions[0];
-  const op = operator === "AND" ? "&&" : "||";
-  return `(${expressions.join(` ${op} `)})`;
+function buildConditionString(expressions: string[], operators: ("AND" | "OR")[]): string {
+  const valid = expressions.filter((e) => e && e !== "true");
+  if (valid.length === 0) return "";
+  if (valid.length === 1) return valid[0];
+  const parts: string[] = [];
+  for (let i = 0; i < valid.length; i++) {
+    parts.push(valid[i]);
+    if (i < operators.length) {
+      parts.push(operators[i] === "OR" ? "||" : "&&");
+    }
+  }
+  return `(${parts.join(" ")})`;
 }
 
 function getLabelForExpression(expression: string): string | null {
@@ -59,7 +100,7 @@ export function getConditionSummary(condition: string): { text: string; isMuted:
   if (!condition || condition === "true") {
     return { text: "ללא תנאי", isMuted: true };
   }
-  const { expressions, isNegated } = parseConditionToSelections(condition);
+  const { expressions, operators, isNegated } = parseConditionToSelections(condition);
   const validExpressions = expressions.filter((e) => e && e !== "true");
   if (validExpressions.length === 0) {
     return { text: "ללא תנאי", isMuted: true };
@@ -70,7 +111,11 @@ export function getConditionSummary(condition: string): { text: string; isMuted:
     return { text: condition, isMuted: false };
   }
 
-  const labelText = labels.length === 1 ? labels[0] : labels.join(" ו");
+  let labelText = labels[0];
+  for (let i = 1; i < labels.length; i++) {
+    const opWord = operators[i - 1] === "OR" ? "או" : "וגם";
+    labelText += ` ${opWord} ${labels[i]}`;
+  }
   const action = isNegated ? "מוסתר" : "מוצג";
   return { text: `אם ${labelText} → ${action}`, isMuted: false };
 }
@@ -82,18 +127,16 @@ interface ConditionBuilderPopoverProps {
 
 export const ConditionBuilderPopover = ({ condition, onConditionChange }: ConditionBuilderPopoverProps) => {
   const [open, setOpen] = useState(false);
-  const [selectedExpressions, setSelectedExpressions] = useState<string[]>([]);
-  const [operator, setOperator] = useState<"AND" | "OR">("AND");
-  const [search, setSearch] = useState("");
+  const [expressions, setExpressions] = useState<string[]>([]);
+  const [operators, setOperators] = useState<("AND" | "OR")[]>([]);
   const [thenAction, setThenAction] = useState<"shown" | "hidden">("shown");
   const [elseAction, setElseAction] = useState<"shown" | "hidden">("hidden");
 
   const handleOpen = () => {
     const parsed = parseConditionToSelections(condition);
     const valid = parsed.expressions.filter((e) => e && e !== "true");
-    setSelectedExpressions(valid);
-    setOperator(parsed.operator);
-    setSearch("");
+    setExpressions(valid.length > 0 ? valid : [""]);
+    setOperators(parsed.operators);
     if (parsed.isNegated) {
       setThenAction("hidden");
       setElseAction("shown");
@@ -104,43 +147,73 @@ export const ConditionBuilderPopover = ({ condition, onConditionChange }: Condit
     setOpen(true);
   };
 
-  const toggleCondition = (expression: string) => {
-    setSelectedExpressions((prev) => {
-      if (prev.includes(expression)) {
-        return prev.filter((e) => e !== expression);
-      }
-      if (prev.length >= MAX_CONDITIONS) return prev;
-      return [...prev, expression];
-    });
-  };
-
-  const removeCondition = (expression: string) => {
-    setSelectedExpressions((prev) => prev.filter((e) => e !== expression));
-  };
-
   const handleConfirm = () => {
-    if (selectedExpressions.length === 0) {
+    const valid = expressions.filter((e) => e && e !== "true");
+    if (valid.length === 0) {
       onConditionChange("");
       setOpen(false);
       return;
     }
-    const raw = buildConditionString(selectedExpressions, operator);
-    // If THEN=hidden, negate the expression
+    // Build operators for valid expressions only
+    const validOps: ("AND" | "OR")[] = [];
+    let opIdx = 0;
+    for (let i = 0; i < expressions.length; i++) {
+      if (expressions[i] && expressions[i] !== "true") {
+        if (validOps.length > 0 || opIdx > 0) {
+          // need an operator before this valid expression (if not first valid)
+        }
+      }
+      if (i < operators.length) opIdx++;
+    }
+    // Simpler: rebuild ops from the valid subset
+    const filteredOps: ("AND" | "OR")[] = [];
+    let validCount = 0;
+    for (let i = 0; i < expressions.length; i++) {
+      if (expressions[i] && expressions[i] !== "true") {
+        if (validCount > 0 && i > 0 && operators[i - 1]) {
+          filteredOps.push(operators[i - 1]);
+        } else if (validCount > 0 && !operators[i - 1]) {
+          filteredOps.push("AND");
+        }
+        validCount++;
+      }
+    }
+    const raw = buildConditionString(valid, filteredOps);
     const result = thenAction === "hidden" ? `!(${raw})` : raw;
     onConditionChange(result);
     setOpen(false);
   };
 
-  const handleClearAll = () => {
-    setSelectedExpressions([]);
-    setOperator("AND");
-    setThenAction("shown");
-    setElseAction("hidden");
+  const addCondition = () => {
+    if (expressions.length < MAX_CONDITIONS) {
+      setExpressions([...expressions, ""]);
+      setOperators([...operators, "AND"]);
+    }
   };
 
-  const filteredConditions = search
-    ? SIMPLE_CONDITIONS.filter((c) => c.label.includes(search))
-    : SIMPLE_CONDITIONS;
+  const removeCondition = (index: number) => {
+    const newExpr = expressions.filter((_, i) => i !== index);
+    const newOps = [...operators];
+    if (index > 0) {
+      newOps.splice(index - 1, 1);
+    } else if (newOps.length > 0) {
+      newOps.splice(0, 1);
+    }
+    setExpressions(newExpr);
+    setOperators(newOps);
+  };
+
+  const updateExpression = (index: number, value: string) => {
+    const newExpr = [...expressions];
+    newExpr[index] = value;
+    setExpressions(newExpr);
+  };
+
+  const toggleOperator = (index: number) => {
+    const newOps = [...operators];
+    newOps[index] = newOps[index] === "AND" ? "OR" : "AND";
+    setOperators(newOps);
+  };
 
   const summary = getConditionSummary(condition);
 
@@ -166,184 +239,178 @@ export const ConditionBuilderPopover = ({ condition, onConditionChange }: Condit
             <DialogTitle>הגדרת תנאי הצגה</DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col">
-            {/* IF Section */}
-            <div className="p-4">
-              <p className="text-sm font-bold mb-2">אם</p>
-
-              {/* Selected conditions as chips */}
-              {selectedExpressions.length > 0 && (
-                <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                  {selectedExpressions.map((expr, index) => {
-                    const label = getLabelForExpression(expr);
-                    return (
-                      <div key={expr} className="contents">
-                        {index > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setOperator((prev) => (prev === "AND" ? "OR" : "AND"))}
-                            className={cn(
-                              "text-[10px] font-bold px-2 py-0.5 rounded-full border transition-colors cursor-pointer select-none",
-                              operator === "OR"
-                                ? "bg-accent text-accent-foreground border-border"
-                                : "bg-primary/10 text-primary border-primary/30"
-                            )}
-                          >
-                            {operator === "OR" ? "או" : "וגם"}
-                          </button>
-                        )}
-                        <span className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">
-                          {label ?? expr}
-                          <button
-                            type="button"
-                            onClick={() => removeCondition(expr)}
-                            className="rounded-full hover:bg-primary/20 transition-colors"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </span>
+          <div className="flex flex-col gap-3 p-4">
+            {/* IF Block */}
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 border-b">
+                <span className="text-sm font-bold text-primary">IF</span>
+                <span className="text-xs text-muted-foreground">אם</span>
+              </div>
+              <div className="p-3 flex flex-col gap-2">
+                {expressions.map((expr, index) => (
+                  <div key={index} className="flex flex-col gap-2">
+                    {index > 0 && (
+                      <div className="flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleOperator(index - 1)}
+                          className={cn(
+                            "text-[10px] font-bold px-3 py-0.5 rounded-full border transition-colors cursor-pointer select-none",
+                            operators[index - 1] === "OR"
+                              ? "bg-amber-100 text-amber-800 border-amber-300"
+                              : "bg-primary/10 text-primary border-primary/30"
+                          )}
+                        >
+                          {operators[index - 1] === "OR" ? "OR" : "AND"}
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
+                    )}
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <SearchableConditionSelect
+                          value={expr || undefined}
+                          options={conditionOptions}
+                          placeholder="בחר תנאי..."
+                          onValueChange={(val) => updateExpression(index, val)}
+                        />
+                      </div>
+                      {index > 0 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-1.5 text-muted-foreground hover:text-destructive shrink-0"
+                          onClick={() => removeCondition(index)}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
 
-              {/* No condition option */}
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className={cn(
-                  "w-full text-right px-3 py-1.5 text-xs rounded transition-colors mb-2",
-                  selectedExpressions.length === 0
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "hover:bg-muted/50 text-muted-foreground"
+                {expressions.length < MAX_CONDITIONS && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full border-dashed text-xs text-muted-foreground gap-1.5"
+                    onClick={addCondition}
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    הוסף תנאי
+                  </Button>
                 )}
-              >
-                ללא תנאי
-              </button>
-
-              {/* Search */}
-              <div className="relative mb-2">
-                <Search className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="חפש תנאי..."
-                  className="h-8 text-xs pr-7"
-                />
               </div>
+            </div>
 
-              {/* Conditions list */}
-              <ScrollArea className="max-h-[220px]">
-                <div className="flex flex-col">
-                  {filteredConditions.map((cond) => {
-                    const isSelected = selectedExpressions.includes(cond.expression);
-                    const isDisabled = !isSelected && selectedExpressions.length >= MAX_CONDITIONS;
-                    return (
-                      <button
-                        key={cond.expression}
-                        type="button"
-                        onClick={() => !isDisabled && toggleCondition(cond.expression)}
-                        disabled={isDisabled}
-                        className={cn(
-                          "text-right px-3 py-1.5 text-xs transition-colors rounded",
-                          isSelected
-                            ? "bg-primary/10 text-primary font-medium"
-                            : isDisabled
-                            ? "text-muted-foreground/50 cursor-not-allowed"
-                            : "hover:bg-muted/50 text-foreground"
-                        )}
-                      >
-                        {cond.label}
-                      </button>
-                    );
-                  })}
-                  {filteredConditions.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">לא נמצאו תנאים</p>
-                  )}
+            {/* Arrow connector IF → THEN */}
+            <div className="flex justify-center">
+              <div className="flex items-center justify-center size-6 rounded-full bg-muted">
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            </div>
+
+            {/* THEN Block */}
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 bg-chart-2/10 border-b">
+                <span className="text-sm font-bold text-chart-2">THEN</span>
+                <span className="text-xs text-muted-foreground">אז</span>
+              </div>
+              <div className="p-3">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5 flex-1",
+                      thenAction === "shown"
+                        ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/25"
+                        : "hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setThenAction("shown");
+                      setElseAction("hidden");
+                    }}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    מוצג
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5 flex-1",
+                      thenAction === "hidden"
+                        ? "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                        : "hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setThenAction("hidden");
+                      setElseAction("shown");
+                    }}
+                  >
+                    <EyeOff className="h-3.5 w-3.5" />
+                    מוסתר
+                  </Button>
                 </div>
-              </ScrollArea>
-            </div>
-
-            <Separator />
-
-            {/* THEN Section */}
-            <div className="p-4">
-              <p className="text-sm font-bold mb-2">אז</p>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant={thenAction === "shown" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "h-8 text-xs gap-1.5 flex-1",
-                    thenAction === "shown" && "bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25"
-                  )}
-                  onClick={() => {
-                    setThenAction("shown");
-                    setElseAction("hidden");
-                  }}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  מוצג
-                </Button>
-                <Button
-                  type="button"
-                  variant={thenAction === "hidden" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "h-8 text-xs gap-1.5 flex-1",
-                    thenAction === "hidden" && "bg-muted text-muted-foreground border border-border hover:bg-muted/80"
-                  )}
-                  onClick={() => {
-                    setThenAction("hidden");
-                    setElseAction("shown");
-                  }}
-                >
-                  <EyeOff className="h-3.5 w-3.5" />
-                  מוסתר
-                </Button>
               </div>
             </div>
 
-            <Separator />
+            {/* Arrow connector THEN → ELSE */}
+            <div className="flex justify-center">
+              <div className="flex items-center justify-center size-6 rounded-full bg-muted">
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
+            </div>
 
-            {/* ELSE Section */}
-            <div className="p-4">
-              <p className="text-sm font-bold mb-2">אחרת</p>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant={elseAction === "shown" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "h-8 text-xs gap-1.5 flex-1",
-                    elseAction === "shown" && "bg-primary/15 text-primary border border-primary/30 hover:bg-primary/25"
-                  )}
-                  onClick={() => {
-                    setElseAction("shown");
-                    setThenAction("hidden");
-                  }}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  מוצג
-                </Button>
-                <Button
-                  type="button"
-                  variant={elseAction === "hidden" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "h-8 text-xs gap-1.5 flex-1",
-                    elseAction === "hidden" && "bg-muted text-muted-foreground border border-border hover:bg-muted/80"
-                  )}
-                  onClick={() => {
-                    setElseAction("hidden");
-                    setThenAction("shown");
-                  }}
-                >
-                  <EyeOff className="h-3.5 w-3.5" />
-                  מוסתר
-                </Button>
+            {/* ELSE Block */}
+            <div className="rounded-lg border bg-card overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted border-b">
+                <span className="text-sm font-bold text-muted-foreground">ELSE</span>
+                <span className="text-xs text-muted-foreground">אחרת</span>
+              </div>
+              <div className="p-3">
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5 flex-1",
+                      elseAction === "shown"
+                        ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/25"
+                        : "hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setElseAction("shown");
+                      setThenAction("hidden");
+                    }}
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    מוצג
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-8 text-xs gap-1.5 flex-1",
+                      elseAction === "hidden"
+                        ? "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                        : "hover:bg-muted/50"
+                    )}
+                    onClick={() => {
+                      setElseAction("hidden");
+                      setThenAction("shown");
+                    }}
+                  >
+                    <EyeOff className="h-3.5 w-3.5" />
+                    מוסתר
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
