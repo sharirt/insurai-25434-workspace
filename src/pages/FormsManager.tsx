@@ -20,10 +20,10 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Upload, Search, Layers, Eye, Trash2, List, Grid3x3, AlertCircle, File, X, Loader2, Check, ChevronsUpDown, StickyNote } from "lucide-react";
+import { Upload, Search, Layers, Eye, Trash2, List, Grid3x3, AlertCircle, File, X, Loader2, Check, ChevronsUpDown, StickyNote, PencilRuler } from "lucide-react";
 import { FormsByProviderPills } from "@/components/FormsByProviderPills";
 import { getPageUrl, cn } from "@/lib/utils";
-import { FormDetailsPage } from "@/product-types";
+import { FormDetailsPage, DynamicFormEditorPage } from "@/product-types";
 import { toast } from "sonner";
 import { FormNotesDialog } from "@/components/FormNotesDialog";
 
@@ -828,6 +828,13 @@ export default function FormsManager() {
                             }}
                           >
                             <StickyNote className={cn(form.notes ? "text-primary" : "")} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => navigate(getPageUrl(DynamicFormEditorPage, { formId: (form as any).id }))}
+                          >
+                            <PencilRuler />
                           </Button>
                           <Button
                             variant="ghost"
