@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { useEntityGetOne, useEntityGetAll, useEntityUpdate, useExecuteAction, useFileUpload } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction, DynamicFormEditorPage } from "@/product-types";
+import { FormsEntity, RequestSchemesEntity, ProvidersEntity, FormsManagerPage, AnalyzePdfFormFieldsAction } from "@/product-types";
 import type { IAnalyzePdfFormFieldsActionOutputAnalyzePdfFormFieldsActionOutputFieldsItemObject } from "@/product-types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { ArrowLeft, AlertCircle, Edit, Check, ChevronsUpDown, X, Eye, EyeOff, RefreshCw, Search, Upload, Loader2, LayoutGrid } from "lucide-react";
+import { ArrowLeft, AlertCircle, Edit, Check, ChevronsUpDown, X, Eye, EyeOff, RefreshCw, Search, Upload, Loader2 } from "lucide-react";
 import { getPageUrl, cn } from "@/lib/utils";
 import { useSignatureFieldsDragDrop } from "@/hooks/useSignatureFieldsDragDrop";
 import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
@@ -434,19 +434,9 @@ export default function FormDetails() {
                   </Button>
                 </>
               ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(getPageUrl(DynamicFormEditorPage) + "?id=" + formId)}
-                  >
-                    <LayoutGrid data-icon="inline-start" />
-                    עריכת שדות דינמיים
-                  </Button>
-                  <Button variant="outline" size="icon" onClick={() => setIsEditingMetadata(true)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </>
+                <Button variant="outline" size="icon" onClick={() => setIsEditingMetadata(true)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
               )}
             </div>
           </div>

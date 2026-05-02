@@ -20,10 +20,10 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Upload, Search, Layers, Eye, Trash2, List, Grid3x3, AlertCircle, File, X, Loader2, Check, ChevronsUpDown, StickyNote, LayoutPanelLeft } from "lucide-react";
+import { Upload, Search, Layers, Eye, Trash2, List, Grid3x3, AlertCircle, File, X, Loader2, Check, ChevronsUpDown, StickyNote, PenLine } from "lucide-react";
 import { FormsByProviderPills } from "@/components/FormsByProviderPills";
 import { getPageUrl, cn } from "@/lib/utils";
-import { FormDetailsPage, DynamicFormEditorPage } from "@/product-types";
+import { FormDetailsPage, PdfFieldEditorPage } from "@/product-types";
 import { toast } from "sonner";
 import { FormNotesDialog } from "@/components/FormNotesDialog";
 
@@ -832,17 +832,16 @@ export default function FormsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleViewForm(form)}
+                            onClick={() => navigate(`${getPageUrl(PdfFieldEditorPage)}?formId=${form.id}`)}
                           >
-                            <Eye className="h-4 w-4" />
+                            <PenLine className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => navigate(getPageUrl(DynamicFormEditorPage, { id: (form as any).id }))}
-                            title="עריכת שדות דינמיים"
+                            onClick={() => handleViewForm(form)}
                           >
-                            <LayoutPanelLeft className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"

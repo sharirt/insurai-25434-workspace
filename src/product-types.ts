@@ -687,11 +687,6 @@ export const ClientsManagerPage = {
   pageName: "ClientsManager",
 } as const;
 
-export const DynamicFormEditorPage = {
-  pageBlockId: "69f639ffa86f06bc9092110d",
-  pageName: "DynamicFormEditor",
-} as const;
-
 export const FormDetailsPage = {
   pageBlockId: "69db99aa7d23f0bc9a294f85",
   pageName: "FormDetails",
@@ -730,6 +725,11 @@ export const NewRequestWizardPage = {
 export const OfficeManagerPage = {
   pageBlockId: "69db99b37d23f0bc9a295564",
   pageName: "OfficeManager",
+} as const;
+
+export const PdfFieldEditorPage = {
+  pageBlockId: "69f643d9c27354e1adf4efaf",
+  pageName: "PdfFieldEditor",
 } as const;
 
 export const ProviderEmailsManagerPage = {
@@ -821,6 +821,194 @@ export const AnalyzePdfFormFieldsAction = {
 
   inputInstanceType: {} as IAnalyzePdfFormFieldsActionInput,
   outputInstanceType: {} as IAnalyzePdfFormFieldsActionOutput,
+} as const;
+
+export type AnnotateFormPdfFieldsActionInputTypeEnum =
+  | "text"
+  | "checkbox"
+  | "dropdown"
+  | "radio"
+  | "optionList"
+  | "signature"
+  | "date";
+
+export type AnnotateFormPdfFieldsActionInputFontFamilyEnum =
+  | "helvetica"
+  | "rubik";
+
+export type AnnotateFormPdfFieldsActionInputTextDirectionEnum = "ltr" | "rtl";
+
+/**
+ * undefined
+ */
+export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldsItemObject {
+  name: string;
+  type: AnnotateFormPdfFieldsActionInputTypeEnum;
+  page: number;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  fontSize?: number;
+  fontFamily?: AnnotateFormPdfFieldsActionInputFontFamilyEnum;
+  textDirection?: AnnotateFormPdfFieldsActionInputTextDirectionEnum;
+  multiline?: boolean;
+  required?: boolean;
+  readOnly?: boolean;
+  options?: string[];
+  defaultValue?: string;
+}
+
+/**
+ * undefined
+ */
+export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject {
+  name: string;
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * AnnotateFormPdfFields input payload
+ */
+export interface IAnnotateFormPdfFieldsActionInput {
+  /** The ID of the form record in the Forms table  */
+  formId: string;
+  /** The current internal /redirect URL of the PDF  */
+  pdfUrl: string;
+  /** The original file name to preserve in fileData  */
+  formFileName?: string;
+  /** New fields to add to the PDF  */
+  fields: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldsItemObject[];
+  /** Names of existing fields to remove from the PDF  */
+  removeFieldNames?: string[];
+  /** Geometry updates for existing fields (move/resize without removing)  */
+  fieldGeometryUpdates?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject[];
+}
+
+export type AnnotateFormPdfFieldsActionOutputFormStatusEnum =
+  | "לפני מיפוי"
+  | "חסרות אפשרויות מיפוי"
+  | "לפני בדיקה"
+  | "צריך לערוך קופסאות"
+  | "מוכן (ללא מקרי קצה)"
+  | "טיוטא ישנה"
+  | "מוכן (100%)";
+
+/**
+ * JSON object with key-value pairs where key is the document field name and value is the mapping rule
+ */
+export interface IAnnotateFormPdfFieldsActionOutputFieldMappingObject {}
+
+/**
+ * undefined
+ */
+export interface IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOutputFieldsItemObject {
+  /** Unique field identifier  */
+  id: string;
+  /** Field type: signature, date, text, checkbox, initials  */
+  type: string;
+  /** Signer role: Agent or Client  */
+  role: string;
+  /** X coordinate as ratio (0-1) of page width  */
+  x: number;
+  /** Y coordinate as ratio (0-1) of page height  */
+  y: number;
+  /** Width as ratio (0-1) of page width  */
+  w: number;
+  /** Height as ratio (0-1) of page height  */
+  h: number;
+  /** Page number (1-indexed, compatible with DocuSeal API)  */
+  page: number;
+}
+
+/**
+ * Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.
+ */
+export interface IAnnotateFormPdfFieldsActionOutputSignatureFieldsObject {
+  /** List of signature fields placed on the PDF with DocuSeal-compatible ratio-based coordinates  */
+  fields: IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOutputFieldsItemObject[];
+}
+
+/**
+ * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
+ */
+export interface IAnnotateFormPdfFieldsActionOutputFileDataObject {
+  /** The original file name  */
+  name: string;
+  /** File size in bytes  */
+  size?: number;
+  /** MIME type of the file  */
+  type?: string;
+  /** The URL where the file is stored  */
+  url: string;
+}
+
+/**
+ * The item updated in the table, keys are the column names, values are the column values
+ */
+export interface IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOutputItemsItemObject {
+  /** The id of the item to update. Must be an existing id in the table.  */
+  id?: string;
+  /** Item created at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  createdAt?: string;
+  /** Item updated at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  updatedAt?: string;
+  /** Item created by user id  */
+  createdBy?: string;
+  /** Item updated by user id  */
+  updatedBy?: string;
+  /** Item updated by agent id  */
+  updatedByAgentId?: string;
+  /** Item tenant id  */
+  tenantId?: string;
+  /** Current status of the form template indicating its readiness or lifecycle stage  */
+  formStatus?: AnnotateFormPdfFieldsActionOutputFormStatusEnum;
+  /** List of Provider IDs from the Providers table  */
+  providers?: string[];
+  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
+  fieldMapping?: IAnnotateFormPdfFieldsActionOutputFieldMappingObject;
+  /** Form title in English  */
+  formTitle?: string;
+  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
+  imageAttachment?: string;
+  /** Number of pages in the form  */
+  pages?: number;
+  /** Unique form identifier number  */
+  formNumber?: string;
+  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
+  notes?: string;
+  /** Optional purpose description for the form, can be null  */
+  purpose?: string;
+  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
+  signatureFields?: IAnnotateFormPdfFieldsActionOutputSignatureFieldsObject;
+  /** List of request type IDs from the RequestSchemes table  */
+  requests?: string[];
+  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
+  fileData?: IAnnotateFormPdfFieldsActionOutputFileDataObject;
+  /** Form title in Hebrew  */
+  formTitleHebrew?: string;
+}
+
+/**
+ * AnnotateFormPdfFields output payload
+ */
+export interface IAnnotateFormPdfFieldsActionOutput {
+  /** The items updated in the table  */
+  items: IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOutputItemsItemObject[];
+}
+
+/**
+ * AnnotateFormPdfFieldsAction
+ * Annotates the PDF form fields for a given form using AnnotatePdfFormFields (remove, geometry update, add new fields), then updates the form record's fileData URL in the Forms table with the newly annotated PDF. Saves changes directly into the file metadata.
+ */
+export const AnnotateFormPdfFieldsAction = {
+  actionBlockId: "69f6438f5200c9748117efab",
+
+  inputInstanceType: {} as IAnnotateFormPdfFieldsActionInput,
+  outputInstanceType: {} as IAnnotateFormPdfFieldsActionOutput,
 } as const;
 
 /**
@@ -1005,172 +1193,76 @@ export const CreateClientContextAction = {
 } as const;
 
 /**
- * undefined
+ * DescribeFormPdfFields input payload
  */
-export interface IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInputFieldsItemObject {
-  /** Unique field name/identifier  */
-  name: string;
-  /** Field type: text, checkbox, dropdown, signature, date  */
-  type: string;
-  /** 0-based page index  */
-  page: number;
-  /** X coordinate from left edge in points  */
-  x: number;
-  /** Y coordinate from bottom edge in points  */
-  y: number;
-  /** Width in points  */
-  width?: number;
-  /** Height in points  */
-  height?: number;
-  /** Font size in points  */
-  fontSize?: number;
-  /** Font family: helvetica or rubik  */
-  fontFamily?: string;
-  /** Text direction: ltr or rtl  */
-  textDirection?: string;
-  /** Whether the text field is multiline  */
-  multiline?: boolean;
-  /** Whether the field is read-only  */
-  readOnly?: boolean;
-}
-
-/**
- * EditDynamicFormFields input payload
- */
-export interface IEditDynamicFormFieldsActionInput {
+export interface IDescribeFormPdfFieldsActionInput {
   /** The ID of the form record in the Forms table  */
   formId: string;
-  /** The current PDF URL (protected internal URL ending with /redirect)  */
+  /** The internal /redirect URL of the PDF file  */
   pdfUrl: string;
-  /** The complete list of form fields to write into the PDF  */
-  fields: IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInputFieldsItemObject[];
-  /** Names of all existing AcroForm fields to remove before adding new ones  */
-  existingFieldNames: string[];
-  /** The form title used for the output file name  */
-  formTitle?: string;
 }
 
-export type EditDynamicFormFieldsActionOutputFormStatusEnum =
-  | "לפני מיפוי"
-  | "חסרות אפשרויות מיפוי"
-  | "לפני בדיקה"
-  | "צריך לערוך קופסאות"
-  | "מוכן (ללא מקרי קצה)"
-  | "טיוטא ישנה"
-  | "מוכן (100%)";
-
-/**
- * JSON object with key-value pairs where key is the document field name and value is the mapping rule
- */
-export interface IEditDynamicFormFieldsActionOutputFieldMappingObject {}
+export type DescribeFormPdfFieldsActionOutputTypeEnum =
+  | "text"
+  | "checkbox"
+  | "dropdown"
+  | "optionList"
+  | "radio"
+  | "signature"
+  | "date"
+  | "unknown";
 
 /**
  * undefined
  */
-export interface IEditDynamicFormFieldsActionOutputEditDynamicFormFieldsActionOutputFieldsItemObject {
-  /** Unique field identifier  */
-  id: string;
-  /** Field type: signature, date, text, checkbox, initials  */
-  type: string;
-  /** Signer role: Agent or Client  */
-  role: string;
-  /** X coordinate as ratio (0-1) of page width  */
-  x: number;
-  /** Y coordinate as ratio (0-1) of page height  */
-  y: number;
-  /** Width as ratio (0-1) of page width  */
-  w: number;
-  /** Height as ratio (0-1) of page height  */
-  h: number;
-  /** Page number (1-indexed, compatible with DocuSeal API)  */
-  page: number;
+export interface IDescribeFormPdfFieldsActionOutputDescribeFormPdfFieldsActionOutputFieldsItemObject {
+  /** The name/identifier of the form field  */
+  name?: string;
+  /** The type of the form field (text, checkbox, dropdown, optionList, radio, signature, date)  */
+  type?: DescribeFormPdfFieldsActionOutputTypeEnum;
+  /** Whether the field is required  */
+  required?: boolean;
+  /** Current value of the field (if any)  */
+  currentValue?: any;
+  /** Available options for dropdown or radio fields  */
+  options?: string[];
+  /** Maximum length for text fields  */
+  maxLength?: number;
+  /** Whether the field is read-only  */
+  readOnly?: boolean;
+  /** Page index (0-based) where the field appears  */
+  page?: number;
+  /** X coordinate of the field on the page  */
+  x?: number;
+  /** Y coordinate of the field on the page  */
+  y?: number;
+  /** Width of the field  */
+  width?: number;
+  /** Height of the field  */
+  height?: number;
 }
 
 /**
- * Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.
+ * DescribeFormPdfFields output payload
  */
-export interface IEditDynamicFormFieldsActionOutputSignatureFieldsObject {
-  /** List of signature fields placed on the PDF with DocuSeal-compatible ratio-based coordinates  */
-  fields: IEditDynamicFormFieldsActionOutputEditDynamicFormFieldsActionOutputFieldsItemObject[];
+export interface IDescribeFormPdfFieldsActionOutput {
+  /** List of form fields found in the PDF  */
+  fields?: IDescribeFormPdfFieldsActionOutputDescribeFormPdfFieldsActionOutputFieldsItemObject[];
+  /** Total number of form fields found  */
+  totalFields?: number;
+  /** Number of pages in the PDF  */
+  pageCount?: number;
 }
 
 /**
- * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
+ * DescribeFormPdfFieldsAction
+ * Generates a signed URL for a form's PDF file, then calls DescribePdfFormFields to return all fillable fields with their positions, types, sizes, and page numbers. Used by the PdfFieldEditor page to load existing fields.
  */
-export interface IEditDynamicFormFieldsActionOutputFileDataObject {
-  /** The original file name  */
-  name: string;
-  /** File size in bytes  */
-  size?: number;
-  /** MIME type of the file  */
-  type?: string;
-  /** The URL where the file is stored  */
-  url: string;
-}
+export const DescribeFormPdfFieldsAction = {
+  actionBlockId: "69f6438e5200c9748117ef53",
 
-/**
- * The item updated in the table, keys are the column names, values are the column values
- */
-export interface IEditDynamicFormFieldsActionOutputEditDynamicFormFieldsActionOutputItemsItemObject {
-  /** The id of the item to update. Must be an existing id in the table.  */
-  id?: string;
-  /** Item created at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  createdAt?: string;
-  /** Item updated at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  updatedAt?: string;
-  /** Item created by user id  */
-  createdBy?: string;
-  /** Item updated by user id  */
-  updatedBy?: string;
-  /** Item updated by agent id  */
-  updatedByAgentId?: string;
-  /** Item tenant id  */
-  tenantId?: string;
-  /** Current status of the form template indicating its readiness or lifecycle stage  */
-  formStatus?: EditDynamicFormFieldsActionOutputFormStatusEnum;
-  /** List of Provider IDs from the Providers table  */
-  providers?: string[];
-  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
-  fieldMapping?: IEditDynamicFormFieldsActionOutputFieldMappingObject;
-  /** Form title in English  */
-  formTitle?: string;
-  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
-  imageAttachment?: string;
-  /** Number of pages in the form  */
-  pages?: number;
-  /** Unique form identifier number  */
-  formNumber?: string;
-  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
-  notes?: string;
-  /** Optional purpose description for the form, can be null  */
-  purpose?: string;
-  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
-  signatureFields?: IEditDynamicFormFieldsActionOutputSignatureFieldsObject;
-  /** List of request type IDs from the RequestSchemes table  */
-  requests?: string[];
-  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
-  fileData?: IEditDynamicFormFieldsActionOutputFileDataObject;
-  /** Form title in Hebrew  */
-  formTitleHebrew?: string;
-}
-
-/**
- * EditDynamicFormFields output payload
- */
-export interface IEditDynamicFormFieldsActionOutput {
-  /** The items updated in the table  */
-  items: IEditDynamicFormFieldsActionOutputEditDynamicFormFieldsActionOutputItemsItemObject[];
-}
-
-/**
- * EditDynamicFormFieldsAction
- * Edits the dynamic form fields of a PDF form template. Takes the form ID and a list of field definitions (with position, size, type, font, direction, fontSize). Fetches the current PDF, removes all existing AcroForm fields, adds the new fields via AnnotatePdfFormFields, then updates the form record's fileData.url with the new annotated PDF URL so changes are persisted in the metadata.
- */
-export const EditDynamicFormFieldsAction = {
-  actionBlockId: "69f639a3a1a69d451737e608",
-
-  inputInstanceType: {} as IEditDynamicFormFieldsActionInput,
-  outputInstanceType: {} as IEditDynamicFormFieldsActionOutput,
+  inputInstanceType: {} as IDescribeFormPdfFieldsActionInput,
+  outputInstanceType: {} as IDescribeFormPdfFieldsActionOutput,
 } as const;
 
 /**
