@@ -71,6 +71,7 @@ export default function DynamicFormEditor() {
   const [containerWidth, setContainerWidth] = useState(0);
   const [fieldsLoaded, setFieldsLoaded] = useState(false);
   const [addFieldOpen, setAddFieldOpen] = useState(false);
+  const [pageCount, setPageCount] = useState(1);
 
   // Drag state
   const [dragState, setDragState] = useState<{
@@ -107,14 +108,17 @@ export default function DynamicFormEditor() {
     return () => obs.disconnect();
   }, [formLoading]);
 
-  // Load fields from DescribePdfFormFields
+  // Load fields from AnalyzePdfFormFields
   useEffect(() => {
     if (!form?.fileData?.url || fieldsLoaded) return;
     const load = async () => {
       try {
         const result = await describeFields({ pdfUrl: form.fileData!.url });
-        if (result?.fields) {
-          const mapped: DynamicField[] = result.fields.map((f) => ({
+        if (result?.pageCount) {
+          setPageCount(result.pageCount);
+        }
+        if (result?.fields && result.fields.length > 0) {
+          const mapped: DynamicField[] = result.fields.map((f: any) => ({
             name: f.name,
             type: f.type,
             page: f.page,
@@ -130,6 +134,8 @@ export default function DynamicFormEditor() {
           }));
           setFields(mapped);
           setOriginalFieldNames(mapped.map((f) => f.name));
+        } else {
+          toast.warning("לא נמצאו שדות בטופס. ניתן להוסיף שדות ידנית.");
         }
       } catch {
         toast.error("שגיאה בטעינת שדות הטופס");
@@ -144,12 +150,13 @@ export default function DynamicFormEditor() {
 
   const selectedField = fields.find((f) => f.name === selectedFieldName) || null;
 
+  const numPages = pageCount || (form as any)?.pages || 1;
+
   const handleFieldUpdate = (name: string, updates: Partial<DynamicField>) => {
     setFields((prev) =>
       prev.map((f) => {
         if (f.name !== name) return f;
         const updated = { ...f, ...updates };
-        // If name changed, update selectedFieldName
         if (updates.name && updates.name !== name) {
           setSelectedFieldName(updates.name);
         }
@@ -168,7 +175,7 @@ export default function DynamicFormEditor() {
     const newField: DynamicField = {
       name: `field_${Date.now()}`,
       type,
-      page: currentPage - 1,
+      page: 0,
       x: 100,
       y: pdfNativeSize ? pdfNativeSize.pdfH / 2 : 400,
       width: defaults.width,
@@ -279,7 +286,6 @@ export default function DynamicFormEditor() {
         newX = resizeState.startX + dx;
       }
       if (h.includes("s")) {
-        // Screen down = PDF y decreases, so "s" handle means shrink height from bottom
         newH = Math.max(10, resizeState.startH + dy);
         newY = resizeState.startY - dy;
       }
@@ -380,7 +386,7 @@ export default function DynamicFormEditor() {
       {/* Main content */}
       <div className="flex-1 flex min-h-0">
         {/* Left: PDF preview 60% */}
-        <div className="flex-[3] min-w-0 overflow-auto relative" ref={containerRef}>
+        <div className="flex-[3] min-w-0 overflow-auto" ref={containerRef}>
           {isDescribing && !fieldsLoaded ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center flex flex-col gap-3 items-center">
@@ -396,7 +402,7 @@ export default function DynamicFormEditor() {
             >
               <PdfViewer
                 file={form.fileData.url}
-                showAll={false}
+                showAll={true}
                 showFields={[]}
                 onPageChange={setCurrentPage}
                 defaultWidth={containerWidth}
@@ -405,10 +411,11 @@ export default function DynamicFormEditor() {
               {pdfNativeSize && (
                 <DynamicFieldOverlay
                   fields={fields}
-                  currentPage={currentPage}
                   selectedFieldName={selectedFieldName}
-                  scale={scale}
-                  pdfNativeHeight={pdfNativeSize.pdfH}
+                  containerWidth={containerWidth}
+                  numPages={numPages}
+                  pdfW={pdfNativeSize.pdfW}
+                  pdfH={pdfNativeSize.pdfH}
                   onSelect={setSelectedFieldName}
                   onDelete={handleDelete}
                   onDragStart={handleDragStart}

@@ -3,10 +3,11 @@ import type { DynamicField } from "@/components/DynamicFieldBox";
 
 interface DynamicFieldOverlayProps {
   fields: DynamicField[];
-  currentPage: number;
   selectedFieldName: string | null;
-  scale: number;
-  pdfNativeHeight: number;
+  containerWidth: number;
+  numPages: number;
+  pdfW: number;
+  pdfH: number;
   onSelect: (name: string) => void;
   onDelete: (name: string) => void;
   onDragStart: (name: string, e: React.MouseEvent) => void;
@@ -15,35 +16,49 @@ interface DynamicFieldOverlayProps {
 
 export const DynamicFieldOverlay = ({
   fields,
-  currentPage,
   selectedFieldName,
-  scale,
-  pdfNativeHeight,
+  containerWidth,
+  numPages,
+  pdfW,
+  pdfH,
   onSelect,
   onDelete,
   onDragStart,
   onResizeStart,
 }: DynamicFieldOverlayProps) => {
-  const pageFields = fields.filter((f) => f.page === currentPage - 1);
+  const scale = containerWidth > 0 && pdfW > 0 ? containerWidth / pdfW : 1;
+  const renderedPageHeight = containerWidth * (pdfH / pdfW);
+  const totalHeight = numPages * renderedPageHeight;
 
   return (
     <div
-      className="absolute top-0 left-0 w-full h-full"
-      style={{ pointerEvents: "none" }}
+      className="absolute top-0 left-0 w-full"
+      style={{ pointerEvents: "none", height: totalHeight }}
     >
-      {pageFields.map((field) => (
-        <DynamicFieldBox
-          key={field.name}
-          field={field}
-          isSelected={selectedFieldName === field.name}
-          scale={scale}
-          pdfNativeHeight={pdfNativeHeight}
-          onSelect={onSelect}
-          onDelete={onDelete}
-          onDragStart={onDragStart}
-          onResizeStart={onResizeStart}
-        />
-      ))}
+      {fields.map((field) => {
+        const screenX = field.x * scale;
+        const screenY =
+          field.page * renderedPageHeight +
+          (renderedPageHeight - (field.y + field.height) * scale);
+        const screenW = field.width * scale;
+        const screenH = field.height * scale;
+
+        return (
+          <DynamicFieldBox
+            key={field.name}
+            field={field}
+            isSelected={selectedFieldName === field.name}
+            screenX={screenX}
+            screenY={screenY}
+            screenW={screenW}
+            screenH={screenH}
+            onSelect={onSelect}
+            onDelete={onDelete}
+            onDragStart={onDragStart}
+            onResizeStart={onResizeStart}
+          />
+        );
+      })}
     </div>
   );
 };

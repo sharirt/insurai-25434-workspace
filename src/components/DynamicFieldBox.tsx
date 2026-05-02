@@ -20,8 +20,10 @@ export interface DynamicField {
 interface DynamicFieldBoxProps {
   field: DynamicField;
   isSelected: boolean;
-  scale: number;
-  pdfNativeHeight: number;
+  screenX: number;
+  screenY: number;
+  screenW: number;
+  screenH: number;
   onSelect: (name: string) => void;
   onDelete: (name: string) => void;
   onDragStart: (name: string, e: React.MouseEvent) => void;
@@ -67,8 +69,10 @@ const HANDLE_POSITIONS: Record<string, React.CSSProperties> = {
 export const DynamicFieldBox = ({
   field,
   isSelected,
-  scale,
-  pdfNativeHeight,
+  screenX,
+  screenY,
+  screenW,
+  screenH,
   onSelect,
   onDelete,
   onDragStart,
@@ -76,11 +80,6 @@ export const DynamicFieldBox = ({
 }: DynamicFieldBoxProps) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const color = getColor(field.type);
-
-  const screenX = field.x * scale;
-  const screenY = (pdfNativeHeight - field.y - field.height) * scale;
-  const screenW = field.width * scale;
-  const screenH = field.height * scale;
 
   return (
     <div
