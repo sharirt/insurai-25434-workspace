@@ -6,6 +6,24 @@ export interface PdfNativeSize {
   pdfH: number;
 }
 
+const FILE_DATA_BLOCK_PATTERN = /api\/blocks\/fileDataBlock\/[^/]+\/redirect/;
+
+function resolveFileUrl(url: string): string {
+  if (!FILE_DATA_BLOCK_PATTERN.test(url)) {
+    return url;
+  }
+  let token = localStorage.getItem('token');
+  if (token) {
+    try {
+      token = JSON.parse(token);
+    } catch {
+      // use as-is
+    }
+  }
+  const separator = url.includes('?') ? '&' : '?';
+  return token ? `${url}${separator}token=${token}` : url;
+}
+
 export function usePdfNativeSize(pdfUrl: string | undefined | null): PdfNativeSize | null {
   const [nativeSize, setNativeSize] = useState<PdfNativeSize | null>(null);
 
@@ -19,7 +37,8 @@ export function usePdfNativeSize(pdfUrl: string | undefined | null): PdfNativeSi
 
     const load = async () => {
       try {
-        const loadingTask = pdfjs.getDocument(pdfUrl);
+        const resolved = resolveFileUrl(pdfUrl);
+        const loadingTask = pdfjs.getDocument(resolved);
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
         const view = page.view; // [x1, y1, x2, y2]
