@@ -8,6 +8,7 @@ import {
   FormsEntity,
   FormDetailsPage,
   EditDynamicFormFieldsAction,
+  AnalyzePdfFormFieldsAction,
 } from "@/product-types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,27 +26,6 @@ import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
 import { getPageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { ArrowRight, Plus, Save, Loader2 } from "lucide-react";
-
-const DescribePdfFormFieldsConfig = {
-  actionBlockId: "69733f8438cd5c8bfe5f57a1",
-  inputInstanceType: {} as { pdfUrl: string },
-  outputInstanceType: {} as {
-    fields: Array<{
-      name: string;
-      type: string;
-      page: number;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-      fontSize?: number;
-      fontFamily?: string;
-      textDirection?: string;
-      multiline?: boolean;
-      readOnly?: boolean;
-    }>;
-  },
-};
 
 const DEFAULT_SIZES: Record<string, { width: number; height: number }> = {
   text: { width: 200, height: 20 },
@@ -75,7 +55,7 @@ export default function DynamicFormEditor() {
   const {
     executeFunction: describeFields,
     isLoading: isDescribing,
-  } = useExecuteAction(DescribePdfFormFieldsConfig);
+  } = useExecuteAction(AnalyzePdfFormFieldsAction);
 
   const {
     executeFunction: saveFields,
@@ -142,11 +122,11 @@ export default function DynamicFormEditor() {
             y: f.y,
             width: f.width || 200,
             height: f.height || 20,
-            fontSize: f.fontSize,
-            fontFamily: f.fontFamily,
-            textDirection: f.textDirection,
-            multiline: f.multiline,
-            readOnly: f.readOnly,
+            fontSize: 12,
+            fontFamily: "helvetica",
+            textDirection: "rtl",
+            multiline: false,
+            readOnly: f.readOnly ?? false,
           }));
           setFields(mapped);
           setOriginalFieldNames(mapped.map((f) => f.name));
