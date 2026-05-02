@@ -1,98 +1,198 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
-import { useEntityGetOne, useExecuteAction } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { FormsEntity, AnalyzePdfFormFieldsAction, EditDynamicFormFieldsAction, FormsManagerPage } from "@/product-types";
+import {
+  useEntityGetOne,
+  useExecuteAction,
+} from "@blocksdiy/blocks-client-sdk/reactSdk";
+import {
+  FormsEntity,
+  FormDetailsPage,
+  EditDynamicFormFieldsAction,
+} from "@/product-types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { PdfViewer } from "@/components/ui/pdf-viewer";
+import { DynamicFieldOverlay } from "@/components/DynamicFieldOverlay";
+import { DynamicFieldProperties } from "@/components/DynamicFieldProperties";
+import type { DynamicField } from "@/components/DynamicFieldBox";
+import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
 import { getPageUrl } from "@/lib/utils";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Loader2, Save, ScanSearch } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PdfFieldEditor } from "@/components/PdfFieldEditor";
-import { FieldPropertiesPanel } from "@/components/FieldPropertiesPanel";
-import type { EditorField } from "@/components/FieldOverlay";
+import { ArrowRight, Plus, Save, Loader2 } from "lucide-react";
+
+const DescribePdfFormFieldsConfig = {
+  actionBlockId: "69733f8438cd5c8bfe5f57a1",
+  inputInstanceType: {} as { pdfUrl: string },
+  outputInstanceType: {} as {
+    fields: Array<{
+      name: string;
+      type: string;
+      page: number;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      fontSize?: number;
+      fontFamily?: string;
+      textDirection?: string;
+      multiline?: boolean;
+      readOnly?: boolean;
+    }>;
+  },
+};
+
+const DEFAULT_SIZES: Record<string, { width: number; height: number }> = {
+  text: { width: 200, height: 20 },
+  checkbox: { width: 14, height: 14 },
+  signature: { width: 200, height: 50 },
+  date: { width: 100, height: 20 },
+  dropdown: { width: 200, height: 24 },
+};
+
+const FIELD_TYPES = [
+  { value: "text", label: "טקסט" },
+  { value: "checkbox", label: "תיבת סימון" },
+  { value: "signature", label: "חתימה" },
+  { value: "date", label: "תאריך" },
+  { value: "dropdown", label: "רשימה נפתחת" },
+];
 
 export default function DynamicFormEditor() {
   const [searchParams] = useSearchParams();
-  const formId = searchParams.get("formId");
   const navigate = useNavigate();
+  const formId = searchParams.get("id") || "";
 
-  const { data: form, isLoading: isLoadingForm } = useEntityGetOne(FormsEntity, { id: formId || "" }, { enabled: !!formId });
-  const { executeFunction: analyzeFields, isLoading: isAnalyzing } = useExecuteAction(AnalyzePdfFormFieldsAction);
-  const { executeFunction: saveFields, isLoading: isSaving } = useExecuteAction(EditDynamicFormFieldsAction);
+  const { data: form, isLoading: formLoading } = useEntityGetOne(FormsEntity, {
+    id: formId,
+  });
 
-  const [fields, setFields] = useState<EditorField[]>([]);
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const {
+    executeFunction: describeFields,
+    isLoading: isDescribing,
+  } = useExecuteAction(DescribePdfFormFieldsConfig);
+
+  const {
+    executeFunction: saveFields,
+    isLoading: isSaving,
+  } = useExecuteAction(EditDynamicFormFieldsAction);
+
+  const pdfNativeSize = usePdfNativeSize(form?.fileData?.url);
+
+  const [fields, setFields] = useState<DynamicField[]>([]);
+  const [originalFieldNames, setOriginalFieldNames] = useState<string[]>([]);
+  const [selectedFieldName, setSelectedFieldName] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [fieldsLoaded, setFieldsLoaded] = useState(false);
+  const [addFieldOpen, setAddFieldOpen] = useState(false);
 
-  const handleAnalyze = async () => {
-    if (!form?.fileData?.url) return;
-    try {
-      const result = await analyzeFields({ pdfUrl: form.fileData.url });
-      if (result?.fields) {
-        const editorFields: EditorField[] = result.fields.map((f: any, i: number) => ({
-          id: `field-${i}-${Date.now()}`,
-          name: f.name || `field_${i}`,
-          type: f.type || "text",
-          page: f.page ?? 0,
-          x: f.x ?? 0,
-          y: f.y ?? 0,
-          width: f.width ?? 100,
-          height: f.height ?? 20,
-          fontSize: undefined,
-          fontFamily: undefined,
-          textDirection: undefined,
-          multiline: false,
-          readOnly: f.readOnly ?? false,
-        }));
-        setFields(editorFields);
+  // Drag state
+  const [dragState, setDragState] = useState<{
+    fieldName: string;
+    startMouseX: number;
+    startMouseY: number;
+    startFieldX: number;
+    startFieldY: number;
+  } | null>(null);
+
+  // Resize state
+  const [resizeState, setResizeState] = useState<{
+    fieldName: string;
+    handle: string;
+    startMouseX: number;
+    startMouseY: number;
+    startX: number;
+    startY: number;
+    startW: number;
+    startH: number;
+  } | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ResizeObserver for container width
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) setContainerWidth(Math.floor(entry.contentRect.width));
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [formLoading]);
+
+  // Load fields from DescribePdfFormFields
+  useEffect(() => {
+    if (!form?.fileData?.url || fieldsLoaded) return;
+    const load = async () => {
+      try {
+        const result = await describeFields({ pdfUrl: form.fileData!.url });
+        if (result?.fields) {
+          const mapped: DynamicField[] = result.fields.map((f) => ({
+            name: f.name,
+            type: f.type,
+            page: f.page,
+            x: f.x,
+            y: f.y,
+            width: f.width || 200,
+            height: f.height || 20,
+            fontSize: f.fontSize,
+            fontFamily: f.fontFamily,
+            textDirection: f.textDirection,
+            multiline: f.multiline,
+            readOnly: f.readOnly,
+          }));
+          setFields(mapped);
+          setOriginalFieldNames(mapped.map((f) => f.name));
+        }
+      } catch {
+        toast.error("שגיאה בטעינת שדות הטופס");
       }
       setFieldsLoaded(true);
-    } catch {
-      toast.error("שגיאה בניתוח שדות הטופס");
-    }
-  };
+    };
+    load();
+  }, [form?.fileData?.url, fieldsLoaded, describeFields]);
 
-  const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
+  const scale =
+    pdfNativeSize && containerWidth > 0 ? containerWidth / pdfNativeSize.pdfW : 1;
 
-  const handleFieldChange = (id: string, updates: Partial<EditorField>) => {
-    setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...updates } : f)));
-  };
+  const selectedField = fields.find((f) => f.name === selectedFieldName) || null;
 
-  const handleMoveField = (id: string, dx: number, dy: number) => {
+  const handleFieldUpdate = (name: string, updates: Partial<DynamicField>) => {
     setFields((prev) =>
       prev.map((f) => {
-        if (f.id !== id) return f;
-        return { ...f, x: f.x + dx, y: f.y - dy };
+        if (f.name !== name) return f;
+        const updated = { ...f, ...updates };
+        // If name changed, update selectedFieldName
+        if (updates.name && updates.name !== name) {
+          setSelectedFieldName(updates.name);
+        }
+        return updated;
       })
     );
   };
 
-  const handleResizeField = (id: string, dw: number, dh: number) => {
-    setFields((prev) =>
-      prev.map((f) => {
-        if (f.id !== id) return f;
-        const newW = Math.max(5, f.width + dw);
-        const newH = Math.max(5, f.height + dh);
-        return { ...f, width: newW, height: newH, y: f.y - dh };
-      })
-    );
+  const handleDelete = (name: string) => {
+    setFields((prev) => prev.filter((f) => f.name !== name));
+    if (selectedFieldName === name) setSelectedFieldName(null);
   };
 
-  const handleDeleteField = (id: string) => {
-    setFields((prev) => prev.filter((f) => f.id !== id));
-    if (selectedFieldId === id) setSelectedFieldId(null);
-  };
-
-  const handleAddField = () => {
-    const newField: EditorField = {
-      id: `field-new-${Date.now()}`,
-      name: `new_field_${fields.length + 1}`,
-      type: "text",
-      page: 0,
-      x: 50,
-      y: 700,
-      width: 120,
-      height: 20,
+  const handleAddField = (type: string) => {
+    const defaults = DEFAULT_SIZES[type] || DEFAULT_SIZES.text;
+    const newField: DynamicField = {
+      name: `field_${Date.now()}`,
+      type,
+      page: currentPage - 1,
+      x: 100,
+      y: pdfNativeSize ? pdfNativeSize.pdfH / 2 : 400,
+      width: defaults.width,
+      height: defaults.height,
       fontSize: 12,
       fontFamily: "helvetica",
       textDirection: "rtl",
@@ -100,140 +200,257 @@ export default function DynamicFormEditor() {
       readOnly: false,
     };
     setFields((prev) => [...prev, newField]);
-    setSelectedFieldId(newField.id);
+    setSelectedFieldName(newField.name);
+    setAddFieldOpen(false);
   };
 
   const handleSave = async () => {
-    if (!formId) return;
+    if (!form?.fileData?.url) return;
     try {
-      const fieldsPayload = fields.map((f) => ({
-        name: f.name,
-        type: f.type as any,
-        page: f.page,
-        x: f.x,
-        y: f.y,
-        width: f.width,
-        height: f.height,
-        fontSize: f.fontSize,
-        fontFamily: f.fontFamily as any,
-        textDirection: f.textDirection as any,
-        multiline: f.multiline,
-        readOnly: f.readOnly,
-      }));
-
-      await saveFields({ formId, fields: fieldsPayload });
-      toast.success("השדות נשמרו בהצלחה");
-      navigate(getPageUrl(FormsManagerPage));
-    } catch {
-      toast.error("שגיאה בשמירת השדות");
+      await saveFields({
+        formId,
+        pdfUrl: form.fileData.url,
+        fields: fields.map((f) => ({
+          name: f.name,
+          type: f.type,
+          page: f.page,
+          x: f.x,
+          y: f.y,
+          width: f.width,
+          height: f.height,
+          fontSize: f.fontSize,
+          fontFamily: f.fontFamily,
+          textDirection: f.textDirection,
+          multiline: f.multiline,
+          readOnly: f.readOnly,
+        })),
+        existingFieldNames: originalFieldNames,
+        formTitle: form.formTitleHebrew || form.formTitle || "form",
+      });
+      setOriginalFieldNames(fields.map((f) => f.name));
+      toast.success("השינויים נשמרו בהצלחה");
+    } catch (err: any) {
+      toast.error(err?.message || "שגיאה בשמירת השינויים");
     }
   };
 
-  if (!formId) {
+  const handleBack = () => {
+    navigate(getPageUrl(FormDetailsPage) + "?id=" + formId);
+  };
+
+  // Drag handlers
+  const handleDragStart = (name: string, e: React.MouseEvent) => {
+    const field = fields.find((f) => f.name === name);
+    if (!field) return;
+    setDragState({
+      fieldName: name,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startFieldX: field.x,
+      startFieldY: field.y,
+    });
+  };
+
+  const handleResizeStart = (
+    name: string,
+    handle: string,
+    e: React.MouseEvent
+  ) => {
+    const field = fields.find((f) => f.name === name);
+    if (!field) return;
+    setResizeState({
+      fieldName: name,
+      handle,
+      startMouseX: e.clientX,
+      startMouseY: e.clientY,
+      startX: field.x,
+      startY: field.y,
+      startW: field.width,
+      startH: field.height,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (dragState) {
+      const dx = (e.clientX - dragState.startMouseX) / scale;
+      const dy = (e.clientY - dragState.startMouseY) / scale;
+      const newX = dragState.startFieldX + dx;
+      // Y is inverted: screen down = PDF y decreases
+      const newY = dragState.startFieldY - dy;
+      setFields((prev) =>
+        prev.map((f) =>
+          f.name === dragState.fieldName ? { ...f, x: newX, y: newY } : f
+        )
+      );
+    }
+    if (resizeState) {
+      const dx = (e.clientX - resizeState.startMouseX) / scale;
+      const dy = (e.clientY - resizeState.startMouseY) / scale;
+      const h = resizeState.handle;
+
+      let newX = resizeState.startX;
+      let newY = resizeState.startY;
+      let newW = resizeState.startW;
+      let newH = resizeState.startH;
+
+      if (h.includes("e")) newW = Math.max(10, resizeState.startW + dx);
+      if (h.includes("w")) {
+        newW = Math.max(10, resizeState.startW - dx);
+        newX = resizeState.startX + dx;
+      }
+      if (h.includes("s")) {
+        // Screen down = PDF y decreases, so "s" handle means shrink height from bottom
+        newH = Math.max(10, resizeState.startH + dy);
+        newY = resizeState.startY - dy;
+      }
+      if (h.includes("n")) {
+        newH = Math.max(10, resizeState.startH - dy);
+      }
+
+      setFields((prev) =>
+        prev.map((f) =>
+          f.name === resizeState.fieldName
+            ? { ...f, x: newX, y: newY, width: newW, height: newH }
+            : f
+        )
+      );
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDragState(null);
+    setResizeState(null);
+  };
+
+  const displayTitle =
+    form?.formTitleHebrew || form?.formTitle || "עורך שדות דינמיים";
+
+  if (formLoading) {
     return (
-      <div className="flex items-center justify-center h-screen text-muted-foreground">
-        לא נמצא מזהה טופס
+      <div className="min-h-screen bg-background">
+        <div className="border-b bg-card p-4">
+          <div className="flex items-center gap-4">
+            <Skeleton className="size-10" />
+            <Skeleton className="h-6 w-48" />
+          </div>
+        </div>
+        <div className="p-6 flex gap-6">
+          <Skeleton className="flex-[3] h-[600px]" />
+          <Skeleton className="flex-[2] h-[600px]" />
+        </div>
       </div>
     );
   }
-
-  if (isLoadingForm) {
-    return (
-      <div className="flex flex-col gap-4 p-6">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-[600px] w-full" />
-      </div>
-    );
-  }
-
-  if (!form?.fileData?.url) {
-    return (
-      <div className="flex items-center justify-center h-screen text-muted-foreground">
-        לא נמצא קובץ PDF לטופס זה
-      </div>
-    );
-  }
-
-  const formTitle = form.formTitleHebrew || form.formTitle || "טופס";
 
   return (
-    <div className="h-screen flex flex-col" style={{ direction: "rtl" }}>
+    <div
+      className="min-h-screen bg-background flex flex-col"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-card">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(getPageUrl(FormsManagerPage))}
-          >
-            <ArrowRight className="size-5" />
-          </Button>
-          <h1 className="text-lg font-semibold truncate max-w-[300px]">{formTitle}</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleAnalyze} disabled={isAnalyzing}>
-            {isAnalyzing ? (
-              <Loader2 className="animate-spin" data-icon="inline-start" />
-            ) : (
-              <ScanSearch data-icon="inline-start" />
-            )}
-            נתח שדות PDF
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? (
-              <>
-                <Loader2 className="animate-spin" data-icon="inline-start" />
-                שומר...
-              </>
-            ) : (
-              <>
-                <Save data-icon="inline-start" />
-                שמור
-              </>
-            )}
-          </Button>
+      <div className="border-b bg-card p-4 shrink-0">
+        <div className="flex items-center justify-between" style={{ direction: "rtl" }}>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={handleBack}>
+              <ArrowRight />
+            </Button>
+            <h1 className="text-xl font-bold truncate">{displayTitle}</h1>
+            <Badge variant="secondary">{fields.length} שדות</Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <Popover open={addFieldOpen} onOpenChange={setAddFieldOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Plus data-icon="inline-start" />
+                  הוסף שדה
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1" align="end">
+                {FIELD_TYPES.map((ft) => (
+                  <button
+                    key={ft.value}
+                    type="button"
+                    className="w-full text-right px-3 py-2 text-sm rounded hover:bg-accent transition-colors"
+                    onClick={() => handleAddField(ft.value)}
+                  >
+                    {ft.label}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+            <Button size="sm" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 data-icon="inline-start" className="animate-spin" />
+                  שומר...
+                </>
+              ) : (
+                <>
+                  <Save data-icon="inline-start" />
+                  שמור
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden" dir="ltr">
-        {/* PDF Editor - left */}
-        <div className="flex-1 min-w-0 relative">
-          <PdfFieldEditor
-            fileUrl={form.fileData.url}
-            fields={fields}
-            selectedFieldId={selectedFieldId}
-            onSelectField={setSelectedFieldId}
-            onDeleteField={handleDeleteField}
-            onMoveField={handleMoveField}
-            onResizeField={handleResizeField}
-          />
-          {fields.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-              {isAnalyzing ? (
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">מנתח שדות טופס...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3 text-center px-4">
-                  <p className="text-sm text-muted-foreground">לא נמצאו שדות. לחץ על &apos;נתח שדות PDF&apos; כדי לטעון שדות מהקובץ</p>
-                  <Button variant="outline" onClick={handleAnalyze}>
-                    <ScanSearch data-icon="inline-start" />
-                    נתח שדות PDF
-                  </Button>
-                </div>
+      <div className="flex-1 flex min-h-0">
+        {/* Left: PDF preview 60% */}
+        <div className="flex-[3] min-w-0 overflow-auto relative" ref={containerRef}>
+          {isDescribing && !fieldsLoaded ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center flex flex-col gap-3 items-center">
+                <Loader2 className="size-8 animate-spin text-primary" />
+                <p className="text-muted-foreground">טוען שדות טופס...</p>
+              </div>
+            </div>
+          ) : form?.fileData?.url && containerWidth > 0 ? (
+            <div
+              className="relative"
+              dir="ltr"
+              style={{ userSelect: dragState || resizeState ? "none" : undefined }}
+            >
+              <PdfViewer
+                file={form.fileData.url}
+                showAll={false}
+                showFields={[]}
+                onPageChange={setCurrentPage}
+                defaultWidth={containerWidth}
+                maxWidth={containerWidth}
+              />
+              {pdfNativeSize && (
+                <DynamicFieldOverlay
+                  fields={fields}
+                  currentPage={currentPage}
+                  selectedFieldName={selectedFieldName}
+                  scale={scale}
+                  pdfNativeHeight={pdfNativeSize.pdfH}
+                  onSelect={setSelectedFieldName}
+                  onDelete={handleDelete}
+                  onDragStart={handleDragStart}
+                  onResizeStart={handleResizeStart}
+                />
               )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              <p>אין קובץ PDF</p>
             </div>
           )}
         </div>
 
-        {/* Side panel - right */}
-        <div className="w-[320px] shrink-0">
-          <FieldPropertiesPanel
-            selectedField={selectedField}
-            onFieldChange={handleFieldChange}
-            onAddField={handleAddField}
+        {/* Right: Side panel 40% */}
+        <div className="flex-[2] border-r bg-card flex flex-col min-h-0">
+          <div className="border-b p-3 shrink-0" style={{ direction: "rtl" }}>
+            <h2 className="font-semibold text-sm">מאפייני שדה</h2>
+          </div>
+          <DynamicFieldProperties
+            field={selectedField}
+            onUpdate={handleFieldUpdate}
             allFieldNames={fields.map((f) => f.name)}
           />
         </div>

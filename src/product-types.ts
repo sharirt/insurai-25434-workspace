@@ -688,7 +688,7 @@ export const ClientsManagerPage = {
 } as const;
 
 export const DynamicFormEditorPage = {
-  pageBlockId: "69f35f32e6c02fda1f7c0025",
+  pageBlockId: "69f639ffa86f06bc9092110d",
   pageName: "DynamicFormEditor",
 } as const;
 
@@ -1004,34 +1004,19 @@ export const CreateClientContextAction = {
   outputInstanceType: {} as ICreateClientContextActionOutput,
 } as const;
 
-export type EditDynamicFormFieldsActionInputTypeEnum =
-  | "text"
-  | "checkbox"
-  | "dropdown"
-  | "optionList"
-  | "radio"
-  | "signature"
-  | "date";
-
-export type EditDynamicFormFieldsActionInputFontFamilyEnum =
-  | "helvetica"
-  | "rubik";
-
-export type EditDynamicFormFieldsActionInputTextDirectionEnum = "ltr" | "rtl";
-
 /**
  * undefined
  */
 export interface IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInputFieldsItemObject {
   /** Unique field name/identifier  */
   name: string;
-  /** Field type  */
-  type: EditDynamicFormFieldsActionInputTypeEnum;
+  /** Field type: text, checkbox, dropdown, signature, date  */
+  type: string;
   /** 0-based page index  */
   page: number;
-  /** X coordinate in points from left edge  */
+  /** X coordinate from left edge in points  */
   x: number;
-  /** Y coordinate in points from bottom edge  */
+  /** Y coordinate from bottom edge in points  */
   y: number;
   /** Width in points  */
   width?: number;
@@ -1039,13 +1024,13 @@ export interface IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInp
   height?: number;
   /** Font size in points  */
   fontSize?: number;
-  /** Font family  */
-  fontFamily?: EditDynamicFormFieldsActionInputFontFamilyEnum;
-  /** Text direction  */
-  textDirection?: EditDynamicFormFieldsActionInputTextDirectionEnum;
-  /** Whether text field is multiline  */
+  /** Font family: helvetica or rubik  */
+  fontFamily?: string;
+  /** Text direction: ltr or rtl  */
+  textDirection?: string;
+  /** Whether the text field is multiline  */
   multiline?: boolean;
-  /** Whether field is read-only  */
+  /** Whether the field is read-only  */
   readOnly?: boolean;
 }
 
@@ -1055,8 +1040,14 @@ export interface IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInp
 export interface IEditDynamicFormFieldsActionInput {
   /** The ID of the form record in the Forms table  */
   formId: string;
-  /** Array of field definitions to write into the PDF  */
+  /** The current PDF URL (protected internal URL ending with /redirect)  */
+  pdfUrl: string;
+  /** The complete list of form fields to write into the PDF  */
   fields: IEditDynamicFormFieldsActionInputEditDynamicFormFieldsActionInputFieldsItemObject[];
+  /** Names of all existing AcroForm fields to remove before adding new ones  */
+  existingFieldNames: string[];
+  /** The form title used for the output file name  */
+  formTitle?: string;
 }
 
 export type EditDynamicFormFieldsActionOutputFormStatusEnum =
@@ -1173,10 +1164,10 @@ export interface IEditDynamicFormFieldsActionOutput {
 
 /**
  * EditDynamicFormFieldsAction
- * Saves edited dynamic form fields back into the PDF file metadata. Takes a formId and an array of field definitions (with position, size, type, font, direction, fontSize). First fetches the form to get the current PDF URL, then calls DescribePdfFormFields to get all existing field names, removes all existing fields, and re-adds them with the new definitions using AnnotatePdfFormFields. Finally updates the form's fileData URL in the Forms table with the newly annotated PDF URL.
+ * Edits the dynamic form fields of a PDF form template. Takes the form ID and a list of field definitions (with position, size, type, font, direction, fontSize). Fetches the current PDF, removes all existing AcroForm fields, adds the new fields via AnnotatePdfFormFields, then updates the form record's fileData.url with the new annotated PDF URL so changes are persisted in the metadata.
  */
 export const EditDynamicFormFieldsAction = {
-  actionBlockId: "69f35ef03b4a82f6fe65105a",
+  actionBlockId: "69f639a3a1a69d451737e608",
 
   inputInstanceType: {} as IEditDynamicFormFieldsActionInput,
   outputInstanceType: {} as IEditDynamicFormFieldsActionOutput,
