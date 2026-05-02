@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router";
-import { useEntityGetOne, useExecuteAction } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { useEntityGetOne, useExecuteAction, useFileUrl } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { FormsEntity, AnalyzePdfFormFieldsAction, EditDynamicFormFieldsAction, FormsManagerPage } from "@/product-types";
 import { getPageUrl } from "@/lib/utils";
 import { toast } from "sonner";
@@ -19,6 +19,8 @@ export default function DynamicFormEditor() {
   const { data: form, isLoading: isLoadingForm } = useEntityGetOne(FormsEntity, { id: formId || "" }, { enabled: !!formId });
   const { executeFunction: analyzeFields, isLoading: isAnalyzing } = useExecuteAction(AnalyzePdfFormFieldsAction);
   const { executeFunction: saveFields, isLoading: isSaving } = useExecuteAction(EditDynamicFormFieldsAction);
+
+  const { url: resolvedFileUrl, isLoading: isLoadingFileUrl } = useFileUrl(form?.fileData?.url || "");
 
   const [fields, setFields] = useState<EditorField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
@@ -137,7 +139,7 @@ export default function DynamicFormEditor() {
     );
   }
 
-  if (isLoadingForm) {
+  if (isLoadingForm || isLoadingFileUrl) {
     return (
       <div className="flex flex-col gap-4 p-6">
         <Skeleton className="h-10 w-64" />
@@ -146,7 +148,7 @@ export default function DynamicFormEditor() {
     );
   }
 
-  if (!form?.fileData?.url) {
+  if (!form?.fileData?.url || !resolvedFileUrl) {
     return (
       <div className="flex items-center justify-center h-screen text-muted-foreground">
         לא נמצא קובץ PDF לטופס זה
@@ -200,7 +202,7 @@ export default function DynamicFormEditor() {
         {/* PDF Editor - left */}
         <div className="flex-1 min-w-0 relative">
           <PdfFieldEditor
-            fileUrl={form.fileData.url}
+            fileUrl={resolvedFileUrl}
             fields={fields}
             selectedFieldId={selectedFieldId}
             onSelectField={setSelectedFieldId}

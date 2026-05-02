@@ -24,17 +24,6 @@ interface PdfFieldEditorProps {
   onResizeField: (id: string, dw: number, dh: number, dx: number, dy: number) => void;
 }
 
-function resolveFileUrl(file: string): string {
-  const pattern = /api\/blocks\/fileDataBlock\/[^/]+\/redirect/;
-  if (!pattern.test(file)) return file;
-  let token = localStorage.getItem("token");
-  if ((window as any).appId) {
-    const appToken = window.localStorage.getItem(`token-${(window as any).appId}`);
-    if (appToken) token = appToken;
-  }
-  return token ? `${file}?token=${token}` : file;
-}
-
 export const PdfFieldEditor = ({
   fileUrl,
   fields,
@@ -44,7 +33,6 @@ export const PdfFieldEditor = ({
   onMoveField,
   onResizeField,
 }: PdfFieldEditorProps) => {
-  const resolvedFile = resolveFileUrl(fileUrl);
   const [numPages, setNumPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [width, setWidth] = useState(700);
@@ -139,7 +127,7 @@ export const PdfFieldEditor = ({
         onClick={() => onSelectField(null)}
       >
         <Document
-          file={resolvedFile}
+          file={fileUrl}
           onLoadSuccess={onDocumentLoadSuccess}
           loading={
             <div className="flex h-64 w-full items-center justify-center">
