@@ -471,7 +471,7 @@ export const MeetingAddRequestDialog = ({
           </div>
 
           {/* Choice Duration & Transfer Type — visible only after request type selected */}
-          {selectedRequestTypeId && <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mt-5">
+          {selectedRequestTypeId && selectedProviderId && <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mt-5">
             {/* Choice Duration */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground">
@@ -518,7 +518,7 @@ export const MeetingAddRequestDialog = ({
           </div>}
 
           {/* יתרת העברה (col 1) + שם קרן (col 2) — visible only after request type selected */}
-          {selectedRequestTypeId && <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mt-5">
+          {selectedRequestTypeId && selectedProviderId && <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mt-5">
             {/* יתרת העברה — LEFT column (col 1) */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground">
@@ -587,7 +587,7 @@ export const MeetingAddRequestDialog = ({
           </div>}
 
           {/* Tracks Section */}
-          {selectedRequestTypeId && (
+          {selectedRequestTypeId && selectedProviderId && (
             <div className="mt-6">
               <Separator className="mb-5" />
               <div
@@ -716,7 +716,7 @@ export const MeetingAddRequestDialog = ({
         <DialogFooter className="px-10 py-6 border-t border-border bg-muted/30">
           <div className="flex items-center justify-between w-full gap-3">
             {/* Total percentage pill — always visible in footer */}
-            {selectedRequestTypeId ? (
+            {selectedRequestTypeId && selectedProviderId ? (
               <span
                 className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors ${
                   isTracksSumValid
