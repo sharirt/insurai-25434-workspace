@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import {
   useEntityGetOne,
+  useEntityUpdate,
   useExecuteAction,
 } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import {
@@ -62,6 +63,8 @@ export default function PdfFieldEditor() {
     executeFunction: annotateFields,
     isLoading: isAnnotating,
   } = useExecuteAction(AnnotateFormPdfFieldsAction);
+
+  const { updateFunction: updateForm } = useEntityUpdate(FormsEntity);
 
   const [fields, setFields] = useState<PdfField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
@@ -160,7 +163,27 @@ export default function PdfFieldEditor() {
         removeFieldNames: removeFieldNames.length ? removeFieldNames : undefined,
         fieldGeometryUpdates: fieldGeometryUpdates.length ? fieldGeometryUpdates : undefined,
       });
-      toast.success("השינויים נשמרו בהצלחה");
+      // Sync fieldMapping
+      const survivingFieldNames = fields
+        .filter((f) => !f.isDeleted)
+        .map((f) => f.name);
+
+      const currentFieldMapping = (form.fieldMapping as Record<string, string>) || {};
+      const mergedFieldMapping: Record<string, string> = {};
+      for (const name of survivingFieldNames) {
+        mergedFieldMapping[name] = currentFieldMapping[name] ?? "";
+      }
+
+      try {
+        await updateForm({
+          id: form.id!,
+          fieldMapping: mergedFieldMapping,
+        });
+        toast.success("השדות ומיפוי השדות נשמרו בהצלחה");
+      } catch {
+        toast.warning("השדות נשמרו, אך עדכון מיפוי השדות נכשל");
+      }
+
       // Reload fields
       setHasLoadedFields(false);
       setSelectedFieldId(null);
