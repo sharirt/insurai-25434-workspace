@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { pdfjs } from "react-pdf";
+import { resolvePdfFileUrl } from "@/utils/PdfFileUrl";
 
 export interface PdfNativeSize {
   pdfW: number;
@@ -19,7 +20,7 @@ export function usePdfNativeSize(pdfUrl: string | undefined | null): PdfNativeSi
 
     const load = async () => {
       try {
-        const loadingTask = pdfjs.getDocument(pdfUrl);
+        const loadingTask = pdfjs.getDocument(resolvePdfFileUrl(pdfUrl));
         const pdf = await loadingTask.promise;
         const page = await pdf.getPage(1);
         const view = page.view; // [x1, y1, x2, y2]
