@@ -1,20 +1,36 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, User, Users, Tag, FileText } from "lucide-react";
+import { Calendar, User, Users, Tag, FileText, ChevronDown } from "lucide-react";
 import { Link } from "react-router";
-import { getPageUrl } from "@/lib/utils";
+import { getPageUrl, cn } from "@/lib/utils";
 import { ClientProfilePage, MeetingsEntity, AgentsEntity, ClientsEntity } from "@/product-types";
-import { useEntityGetOne } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { getStatusLabel, getStatusVariant } from "@/utils/StatusConfig";
+import { useEntityGetOne, useEntityUpdate } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { getStatusLabel, getStatusVariant, STATUS_VALUES } from "@/utils/StatusConfig";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useState } from "react";
 
 export const MeetingInfoCard = ({
   meeting,
+  onStatusChange,
 }: {
   meeting: typeof MeetingsEntity["instanceType"] & { id: string };
+  onStatusChange?: () => void;
 }) => {
   const { data: agent } = useEntityGetOne(AgentsEntity, { id: meeting.agentId || "" }, { enabled: !!meeting.agentId });
   const { data: client } = useEntityGetOne(ClientsEntity, { id: meeting.clientId || "" }, { enabled: !!meeting.clientId });
+  const { updateFunction, isLoading: isUpdatingStatus } = useEntityUpdate(MeetingsEntity);
+  const [localStatus, setLocalStatus] = useState<string | null>(null);
+
+  const handleStatusChange = async (newStatus: string) => {
+    setLocalStatus(newStatus);
+    try {
+      await updateFunction({ id: meeting.id, data: { status: newStatus } });
+      onStatusChange?.();
+    } finally {
+      setLocalStatus(null);
+    }
+  };
 
 const formattedDateTime = meeting.date
     ? (() => {
@@ -39,6 +55,7 @@ const formattedDateTime = meeting.date
   const clientName = [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "לקוח לא ידוע";
   const agentName = [agent?.firstName, agent?.lastName].filter(Boolean).join(" ") || "סוכן לא ידוע";
   const status = meeting.status || "מעבד";
+  const displayStatus = localStatus || status;
 
   return (
     <Card>
@@ -80,9 +97,35 @@ const formattedDateTime = meeting.date
             <Tag className="text-muted-foreground mt-0.5" />
             <div>
               <p className="text-xs text-muted-foreground">סטטוס</p>
-              <Badge variant={getStatusVariant(status)}>
-                {getStatusLabel(status)}
-              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" className="cursor-pointer">
+                    <Badge
+                      variant={getStatusVariant(displayStatus)}
+                      className={cn(
+                        "inline-flex items-center gap-1",
+                        isUpdatingStatus && "opacity-50"
+                      )}
+                    >
+                      {getStatusLabel(displayStatus)}
+                      <ChevronDown />
+                    </Badge>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {STATUS_VALUES.map((s) => (
+                    <DropdownMenuItem
+                      key={s}
+                      onClick={() => handleStatusChange(s)}
+                      disabled={s === displayStatus}
+                    >
+                      <Badge variant={getStatusVariant(s)} className="pointer-events-none">
+                        {getStatusLabel(s)}
+                      </Badge>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           {meeting.notes && (
