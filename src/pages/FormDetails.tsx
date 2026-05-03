@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { ArrowLeft, AlertCircle, Edit, Check, ChevronsUpDown, X, Eye, EyeOff, RefreshCw, Search, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, AlertCircle, Edit, Check, ChevronsUpDown, X, Eye, EyeOff, RefreshCw, Search, Upload, Download, Loader2 } from "lucide-react";
 import { getPageUrl, cn } from "@/lib/utils";
 import { useSignatureFieldsDragDrop } from "@/hooks/useSignatureFieldsDragDrop";
 import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
@@ -626,27 +626,47 @@ export default function FormDetails() {
           {/* Left: PDF Preview */}
           <div className="flex flex-col h-[calc(100vh-200px)]">
             <div className="flex items-center justify-end px-3 py-1.5 border rounded-t-lg bg-muted/30" dir="rtl">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-                onChange={handleReplacePdf}
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 h-7 text-xs"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading || isLoading}
-              >
-                {isUploading ? (
-                  <Loader2 data-icon="inline-start" className="animate-spin" />
-                ) : (
-                  <Upload data-icon="inline-start" />
-                )}
-                {isUploading ? "מעלה..." : "החלף PDF"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={handleReplacePdf}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 h-7 text-xs"
+                  onClick={() => {
+                    const a = document.createElement('a');
+                    a.href = form.fileData.url;
+                    a.download = (form?.formTitleHebrew || form?.formTitle || 'form') + '.pdf';
+                    a.target = '_blank';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }}
+                  disabled={!form?.fileData?.url || isLoading}
+                >
+                  <Download data-icon="inline-start" />
+                  הורד PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 h-7 text-xs"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isLoading}
+                >
+                  {isUploading ? (
+                    <Loader2 data-icon="inline-start" className="animate-spin" />
+                  ) : (
+                    <Upload data-icon="inline-start" />
+                  )}
+                  {isUploading ? "מעלה..." : "החלף PDF"}
+                </Button>
+              </div>
             </div>
           <div
             dir="ltr"
