@@ -179,6 +179,7 @@ export const SendToProviderSection = ({
         body,
         attachmentUrls: [...signedAttachments, ...additionalAttachments],
         clientId: request?.clientId,
+        requestId: request?.id,
       });
 
       setOpen(false);
