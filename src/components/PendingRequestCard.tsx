@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X, Pencil } from "lucide-react";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
-import { getTrackDisplayLabel } from "@/utils/trackTranslationOverrides";
+import { getFieldLabel } from "@/utils/fieldTranslations";
 import { formatCurrency } from "@/utils/FormatUtils";
 
 interface PendingRequestCardProps {
@@ -82,11 +82,7 @@ export const PendingRequestCard = ({
                     className="flex items-center justify-between text-xs"
                   >
                     <span className="text-muted-foreground">
-                      {getTrackDisplayLabel({
-                        requestTypeName: request.requestTypeName ?? "",
-                        providerName: request.providerName ?? "",
-                        trackKey: key,
-                      })}
+                      {getFieldLabel(key)}
                     </span>
                     <span className="font-medium tabular-nums">{value}%</span>
                   </div>

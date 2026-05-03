@@ -19,8 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
-import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
-import { getTrackDisplayLabel } from "@/utils/trackTranslationOverrides";
+import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search } from "lucide-react";
 
@@ -588,19 +587,7 @@ export const MeetingAddRequestDialog = ({
           </div>}
 
           {/* Tracks Section */}
-          {selectedRequestTypeId && selectedProviderId && (() => {
-            const selectedRt = sortedRequestTypes.find(
-              (rt) => rt.id === selectedRequestTypeId
-            );
-            const selectedPv = sortedProviders.find(
-              (p) => p.id === selectedProviderId
-            );
-            const trackLabelRequestTypeName =
-              selectedRt?.requestTypeName?.trim() ?? "";
-            const trackLabelProviderName =
-              selectedPv?.provider_name?.trim() ?? "";
-
-            return (
+          {selectedRequestTypeId && selectedProviderId && (
             <div className="mt-6">
               <Separator className="mb-5" />
               <div
@@ -650,15 +637,9 @@ export const MeetingAddRequestDialog = ({
 
                 {/* Tracks — 2-column grid on md+ */}
                 {(() => {
-                  const q = trackSearch.toLowerCase();
-                  const filteredTracksKeys = tracksKeys.filter((key) => {
-                    const label = getTrackDisplayLabel({
-                      requestTypeName: trackLabelRequestTypeName,
-                      providerName: trackLabelProviderName,
-                      trackKey: key,
-                    });
-                    return label.toLowerCase().includes(q);
-                  });
+                  const filteredTracksKeys = tracksKeys.filter(key =>
+                    getFieldLabel(key)?.toLowerCase().includes(trackSearch.toLowerCase())
+                  );
                   if (filteredTracksKeys.length === 0) {
                     return (
                       <p className="text-sm text-muted-foreground text-center py-4">
@@ -671,11 +652,7 @@ export const MeetingAddRequestDialog = ({
                   {filteredTracksKeys.map((key) => (
                     <div key={key} className="space-y-1.5">
                       <Label className="text-sm font-semibold text-foreground">
-                        {getTrackDisplayLabel({
-                          requestTypeName: trackLabelRequestTypeName,
-                          providerName: trackLabelProviderName,
-                          trackKey: key,
-                        })}
+                        {getFieldLabel(key)}
                       </Label>
                       <div className="relative">
                         <Input
@@ -725,8 +702,7 @@ export const MeetingAddRequestDialog = ({
                 )}
               </div>
             </div>
-            );
-          })()}
+          )}
         </div>
 
         {/* Hint text */}
@@ -740,7 +716,7 @@ export const MeetingAddRequestDialog = ({
         <DialogFooter className="px-10 py-6 border-t border-border bg-muted/30">
           <div className="flex items-center justify-between w-full gap-3">
             {/* Total percentage pill — always visible in footer */}
-            {selectedRequestTypeId && selectedProviderId ? (
+            {selectedRequestTypeId ? (
               <span
                 className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors ${
                   isTracksSumValid

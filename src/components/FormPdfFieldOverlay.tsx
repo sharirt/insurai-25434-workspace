@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useRef, useEffect } from "react";
 import { PdfField, FIELD_TYPE_COLORS } from "@/utils/PdfFieldTypes";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
