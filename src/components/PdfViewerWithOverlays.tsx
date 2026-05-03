@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { PdfViewer } from "@/components/ui/pdf-viewer";
 import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
 import { PdfField, FIELD_TYPE_COLORS } from "@/utils/PdfFieldTypes";
-import { cn } from "@/lib/utils";
 
 interface PdfViewerWithOverlaysProps {
   pdfUrl: string;
@@ -18,8 +17,7 @@ export const PdfViewerWithOverlays = ({
   onSelectField,
 }: PdfViewerWithOverlaysProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const [canvasSize, setCanvasSize] = useState<{ w: number; h: number } | null>(null);
-  const [overlayPos, setOverlayPos] = useState({ left: 0, top: 0 });
+  const [canvasRect, setCanvasRect] = useState<DOMRect | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
@@ -29,58 +27,48 @@ export const PdfViewerWithOverlays = ({
     (f) => !f.isDeleted && f.page === currentPage
   );
 
-  // Find canvas via MutationObserver, track size via ResizeObserver
+  // Find canvas via MutationObserver
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    let resizeObserver: ResizeObserver | null = null;
-
-    const attachToCanvas = (canvas: HTMLCanvasElement) => {
-      canvasRef.current = canvas;
-      setCanvasSize({ w: canvas.offsetWidth, h: canvas.offsetHeight });
-
-      resizeObserver = new ResizeObserver(() => {
-        setCanvasSize({ w: canvas.offsetWidth, h: canvas.offsetHeight });
-      });
-      resizeObserver.observe(canvas);
-    };
-
-    const existing = container.querySelector("canvas");
-    if (existing) {
-      attachToCanvas(existing);
-    }
-
-    const mutationObserver = new MutationObserver(() => {
+    const findCanvas = () => {
       const canvas = container.querySelector("canvas");
       if (canvas && canvas !== canvasRef.current) {
-        resizeObserver?.disconnect();
-        attachToCanvas(canvas);
+        canvasRef.current = canvas;
       }
-    });
+    };
 
+    findCanvas();
+
+    const mutationObserver = new MutationObserver(findCanvas);
     mutationObserver.observe(container, { childList: true, subtree: true });
 
     return () => {
       mutationObserver.disconnect();
-      resizeObserver?.disconnect();
       canvasRef.current = null;
     };
   }, []);
 
-  // Update overlay position to match canvas location within scroll container
+  // rAF loop to track canvas position using getBoundingClientRect (fixed positioning)
   useEffect(() => {
-    const container = containerRef.current;
-    const canvas = canvasRef.current;
-    if (!container || !canvas) return;
-
     const updatePosition = () => {
-      const containerRect = container.getBoundingClientRect();
-      const canvasRect = canvas.getBoundingClientRect();
-      setOverlayPos({
-        left: canvasRect.left - containerRect.left + container.scrollLeft,
-        top: canvasRect.top - containerRect.top + container.scrollTop,
-      });
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        setCanvasRect((prev) => {
+          if (
+            prev &&
+            Math.abs(prev.left - rect.left) < 0.5 &&
+            Math.abs(prev.top - rect.top) < 0.5 &&
+            Math.abs(prev.width - rect.width) < 0.5 &&
+            Math.abs(prev.height - rect.height) < 0.5
+          ) {
+            return prev;
+          }
+          return rect;
+        });
+      }
       rafRef.current = requestAnimationFrame(updatePosition);
     };
 
@@ -89,33 +77,36 @@ export const PdfViewerWithOverlays = ({
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [canvasSize]);
+  }, []);
 
-  const scale = nativeSize && canvasSize ? canvasSize.w / nativeSize.pdfW : 1;
+  const scale =
+    nativeSize && canvasRect ? canvasRect.width / nativeSize.pdfW : 1;
 
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "auto" }}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden" }}
     >
       <PdfViewer
         file={pdfUrl}
         onPageChange={(page: number) => setCurrentPage(page - 1)}
       />
-      {nativeSize && canvasSize && (
+      {nativeSize && canvasRect && (
         <div
           style={{
-            position: "absolute",
+            position: "fixed",
             pointerEvents: "none",
-            left: `${overlayPos.left}px`,
-            top: `${overlayPos.top}px`,
-            width: `${canvasSize.w}px`,
-            height: `${canvasSize.h}px`,
+            left: `${canvasRect.left}px`,
+            top: `${canvasRect.top}px`,
+            width: `${canvasRect.width}px`,
+            height: `${canvasRect.height}px`,
+            zIndex: 10,
           }}
         >
           {visibleFields.map((field) => {
             const screenX = field.x * scale;
-            const screenY = (nativeSize.pdfH - field.y - field.height) * scale;
+            const screenY =
+              nativeSize.pdfH * scale - field.y * scale - field.height * scale;
             const screenW = field.width * scale;
             const screenH = field.height * scale;
             const color = FIELD_TYPE_COLORS[field.type];
@@ -124,20 +115,22 @@ export const PdfViewerWithOverlays = ({
             return (
               <div
                 key={field.id}
-                className={cn(
-                  "absolute cursor-pointer flex items-start overflow-hidden",
-                  isSelected ? "z-10" : "z-0"
-                )}
                 style={{
+                  position: "absolute",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  overflow: "hidden",
                   left: `${screenX}px`,
                   top: `${screenY}px`,
                   width: `${screenW}px`,
                   height: `${screenH}px`,
-                  backgroundColor: `${color}${isSelected ? "80" : "4D"}`,
+                  backgroundColor: `${color}${isSelected ? "80" : "33"}`,
                   border: isSelected
                     ? `2px solid ${color}`
                     : `1px solid ${color}CC`,
                   pointerEvents: "auto",
+                  zIndex: isSelected ? 10 : 0,
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -145,8 +138,16 @@ export const PdfViewerWithOverlays = ({
                 }}
               >
                 <span
-                  className="text-white px-0.5 truncate leading-tight"
-                  style={{ fontSize: "10px" }}
+                  style={{
+                    fontSize: "10px",
+                    color: "white",
+                    paddingLeft: "2px",
+                    paddingRight: "2px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    lineHeight: 1.2,
+                  }}
                 >
                   {field.name}
                 </span>
