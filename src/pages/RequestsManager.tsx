@@ -79,7 +79,7 @@ import {
 import { getPageUrl } from "@/lib/utils";
 import { toast } from "sonner";
 import { formatDate, formatCurrency } from "@/utils/FormatUtils";
-import { getStatusLabel, getStatusVariant } from "@/utils/StatusConfig";
+import { StatusSelector } from "@/components/StatusSelector";
 
 export default function RequestsManager() {
   const [searchParams] = useSearchParams();
@@ -167,9 +167,6 @@ function RequestDetail({ requestId }: { requestId: string }) {
   );
 
   const { data: allForms } = useEntityGetAll(FormsEntity);
-
-  const statusLabel = getStatusLabel(request?.status);
-  const statusVariant = getStatusVariant(request?.status);
 
   const handleStatusChange = async (newStatus: string) => {
     try {
@@ -357,7 +354,11 @@ function RequestDetail({ requestId }: { requestId: string }) {
                   <Pencil data-icon="inline-start" />
                   עריכה
                 </Button>
-                <Badge variant={statusVariant}>{statusLabel}</Badge>
+                <StatusSelector
+                  currentStatus={request?.status}
+                  onStatusChange={handleStatusChange}
+                  isLoading={isUpdating}
+                />
               </div>
             </div>
           </CardHeader>
