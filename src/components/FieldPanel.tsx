@@ -8,6 +8,7 @@ import { FieldEditor } from "@/components/FieldEditor";
 import { Link } from "react-router";
 import { getPageUrl } from "@/lib/utils";
 import { FormsManagerPage } from "@/product-types";
+import { useState } from "react";
 
 interface FieldPanelProps {
   formTitle: string;
@@ -36,6 +37,7 @@ export const FieldPanel = ({
   isSaving,
   isRefreshing,
 }: FieldPanelProps) => {
+  const [expandedFieldId, setExpandedFieldId] = useState<string | null>(null);
   const visibleFields = fields.filter((f) => !f.isDeleted);
 
   return (
@@ -100,9 +102,17 @@ export const FieldPanel = ({
               <FieldRow
                 field={field}
                 isSelected={selectedFieldId === field.id}
-                onClick={() => onSelectField(field.id)}
+                isExpanded={expandedFieldId === field.id}
+                onClick={() => {
+                  if (expandedFieldId === field.id) {
+                    setExpandedFieldId(null);
+                  } else {
+                    onSelectField(field.id);
+                    setExpandedFieldId(field.id);
+                  }
+                }}
               />
-              {selectedFieldId === field.id && (
+              {expandedFieldId === field.id && (
                 <FieldEditor
                   field={field}
                   onUpdate={onUpdateField}

@@ -1,14 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { PdfField, FIELD_TYPE_COLORS, FIELD_TYPE_LABELS_HE } from "@/utils/PdfFieldTypes";
 import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
 
 interface FieldRowProps {
   field: PdfField;
   isSelected: boolean;
+  isExpanded: boolean;
   onClick: () => void;
 }
 
-export const FieldRow = ({ field, isSelected, onClick }: FieldRowProps) => {
+export const FieldRow = ({ field, isSelected, isExpanded, onClick }: FieldRowProps) => {
   return (
     <div
       className={cn(
@@ -29,6 +31,12 @@ export const FieldRow = ({ field, isSelected, onClick }: FieldRowProps) => {
       <span className="text-xs text-muted-foreground shrink-0">
         עמ׳ {field.page + 1}
       </span>
+      <ChevronDown
+        className={cn(
+          "size-4 text-muted-foreground shrink-0 transition-transform duration-200",
+          isExpanded && "rotate-180"
+        )}
+      />
     </div>
   );
 };
