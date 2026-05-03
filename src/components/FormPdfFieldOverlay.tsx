@@ -387,8 +387,8 @@ export const FormPdfFieldOverlay = ({
                     }}
                     style={{
                       position: "absolute",
-                      top: "-6px",
-                      right: "-6px",
+                      top: "4px",
+                      right: "4px",
                       width: "18px",
                       height: "18px",
                       borderRadius: "50%",
