@@ -177,7 +177,7 @@ export default function PdfFieldEditor() {
       try {
         await updateForm({
           id: form.id!,
-          fieldMapping: mergedFieldMapping,
+          data: { fieldMapping: mergedFieldMapping },
         });
         toast.success("השדות ומיפוי השדות נשמרו בהצלחה");
       } catch {
