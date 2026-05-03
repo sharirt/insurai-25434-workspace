@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
 import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
+import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import {
   useEntityGetAll,
   useEntityUpdate,
@@ -86,6 +87,20 @@ export const EditRequestDialog = ({
     if (!allFunds) return [];
     return [...allFunds].sort((a, b) => (a.planName || "").localeCompare(b.planName || ""));
   }, [allFunds]);
+
+  const selectedRequestTypeName = sortedRequestTypes.find(
+    (rt) => rt.id === selectedRequestTypeId
+  )?.requestTypeName || "";
+  const selectedProviderName = sortedProviders.find(
+    (p) => p.id === selectedProviderId
+  )?.provider_name || "";
+
+  const getTrackLabel = (key: string): string => {
+    if (selectedRequestTypeName && selectedProviderName) {
+      return getCustomTrackLabel(selectedRequestTypeName, selectedProviderName, key);
+    }
+    return getFieldLabel(key);
+  };
 
   const tracksKeys = STATIC_TRACK_KEYS;
 
@@ -475,7 +490,7 @@ export const EditRequestDialog = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                   {tracksKeys.map((key) => (
                     <div key={key} className="flex flex-col gap-1.5">
-                      <Label className="text-sm font-semibold text-foreground">{getFieldLabel(key)}</Label>
+                      <Label className="text-sm font-semibold text-foreground">{getTrackLabel(key)}</Label>
                       <div className="relative">
                         <Input
                           type="number"

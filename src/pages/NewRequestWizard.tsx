@@ -250,6 +250,8 @@ export default function NewRequestWizard() {
               <WizardStep2Content
                 tracksValues={tracksValues}
                 handleTrackValue={handleTrackValue}
+                selectedRequestTypeName={sortedRequestTypes.find((rt) => rt.id === selectedRequestTypeId)?.requestTypeName}
+                selectedProviderName={sortedProviders.find((p) => p.id === selectedProviderId)?.provider_name}
               />
             )}
           </CardContent>

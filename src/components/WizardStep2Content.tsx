@@ -2,17 +2,29 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { STATIC_TRACK_KEYS, getFieldLabel } from "@/utils/fieldTranslations";
+import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import { useCallback } from "react";
 
 interface WizardStep2ContentProps {
   tracksValues: Record<string, string>;
   handleTrackValue: (key: string, value: string) => void;
+  selectedRequestTypeName?: string;
+  selectedProviderName?: string;
 }
 
 export const WizardStep2Content = ({
   tracksValues,
   handleTrackValue,
+  selectedRequestTypeName,
+  selectedProviderName,
 }: WizardStep2ContentProps) => {
+  const getTrackLabel = (key: string): string => {
+    if (selectedRequestTypeName && selectedProviderName) {
+      return getCustomTrackLabel(selectedRequestTypeName, selectedProviderName, key);
+    }
+    return getFieldLabel(key);
+  };
+
   const onFieldChange = useCallback(
     (key: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
@@ -50,7 +62,7 @@ export const WizardStep2Content = ({
         {STATIC_TRACK_KEYS.map((key) => (
           <div key={key} className="flex flex-col gap-1.5">
             <Label className="text-sm font-semibold text-foreground">
-              {getFieldLabel(key)}
+              {getTrackLabel(key)}
             </Label>
             <div className="relative">
               <Input

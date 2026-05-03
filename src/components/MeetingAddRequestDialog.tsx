@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
 import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
+import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search } from "lucide-react";
 
@@ -87,6 +88,20 @@ export const MeetingAddRequestDialog = ({
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
     [requestSchemes, selectedRequestTypeId]
   );
+
+  const selectedRequestTypeName = sortedRequestTypes.find(
+    (rt) => rt.id === selectedRequestTypeId
+  )?.requestTypeName || "";
+  const selectedProviderName = sortedProviders.find(
+    (p) => p.id === selectedProviderId
+  )?.provider_name || "";
+
+  const getTrackLabel = (key: string): string => {
+    if (selectedRequestTypeName && selectedProviderName) {
+      return getCustomTrackLabel(selectedRequestTypeName, selectedProviderName, key);
+    }
+    return getFieldLabel(key);
+  };
 
   const filteredRequestTypes = sortedRequestTypes.filter((rt) =>
     (rt.requestTypeName || "סוג בקשה ללא שם")
@@ -637,9 +652,10 @@ export const MeetingAddRequestDialog = ({
 
                 {/* Tracks — 2-column grid on md+ */}
                 {(() => {
-                  const filteredTracksKeys = tracksKeys.filter(key =>
-                    getFieldLabel(key)?.toLowerCase().includes(trackSearch.toLowerCase())
-                  );
+                  const filteredTracksKeys = tracksKeys.filter(key => {
+                    const label = getTrackLabel(key);
+                    return label?.toLowerCase().includes(trackSearch.toLowerCase());
+                  });
                   if (filteredTracksKeys.length === 0) {
                     return (
                       <p className="text-sm text-muted-foreground text-center py-4">
@@ -652,7 +668,7 @@ export const MeetingAddRequestDialog = ({
                   {filteredTracksKeys.map((key) => (
                     <div key={key} className="space-y-1.5">
                       <Label className="text-sm font-semibold text-foreground">
-                        {getFieldLabel(key)}
+                        {getTrackLabel(key)}
                       </Label>
                       <div className="relative">
                         <Input
