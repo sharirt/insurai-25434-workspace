@@ -37,14 +37,12 @@ interface SendToProviderSectionProps {
   requestTypeName: string;
   signedDocuments: (ISignedDocumentsEntity & { id: string })[];
   request: IRequestsEntity & { id: string };
-  meetingId?: string;
 }
 
 export const SendToProviderSection = ({
   requestTypeName,
   signedDocuments,
   request,
-  meetingId,
 }: SendToProviderSectionProps) => {
   const [open, setOpen] = useState(false);
   const [toEmail, setToEmail] = useState("");
@@ -182,7 +180,6 @@ export const SendToProviderSection = ({
         attachmentUrls: [...signedAttachments, ...additionalAttachments],
         clientId: request?.clientId,
         requestId: request?.id,
-        meetingId,
       });
 
       setOpen(false);

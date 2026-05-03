@@ -198,7 +198,6 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
               requestTypeName={scheme?.requestTypeName || "סוג בקשה לא ידוע"}
               signedDocuments={signedDocuments as any}
               request={request as any}
-              meetingId={meetingId}
             />
           )}
         </CardContent>

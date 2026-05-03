@@ -36,6 +36,7 @@ export default function MeetingDetails() {
   });
 
   const hasAutoUpdated = useRef(false);
+  const hasAutoUpdatedYitzran = useRef(false);
 
   useEffect(() => {
     if (isLoading || !meeting || hasAutoUpdated.current) return;
@@ -53,6 +54,26 @@ export default function MeetingDetails() {
       updateMeeting({
         id: meetingId,
         data: { status: "מוכן לשליחה ללקוח" },
+      });
+    }
+  }, [isLoading, meeting, allRequests, meetingId, updateMeeting]);
+
+  useEffect(() => {
+    if (isLoading || !meeting || hasAutoUpdatedYitzran.current) return;
+    const meetingRequestIds = meeting.requests;
+    if (!meetingRequestIds || meetingRequestIds.length === 0) return;
+    if (meeting.status === "נשלח ליצרן") return;
+    if (!allRequests || allRequests.length === 0) return;
+
+    const linkedRequests = allRequests.filter((r) => meetingRequestIds.includes(r.id));
+    if (linkedRequests.length === 0) return;
+
+    const allSentToYitzran = linkedRequests.every((r) => r.status === "נשלח ליצרן");
+    if (allSentToYitzran) {
+      hasAutoUpdatedYitzran.current = true;
+      updateMeeting({
+        id: meetingId,
+        data: { status: "נשלח ליצרן" },
       });
     }
   }, [isLoading, meeting, allRequests, meetingId, updateMeeting]);
