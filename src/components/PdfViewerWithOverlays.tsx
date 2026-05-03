@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { PdfViewer } from "@/components/ui/pdf-viewer";
 import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
 import { PdfField, FIELD_TYPE_COLORS } from "@/utils/PdfFieldTypes";
@@ -18,126 +17,144 @@ export const PdfViewerWithOverlays = ({
   selectedFieldId,
   onSelectField,
 }: PdfViewerWithOverlaysProps) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-  const [renderedWidth, setRenderedWidth] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [canvasSize, setCanvasSize] = useState<{ w: number; h: number } | null>(null);
+  const [overlayPos, setOverlayPos] = useState({ left: 0, top: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rafRef = useRef<number>(0);
   const nativeSize = usePdfNativeSize(pdfUrl);
 
-  // Find the .shadow-lg portal target via MutationObserver
+  const visibleFields = fields.filter(
+    (f) => !f.isDeleted && f.page === currentPage
+  );
+
+  // Find canvas via MutationObserver, track size via ResizeObserver
   useEffect(() => {
-    if (!containerRef.current) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    const attachResizeObserver = (el: HTMLElement) => {
-      resizeObserverRef.current?.disconnect();
-      const ro = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setRenderedWidth(entry.contentRect.width);
-        }
+    let resizeObserver: ResizeObserver | null = null;
+
+    const attachToCanvas = (canvas: HTMLCanvasElement) => {
+      canvasRef.current = canvas;
+      setCanvasSize({ w: canvas.offsetWidth, h: canvas.offsetHeight });
+
+      resizeObserver = new ResizeObserver(() => {
+        setCanvasSize({ w: canvas.offsetWidth, h: canvas.offsetHeight });
       });
-      ro.observe(el);
-      resizeObserverRef.current = ro;
-      // Set initial width
-      setRenderedWidth(el.getBoundingClientRect().width);
+      resizeObserver.observe(canvas);
     };
 
-    const findTarget = () => {
-      const el = containerRef.current?.querySelector(".shadow-lg");
-      if (el instanceof HTMLElement) {
-        setPortalTarget(el);
-        attachResizeObserver(el);
+    const existing = container.querySelector("canvas");
+    if (existing) {
+      attachToCanvas(existing);
+    }
+
+    const mutationObserver = new MutationObserver(() => {
+      const canvas = container.querySelector("canvas");
+      if (canvas && canvas !== canvasRef.current) {
+        resizeObserver?.disconnect();
+        attachToCanvas(canvas);
       }
-    };
-
-    findTarget();
-
-    const observer = new MutationObserver(() => {
-      findTarget();
     });
 
-    observer.observe(containerRef.current, {
-      childList: true,
-      subtree: true,
-    });
+    mutationObserver.observe(container, { childList: true, subtree: true });
 
     return () => {
-      observer.disconnect();
-      resizeObserverRef.current?.disconnect();
+      mutationObserver.disconnect();
+      resizeObserver?.disconnect();
+      canvasRef.current = null;
     };
   }, []);
 
-  // Fallback: try to get native size from canvas if usePdfNativeSize fails
-  const getNativeSize = (): { pdfW: number; pdfH: number } | null => {
-    if (nativeSize) return nativeSize;
-    // Try reading canvas natural dimensions as fallback
-    if (portalTarget) {
-      const canvas = portalTarget.querySelector("canvas");
-      if (canvas) {
-        return { pdfW: canvas.width, pdfH: canvas.height };
-      }
-    }
-    return null;
-  };
+  // Update overlay position to match canvas location within scroll container
+  useEffect(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas) return;
 
-  const native = getNativeSize();
-  const scale = native && renderedWidth > 0 ? renderedWidth / native.pdfW : 0;
+    const updatePosition = () => {
+      const containerRect = container.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      setOverlayPos({
+        left: canvasRect.left - containerRect.left + container.scrollLeft,
+        top: canvasRect.top - containerRect.top + container.scrollTop,
+      });
+      rafRef.current = requestAnimationFrame(updatePosition);
+    };
 
-  const visibleFields = fields.filter(
-    (f) => !f.isDeleted && f.page === currentPage - 1
-  );
+    rafRef.current = requestAnimationFrame(updatePosition);
 
-  const overlayContent = scale > 0 && native && portalTarget && (
-    <>
-      {visibleFields.map((field) => {
-        const screenX = field.x * scale;
-        const screenY = (native.pdfH - field.y - field.height) * scale;
-        const screenW = field.width * scale;
-        const screenH = field.height * scale;
-        const color = FIELD_TYPE_COLORS[field.type];
-        const isSelected = selectedFieldId === field.id;
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [canvasSize]);
 
-        return (
-          <div
-            key={field.id}
-            className={cn(
-              "absolute cursor-pointer flex items-start overflow-hidden pointer-events-auto",
-              isSelected ? "z-10" : "z-0"
-            )}
-            style={{
-              left: `${screenX}px`,
-              top: `${screenY}px`,
-              width: `${screenW}px`,
-              height: `${screenH}px`,
-              backgroundColor: `${color}${isSelected ? "80" : "4D"}`,
-              border: isSelected
-                ? `2px solid ${color}`
-                : `1px solid ${color}66`,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelectField(field.id);
-            }}
-          >
-            <span
-              className="text-white px-0.5 truncate leading-tight"
-              style={{ fontSize: "10px" }}
-            >
-              {field.name}
-            </span>
-          </div>
-        );
-      })}
-    </>
-  );
+  const scale = nativeSize && canvasSize ? canvasSize.w / nativeSize.pdfW : 1;
 
   return (
-    <div ref={containerRef} className="w-full h-full">
+    <div
+      ref={containerRef}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "auto" }}
+    >
       <PdfViewer
         file={pdfUrl}
-        onPageChange={(page) => setCurrentPage(page)}
+        onPageChange={(page: number) => setCurrentPage(page - 1)}
       />
-      {portalTarget && overlayContent && createPortal(overlayContent, portalTarget)}
+      {nativeSize && canvasSize && (
+        <div
+          style={{
+            position: "absolute",
+            pointerEvents: "none",
+            left: `${overlayPos.left}px`,
+            top: `${overlayPos.top}px`,
+            width: `${canvasSize.w}px`,
+            height: `${canvasSize.h}px`,
+          }}
+        >
+          {visibleFields.map((field) => {
+            const screenX = field.x * scale;
+            const screenY = (nativeSize.pdfH - field.y - field.height) * scale;
+            const screenW = field.width * scale;
+            const screenH = field.height * scale;
+            const color = FIELD_TYPE_COLORS[field.type];
+            const isSelected = selectedFieldId === field.id;
+
+            return (
+              <div
+                key={field.id}
+                className={cn(
+                  "absolute cursor-pointer flex items-start overflow-hidden",
+                  isSelected ? "z-10" : "z-0"
+                )}
+                style={{
+                  left: `${screenX}px`,
+                  top: `${screenY}px`,
+                  width: `${screenW}px`,
+                  height: `${screenH}px`,
+                  backgroundColor: `${color}${isSelected ? "80" : "4D"}`,
+                  border: isSelected
+                    ? `2px solid ${color}`
+                    : `1px solid ${color}CC`,
+                  pointerEvents: "auto",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectField(field.id);
+                }}
+              >
+                <span
+                  className="text-white px-0.5 truncate leading-tight"
+                  style={{ fontSize: "10px" }}
+                >
+                  {field.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
