@@ -229,6 +229,7 @@ export default function PdfFieldEditor() {
             fields={fields}
             selectedFieldId={selectedFieldId}
             onSelectField={setSelectedFieldId}
+            onUpdateField={handleUpdateField}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">

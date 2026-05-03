@@ -9,6 +9,7 @@ interface PdfViewerWithOverlaysProps {
   fields: PdfField[];
   selectedFieldId: string | null;
   onSelectField: (id: string) => void;
+  onUpdateField?: (id: string, updates: Partial<PdfField>) => void;
 }
 
 export const PdfViewerWithOverlays = ({
@@ -16,6 +17,7 @@ export const PdfViewerWithOverlays = ({
   fields,
   selectedFieldId,
   onSelectField,
+  onUpdateField,
 }: PdfViewerWithOverlaysProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const nativeSize = usePdfNativeSize(pdfUrl);
@@ -31,6 +33,7 @@ export const PdfViewerWithOverlays = ({
         fields={fields}
         selectedFieldId={selectedFieldId}
         onSelectField={onSelectField}
+        onUpdateField={onUpdateField}
         currentPage={currentPage}
         nativeSize={nativeSize}
       />
