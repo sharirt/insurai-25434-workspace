@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
+import { Trash2 } from "lucide-react";
 import { PdfField, FIELD_TYPE_COLORS } from "@/utils/PdfFieldTypes";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -35,6 +36,7 @@ interface FormPdfFieldOverlayProps {
   selectedFieldId: string | null;
   onSelectField: (id: string) => void;
   onUpdateField?: (id: string, updates: Partial<PdfField>) => void;
+  onDeleteField?: (id: string) => void;
   currentPage: number;
   nativeSize: PdfNativeSize | null;
 }
@@ -57,6 +59,7 @@ export const FormPdfFieldOverlay = ({
   selectedFieldId,
   onSelectField,
   onUpdateField,
+  onDeleteField,
   currentPage,
   nativeSize,
 }: FormPdfFieldOverlayProps) => {
@@ -371,6 +374,44 @@ export const FormPdfFieldOverlay = ({
                 >
                   {field.name}
                 </span>
+                {isSelected && onDeleteField && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      onDeleteField(field.id);
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "-6px",
+                      right: "-6px",
+                      width: "18px",
+                      height: "18px",
+                      borderRadius: "50%",
+                      backgroundColor: "#EF4444",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      border: "none",
+                      cursor: "pointer",
+                      zIndex: 30,
+                      pointerEvents: "auto",
+                      padding: 0,
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#DC2626";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#EF4444";
+                    }}
+                  >
+                    <Trash2 style={{ width: "10px", height: "10px", color: "white" }} />
+                  </button>
+                )}
               </div>
               {/* Resize handles for selected field */}
               {isSelected && HANDLE_DIRS.map((h) => (
