@@ -1,7 +1,4 @@
 export const FIELD_TRANSLATIONS: Record<string, string> = {
-  bnei_50_umata: "בני 50 ומטה",
-  bnei_50_ad_60: "בני 50 עד 60",
-  bnei_60_umaala: "בני 60 ומעלה",
   menayot: "מניות",
   okev_madad_sp: "עוקב מדד S&P500",
   hilchati: "הלכתי",
@@ -37,9 +34,6 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   agach_sachir_ad25_menayot: "אג״ח סחיר עד 25% מניות",
   nihul_ishi: "ניהול אישי",
   agrresivi: "אגרסיבי",
-  ad_gil_50: "עד גיל 50",
-  gil_50_ad_60: "מגיל 50 עד 60",
-  gil_60_plus: "מגיל 60 ומעלה",
   agach_memshalti_sachir: "אג״ח ממשלתי סחיר",
   okev_madadim_agach_ad25_menayot: "עוקב מדדים אג״ח עד 25% מניות",
   menayot_chul: "מניות חו״ל",
