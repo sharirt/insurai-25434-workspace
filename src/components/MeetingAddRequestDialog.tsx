@@ -655,6 +655,14 @@ export const MeetingAddRequestDialog = ({
                   const filteredTracksKeys = tracksKeys.filter(key => {
                     const label = getTrackLabel(key);
                     return label?.toLowerCase().includes(trackSearch.toLowerCase());
+                  }).sort((a, b) => {
+                    const aCustom = getCustomTrackLabel(selectedRequestTypeName, selectedProviderName, a);
+                    const aDefault = getFieldLabel(a);
+                    const bCustom = getCustomTrackLabel(selectedRequestTypeName, selectedProviderName, b);
+                    const bDefault = getFieldLabel(b);
+                    const aRank = aCustom !== aDefault ? 0 : 1;
+                    const bRank = bCustom !== bDefault ? 0 : 1;
+                    return aRank - bRank;
                   });
                   if (filteredTracksKeys.length === 0) {
                     return (
