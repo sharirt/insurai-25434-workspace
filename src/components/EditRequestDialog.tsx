@@ -33,7 +33,7 @@ import {
   AutoProcessNewRequestAction,
 } from "@/product-types";
 import type { IRequestsEntity } from "@/product-types";
-import { Pencil, SlidersHorizontal, Eraser, Loader2 } from "lucide-react";
+import { Pencil, SlidersHorizontal, Eraser, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { STATUS_VALUES } from "@/utils/StatusConfig";
 
@@ -62,6 +62,7 @@ export const EditRequestDialog = ({
   const [isTotalTransfer, setIsTotalTransfer] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("מעבד");
   const [selectedStanding, setSelectedStanding] = useState("");
+  const [trackSearch, setTrackSearch] = useState("");
 
   const { data: providers, isLoading: isLoadingProviders } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes, isLoading: isLoadingRequestTypes } = useEntityGetAll(RequestSchemesEntity);
@@ -107,6 +108,7 @@ export const EditRequestDialog = ({
   // Populate form with request data when dialog opens
   useEffect(() => {
     if (!open) {
+      setTrackSearch("");
       return;
     }
     // Pre-populate from request
@@ -487,8 +489,27 @@ export const EditRequestDialog = ({
                   </Button>
                 </div>
 
+                <div className="relative" dir="rtl">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    value={trackSearch}
+                    onChange={(e) => setTrackSearch(e.target.value)}
+                    placeholder="חפש מסלול..."
+                    className="pr-9 pl-9"
+                  />
+                  {trackSearch && (
+                    <button
+                      type="button"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setTrackSearch("")}
+                    >
+                      <X className="size-4" />
+                    </button>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                  {tracksKeys.map((key) => (
+                  {tracksKeys.filter((key) => !trackSearch || getTrackLabel(key)?.toLowerCase().includes(trackSearch.toLowerCase())).map((key) => (
                     <div key={key} className="flex flex-col gap-1.5">
                       <Label className="text-sm font-semibold text-foreground">{getTrackLabel(key)}</Label>
                       <div className="relative">
