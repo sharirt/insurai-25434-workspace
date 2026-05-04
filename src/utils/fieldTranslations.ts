@@ -39,6 +39,9 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   menayot_chul: "מניות חו״ל",
   chul: "חו״ל",
   agach_chul: "אג״ח חו״ל",
+  bnei_50_umata: "בני 50 ומטה",
+  bnei_50_ad_60: "בני 50 עד 60",
+  bnei_60_umaala: "בני 60 ומעלה",
 };
 
 export const STATIC_TRACK_KEYS = Object.keys(FIELD_TRANSLATIONS);
