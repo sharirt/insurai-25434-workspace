@@ -2,39 +2,37 @@ import { useAgentChat as useAgentChatSDK } from "@blocksdiy/blocks-client-sdk/re
 import { AgentChatSimple } from "@/components/ui/agent-chat";
 import { MeetingAssistantAgentChat } from "@/product-types";
 import { Bot } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useRef, useEffect } from "react";
 
-interface WorkspaceChatPanelProps {
+interface ChatContext {
   clientId: string;
   clientName: string;
   agentEmail: string;
   meetingDate: string;
-  meetingSummary?: string;
-  initialHistory?: Array<{ role: string; content: string }>;
+}
+
+interface WorkspaceChatPanelProps {
+  chatContext?: ChatContext;
+  onFirstMessageSent?: () => void;
 }
 
 export const WorkspaceChatPanel = ({
-  clientId,
-  clientName,
-  agentEmail,
-  meetingDate,
-  meetingSummary,
-  initialHistory,
+  chatContext,
+  onFirstMessageSent,
 }: WorkspaceChatPanelProps) => {
   const agentChat = useAgentChatSDK(MeetingAssistantAgentChat);
-  const hasSentRef = useRef(false);
+  const hasFiredRef = useRef(false);
 
   useEffect(() => {
-    if (initialHistory && initialHistory.length > 0) return;
-    if (hasSentRef.current || !meetingSummary) return;
-    const timer = setTimeout(() => {
-      if (!hasSentRef.current) {
-        hasSentRef.current = true;
-        agentChat.sendMessage({ content: meetingSummary });
+    if (hasFiredRef.current) return;
+    if (agentChat.messages && agentChat.messages.length > 0) {
+      const hasUserMsg = agentChat.messages.some((m: any) => m.role === "user");
+      if (hasUserMsg) {
+        hasFiredRef.current = true;
+        onFirstMessageSent?.();
       }
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [meetingSummary, agentChat, initialHistory]);
+    }
+  }, [agentChat.messages, onFirstMessageSent]);
 
   return (
     <div
@@ -52,13 +50,7 @@ export const WorkspaceChatPanel = ({
           size="md"
           chatId="meeting-workspace"
           noPersistency
-          initialMessages={initialHistory && initialHistory.length > 0 ? initialHistory : undefined}
-          chatContext={{
-            clientId,
-            clientName,
-            agentEmail,
-            meetingDate,
-          }}
+          chatContext={chatContext}
         />
       </div>
     </div>

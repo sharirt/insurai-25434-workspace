@@ -707,11 +707,6 @@ export const LoginPage = {
   pageName: "Login",
 } as const;
 
-export const MeetingChatLandingPage = {
-  pageBlockId: "69fa3430661c6ae86794e657",
-  pageName: "MeetingChatLanding",
-} as const;
-
 export const MeetingChatWorkspacePage = {
   pageBlockId: "69fa3430661c6ae86794e662",
   pageName: "MeetingChatWorkspace",
