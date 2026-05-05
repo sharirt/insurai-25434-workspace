@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import {
   useEntityGetAll,
   useEntityGetOne,
@@ -27,11 +27,16 @@ import { Loader2 } from "lucide-react";
 
 export default function MeetingChatWorkspace() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useUser();
 
   const [clientId] = useState(() => sessionStorage.getItem("meetingClientId") || "");
   const [meetingDateInit] = useState(() => sessionStorage.getItem("meetingDate") || "");
-  const [meetingSummary] = useState(() => sessionStorage.getItem("meetingSummary") || "");
+  const [meetingSummary] = useState(() => {
+    const urlSummary = searchParams.get("summary");
+    if (urlSummary) return urlSummary;
+    return sessionStorage.getItem("meetingSummary") || "";
+  });
 
   const [meetingDate, setMeetingDate] = useState(meetingDateInit);
   const [selectedAgentId, setSelectedAgentId] = useState("");

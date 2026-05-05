@@ -39,7 +39,8 @@ export default function MeetingChatLanding() {
     sessionStorage.setItem("meetingSummary", summary);
     sessionStorage.setItem("meetingClientId", selectedClientId);
     sessionStorage.setItem("meetingDate", meetingDate);
-    navigate(getPageUrl(MeetingChatWorkspacePage));
+    const targetUrl = getPageUrl(MeetingChatWorkspacePage);
+    navigate(`${targetUrl}?summary=${encodeURIComponent(summary)}`);
   };
 
   const clientsManagerUrl = "/ClientsManager";

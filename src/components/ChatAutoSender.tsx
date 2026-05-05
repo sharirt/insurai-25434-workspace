@@ -14,7 +14,7 @@ export const ChatAutoSender = ({ message }: ChatAutoSenderProps) => {
       sentRef.current = true;
       const timer = setTimeout(() => {
         sendMessage({ content: message });
-      }, 800);
+      }, 1200);
       return () => clearTimeout(timer);
     }
   }, [message, sendMessage]);

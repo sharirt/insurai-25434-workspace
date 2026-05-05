@@ -35,7 +35,7 @@ export const WorkspaceChatPanel = ({
           agentChat={agentChat}
           variant="bubble"
           size="md"
-          chatId={`meeting-${clientId}-${meetingDate}`}
+          chatId="meeting-workspace"
           noPersistency
           chatContext={{
             clientId,
