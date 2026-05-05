@@ -5,7 +5,6 @@ import { ClientsEntity, MeetingChatWorkspacePage } from "@/product-types";
 import { getPageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ClientCombobox } from "@/components/ClientCombobox";
 import { Calendar, ArrowRight, Send } from "lucide-react";
@@ -34,7 +33,7 @@ export default function MeetingChatLanding() {
     }
   }, [urlClientId, selectedClientId]);
 
-  const isDisabled = !selectedClientId || !summary.trim();
+  const isDisabled = !summary.trim();
 
   const handleSubmit = () => {
     sessionStorage.setItem("meetingSummary", summary);
@@ -61,28 +60,17 @@ export default function MeetingChatLanding() {
       </div>
 
       <div className="max-w-3xl mx-auto px-6 py-8 flex flex-col gap-6">
-        <div className="flex gap-4">
-          <div className="flex-1 flex flex-col gap-1.5">
-            <Label>לקוח</Label>
-            {isLoadingClients ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <ClientCombobox
-                clients={clients || []}
-                selectedClientId={selectedClientId}
-                onSelectClient={setSelectedClientId}
-              />
-            )}
-          </div>
-          <div className="flex-1 flex flex-col gap-1.5">
-            <Label>תאריך ושעה</Label>
-            <Input
-              type="datetime-local"
-              value={meetingDate}
-              onChange={(e) => setMeetingDate(e.target.value)}
-              dir="ltr"
+        <div className="flex flex-col gap-1.5">
+          <Label>לקוח</Label>
+          {isLoadingClients ? (
+            <Skeleton className="h-10 w-full" />
+          ) : (
+            <ClientCombobox
+              clients={clients || []}
+              selectedClientId={selectedClientId}
+              onSelectClient={setSelectedClientId}
             />
-          </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4">
