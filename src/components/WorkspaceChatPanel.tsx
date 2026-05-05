@@ -1,8 +1,8 @@
 import { useAgentChat as useAgentChatSDK } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { AgentChatSimple } from "@/components/ui/agent-chat";
-import { ChatAutoSender } from "@/components/ChatAutoSender";
 import { MeetingAssistantAgentChat } from "@/product-types";
 import { Bot } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 interface WorkspaceChatPanelProps {
   clientId: string;
@@ -20,6 +20,18 @@ export const WorkspaceChatPanel = ({
   meetingSummary,
 }: WorkspaceChatPanelProps) => {
   const agentChat = useAgentChatSDK(MeetingAssistantAgentChat);
+  const hasSentRef = useRef(false);
+
+  useEffect(() => {
+    if (hasSentRef.current || !meetingSummary) return;
+    const timer = setTimeout(() => {
+      if (!hasSentRef.current) {
+        hasSentRef.current = true;
+        agentChat.sendMessage({ content: meetingSummary });
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [meetingSummary, agentChat]);
 
   return (
     <div
@@ -43,9 +55,7 @@ export const WorkspaceChatPanel = ({
             agentEmail,
             meetingDate,
           }}
-        >
-          <ChatAutoSender message={meetingSummary} />
-        </AgentChatSimple>
+        />
       </div>
     </div>
   );
