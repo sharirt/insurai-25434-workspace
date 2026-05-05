@@ -6,15 +6,18 @@ interface ChatAutoSenderProps {
 }
 
 export const ChatAutoSender = ({ message }: ChatAutoSenderProps) => {
-  const { sendMessage, messages } = useAgentChat();
+  const { sendMessage } = useAgentChat();
   const sentRef = useRef(false);
 
   useEffect(() => {
-    if (message && !sentRef.current && messages.length === 0) {
+    if (message && !sentRef.current) {
       sentRef.current = true;
-      sendMessage({ content: message });
+      const timer = setTimeout(() => {
+        sendMessage({ content: message });
+      }, 800);
+      return () => clearTimeout(timer);
     }
-  }, [message, sendMessage, messages.length]);
+  }, [message, sendMessage]);
 
   return null;
 };
