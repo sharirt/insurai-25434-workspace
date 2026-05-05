@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ClientCombobox } from "@/components/ClientCombobox";
 import { Calendar, ArrowRight, Send, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Link } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -50,7 +51,6 @@ export default function MeetingChatLanding() {
   // Watch for assistant response
   useEffect(() => {
     if (assistantCountAtSend === null) return;
-    if (agentChat.isProcessing) return;
 
     const messages = agentChat.messages || [];
     const assistantMessages = messages.filter(
@@ -74,13 +74,25 @@ export default function MeetingChatLanding() {
     }
   }, [
     agentChat.messages,
-    agentChat.isProcessing,
     assistantCountAtSend,
     summary,
     selectedClientId,
     meetingDate,
     navigate,
   ]);
+
+  // Safety timeout - reset if no response after 90 seconds
+  useEffect(() => {
+    if (assistantCountAtSend === null) return;
+
+    const timer = setTimeout(() => {
+      setIsProcessing(false);
+      setAssistantCountAtSend(null);
+      toast("הסוכן לא הגיב, נסה שוב");
+    }, 90000);
+
+    return () => clearTimeout(timer);
+  }, [assistantCountAtSend]);
 
   const isDisabled = !summary.trim() || isProcessing;
 
