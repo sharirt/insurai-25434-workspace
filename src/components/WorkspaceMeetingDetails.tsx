@@ -10,12 +10,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ClientCombobox } from "@/components/ClientCombobox";
 
 interface Agent {
   id: string;
   firstName?: string;
   lastName?: string;
   email?: string;
+}
+
+interface Client {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  national_id?: string;
 }
 
 interface WorkspaceMeetingDetailsProps {
@@ -27,6 +35,11 @@ interface WorkspaceMeetingDetailsProps {
   onNotesChange: (val: string) => void;
   agents: Agent[];
   isLoadingAgents: boolean;
+  clients: Client[];
+  selectedClientId: string;
+  onSelectClient: (clientId: string) => void;
+  isLoadingClients: boolean;
+  clientDisabled: boolean;
 }
 
 export const WorkspaceMeetingDetails = ({
@@ -38,6 +51,11 @@ export const WorkspaceMeetingDetails = ({
   onNotesChange,
   agents,
   isLoadingAgents,
+  clients,
+  selectedClientId,
+  onSelectClient,
+  isLoadingClients,
+  clientDisabled,
 }: WorkspaceMeetingDetailsProps) => {
   return (
     <Card>
@@ -51,44 +69,55 @@ export const WorkspaceMeetingDetails = ({
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="meeting-date">תאריך ושעה</Label>
-          <Input
-            id="meeting-date"
-            type="datetime-local"
-            value={meetingDate}
-            onChange={(e) => onMeetingDateChange(e.target.value)}
-            dir="ltr"
+          <Label>לקוח</Label>
+          <ClientCombobox
+            clients={clients}
+            selectedClientId={selectedClientId}
+            onSelectClient={onSelectClient}
+            disabled={isLoadingClients || clientDisabled}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="meeting-agent">סוכן</Label>
-          {isLoadingAgents ? (
-            <Skeleton className="h-10 w-full" />
-          ) : (
-            <Select value={selectedAgentId} onValueChange={onAgentChange} dir="rtl">
-              <SelectTrigger>
-                <SelectValue placeholder="בחר סוכן" />
-              </SelectTrigger>
-              <SelectContent>
-                {agents?.map((agent) => (
-                  <SelectItem key={agent.id} value={agent.id}>
-                    {[agent.firstName, agent.lastName].filter(Boolean).join(" ") || agent.email || "סוכן"}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="meeting-notes">הערות</Label>
-          <Textarea
-            id="meeting-notes"
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="הערות לפגישה..."
-            dir="rtl"
-            rows={3}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="meeting-date">תאריך ושעה</Label>
+            <Input
+              id="meeting-date"
+              type="datetime-local"
+              value={meetingDate}
+              onChange={(e) => onMeetingDateChange(e.target.value)}
+              dir="ltr"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="meeting-agent">סוכן</Label>
+            {isLoadingAgents ? (
+              <Skeleton className="h-10 w-full" />
+            ) : (
+              <Select value={selectedAgentId} onValueChange={onAgentChange} dir="rtl">
+                <SelectTrigger>
+                  <SelectValue placeholder="בחר סוכן" />
+                </SelectTrigger>
+                <SelectContent>
+                  {agents?.map((agent) => (
+                    <SelectItem key={agent.id} value={agent.id}>
+                      {[agent.firstName, agent.lastName].filter(Boolean).join(" ") || agent.email || "סוכן"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <Label htmlFor="meeting-notes">הערות</Label>
+            <Textarea
+              id="meeting-notes"
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="הערות לפגישה..."
+              dir="rtl"
+              rows={3}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

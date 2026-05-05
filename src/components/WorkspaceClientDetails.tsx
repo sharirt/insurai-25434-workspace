@@ -79,7 +79,7 @@ export const WorkspaceClientDetails = ({ client }: WorkspaceClientDetailsProps) 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">לא נמצא לקוח</p>
+          <p className="text-muted-foreground text-sm">בחר לקוח כדי לראות פרטים</p>
         </CardContent>
       </Card>
     );
