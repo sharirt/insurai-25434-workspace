@@ -9,7 +9,8 @@ interface WorkspaceChatPanelProps {
   clientName: string;
   agentEmail: string;
   meetingDate: string;
-  meetingSummary: string;
+  meetingSummary?: string;
+  initialHistory?: Array<{ role: string; content: string }>;
 }
 
 export const WorkspaceChatPanel = ({
@@ -18,11 +19,13 @@ export const WorkspaceChatPanel = ({
   agentEmail,
   meetingDate,
   meetingSummary,
+  initialHistory,
 }: WorkspaceChatPanelProps) => {
   const agentChat = useAgentChatSDK(MeetingAssistantAgentChat);
   const hasSentRef = useRef(false);
 
   useEffect(() => {
+    if (initialHistory && initialHistory.length > 0) return;
     if (hasSentRef.current || !meetingSummary) return;
     const timer = setTimeout(() => {
       if (!hasSentRef.current) {
@@ -31,7 +34,7 @@ export const WorkspaceChatPanel = ({
       }
     }, 800);
     return () => clearTimeout(timer);
-  }, [meetingSummary, agentChat]);
+  }, [meetingSummary, agentChat, initialHistory]);
 
   return (
     <div
@@ -49,6 +52,7 @@ export const WorkspaceChatPanel = ({
           size="md"
           chatId="meeting-workspace"
           noPersistency
+          initialMessages={initialHistory && initialHistory.length > 0 ? initialHistory : undefined}
           chatContext={{
             clientId,
             clientName,

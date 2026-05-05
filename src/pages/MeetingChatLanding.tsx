@@ -1,25 +1,39 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router";
-import { useEntityGetAll } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { ClientsEntity, MeetingChatWorkspacePage } from "@/product-types";
+import {
+  useEntityGetAll,
+  useUser,
+  useAgentChat,
+} from "@blocksdiy/blocks-client-sdk/reactSdk";
+import {
+  ClientsEntity,
+  MeetingChatWorkspacePage,
+  MeetingAssistantAgentChat,
+} from "@/product-types";
 import { getPageUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ClientCombobox } from "@/components/ClientCombobox";
-import { Calendar, ArrowRight, Send } from "lucide-react";
+import { Calendar, ArrowRight, Send, Loader2 } from "lucide-react";
 import { Link } from "react-router";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MeetingChatLanding() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const user = useUser();
   const urlClientId = searchParams.get("clientId") || "";
 
-  const { data: clients, isLoading: isLoadingClients } = useEntityGetAll(ClientsEntity);
+  const { data: clients, isLoading: isLoadingClients } =
+    useEntityGetAll(ClientsEntity);
+
+  const agentChat = useAgentChat(MeetingAssistantAgentChat);
 
   const [selectedClientId, setSelectedClientId] = useState(urlClientId);
   const [summary, setSummary] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [sentMessageCount, setSentMessageCount] = useState<number | null>(null);
 
   const now = new Date();
   const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -33,14 +47,66 @@ export default function MeetingChatLanding() {
     }
   }, [urlClientId, selectedClientId]);
 
-  const isDisabled = !summary.trim();
+  // Watch for assistant response
+  useEffect(() => {
+    if (sentMessageCount === null) return;
+    if (agentChat.isProcessing) return;
+
+    const messages = agentChat.messages || [];
+    const assistantMessages = messages.filter(
+      (m: any) => m.role === "assistant"
+    );
+
+    if (assistantMessages.length > 0) {
+      // Agent has responded - save chat history and navigate
+      const chatHistory = messages.map((m: any) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      sessionStorage.setItem("meetingSummary", summary);
+      sessionStorage.setItem("meetingClientId", selectedClientId);
+      sessionStorage.setItem("meetingDate", meetingDate);
+      sessionStorage.setItem("meetingChatHistory", JSON.stringify(chatHistory));
+
+      const targetUrl = getPageUrl(MeetingChatWorkspacePage);
+      navigate(targetUrl);
+    }
+  }, [
+    agentChat.messages,
+    agentChat.isProcessing,
+    sentMessageCount,
+    summary,
+    selectedClientId,
+    meetingDate,
+    navigate,
+  ]);
+
+  const isDisabled = !summary.trim() || isProcessing;
 
   const handleSubmit = () => {
-    sessionStorage.setItem("meetingSummary", summary);
-    sessionStorage.setItem("meetingClientId", selectedClientId);
-    sessionStorage.setItem("meetingDate", meetingDate);
-    const targetUrl = getPageUrl(MeetingChatWorkspacePage);
-    navigate(`${targetUrl}?summary=${encodeURIComponent(summary)}`);
+    const clientName =
+      clients?.find((c) => c.id === selectedClientId)
+        ? [
+            clients.find((c) => c.id === selectedClientId)?.first_name,
+            clients.find((c) => c.id === selectedClientId)?.last_name,
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : "";
+
+    setIsProcessing(true);
+    setSentMessageCount((agentChat.messages || []).length);
+
+    agentChat.sendMessage({
+      content: summary,
+      chatContext: {
+        clientId: selectedClientId,
+        clientName,
+        agentEmail: user?.email || "",
+        meetingDate,
+      },
+    });
   };
 
   const clientsManagerUrl = "/ClientsManager";
@@ -74,12 +140,17 @@ export default function MeetingChatLanding() {
           )}
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4">
-          <div
-            className="rounded-lg p-4 bg-primary text-primary-foreground animate-in fade-in duration-500"
-          >
+        <div
+          className={
+            isProcessing
+              ? "rounded-xl border border-border bg-card p-6 flex flex-col gap-4 opacity-50 pointer-events-none"
+              : "rounded-xl border border-border bg-card p-6 flex flex-col gap-4"
+          }
+        >
+          <div className="rounded-lg p-4 bg-primary text-primary-foreground animate-in fade-in duration-500">
             <p className="text-sm leading-relaxed">
-              שלום! אני כאן לעזור לך לעבד את סיכום הפגישה. שלח לי את הסיכום ואני אזין את הבקשות למערכת אוטומטית
+              שלום! אני כאן לעזור לך לעבד את סיכום הפגישה. שלח לי את הסיכום
+              ואני אזין את הבקשות למערכת אוטומטית
             </p>
           </div>
 
@@ -93,17 +164,29 @@ export default function MeetingChatLanding() {
               rows={5}
             />
             <div className="flex justify-start">
-              <Button
-                size="lg"
-                onClick={handleSubmit}
-                disabled={isDisabled}
-              >
-                <Send data-icon="inline-start" />
-                שלח סיכום
+              <Button size="lg" onClick={handleSubmit} disabled={isDisabled}>
+                {isProcessing ? (
+                  <Loader2 className="animate-spin" data-icon="inline-start" />
+                ) : (
+                  <Send data-icon="inline-start" />
+                )}
+                {isProcessing ? "מעבד סיכום..." : "שלח סיכום"}
               </Button>
             </div>
           </div>
         </div>
+
+        {isProcessing && (
+          <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 text-center flex flex-col items-center gap-2">
+            <Loader2 className="size-8 animate-spin text-primary" />
+            <p className="font-semibold text-foreground">
+              הסוכן מנתח את הסיכום...
+            </p>
+            <p className="text-sm text-muted-foreground">
+              אנא המתן, זה עשוי לקחת מספר שניות
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

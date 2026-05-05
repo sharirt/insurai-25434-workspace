@@ -33,9 +33,15 @@ export default function MeetingChatWorkspace() {
   const [clientId] = useState(() => sessionStorage.getItem("meetingClientId") || "");
   const [meetingDateInit] = useState(() => sessionStorage.getItem("meetingDate") || "");
   const [meetingSummary] = useState(() => {
-    const urlSummary = searchParams.get("summary");
-    if (urlSummary) return urlSummary;
     return sessionStorage.getItem("meetingSummary") || "";
+  });
+  const [chatHistory] = useState<Array<{ role: string; content: string }>>(() => {
+    try {
+      const stored = sessionStorage.getItem("meetingChatHistory");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
   });
 
   const [meetingDate, setMeetingDate] = useState(meetingDateInit);
@@ -170,7 +176,8 @@ export default function MeetingChatWorkspace() {
         clientName={clientName}
         agentEmail={user?.email || ""}
         meetingDate={meetingDate}
-        meetingSummary={meetingSummary}
+        meetingSummary={chatHistory.length > 0 ? undefined : meetingSummary}
+        initialHistory={chatHistory.length > 0 ? chatHistory : undefined}
       />
     </div>
   );
