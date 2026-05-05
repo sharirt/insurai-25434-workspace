@@ -33,7 +33,7 @@ export default function MeetingChatLanding() {
   const [selectedClientId, setSelectedClientId] = useState(urlClientId);
   const [summary, setSummary] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [sentMessageCount, setSentMessageCount] = useState<number | null>(null);
+  const [assistantCountAtSend, setAssistantCountAtSend] = useState<number | null>(null);
 
   const now = new Date();
   const localIso = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
@@ -49,7 +49,7 @@ export default function MeetingChatLanding() {
 
   // Watch for assistant response
   useEffect(() => {
-    if (sentMessageCount === null) return;
+    if (assistantCountAtSend === null) return;
     if (agentChat.isProcessing) return;
 
     const messages = agentChat.messages || [];
@@ -57,7 +57,7 @@ export default function MeetingChatLanding() {
       (m: any) => m.role === "assistant"
     );
 
-    if (assistantMessages.length > 0) {
+    if (assistantMessages.length > assistantCountAtSend) {
       // Agent has responded - save chat history and navigate
       const chatHistory = messages.map((m: any) => ({
         role: m.role,
@@ -75,7 +75,7 @@ export default function MeetingChatLanding() {
   }, [
     agentChat.messages,
     agentChat.isProcessing,
-    sentMessageCount,
+    assistantCountAtSend,
     summary,
     selectedClientId,
     meetingDate,
@@ -96,7 +96,8 @@ export default function MeetingChatLanding() {
         : "";
 
     setIsProcessing(true);
-    setSentMessageCount((agentChat.messages || []).length);
+    const assistantMsgs = (agentChat.messages || []).filter((m: any) => m.role === "assistant");
+    setAssistantCountAtSend(assistantMsgs.length);
 
     agentChat.sendMessage({
       content: summary,
