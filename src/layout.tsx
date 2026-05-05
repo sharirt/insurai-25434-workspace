@@ -14,7 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, CalendarPlus } from "lucide-react";
+import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, CalendarPlus, Bot } from "lucide-react";
 import { useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getPageUrl, logOut } from "@/lib/utils";
 import { LoginPage, AgentDashboard2Page, AgentProfilePage, MeetingChatWorkspacePage } from "@/product-types";
@@ -25,7 +25,8 @@ import { AccessDenied } from "@/components/AccessDenied";
 const navigationItems = [
   { title: "דף סוכן", url: getPageUrl(AgentDashboard2Page), icon: LayoutDashboard },
   { title: "ניהול לקוחות", url: "/ClientsManager", icon: Users },
-  { title: "פגישה חדשה", url: getPageUrl(MeetingChatWorkspacePage), icon: CalendarPlus },
+  { title: "פגישה חדשה", url: "/NewMeetingWizard", icon: CalendarPlus },
+  { title: "פגישה עם AI", url: getPageUrl(MeetingChatWorkspacePage), icon: Bot },
   { title: "ניהול יצרנים", url: "/ProvidersManager", icon: Building },
   { title: "ניהול סוכנים", url: "/AgentsManager", icon: UserCog },
   { title: "ניהול סוגי בקשות", url: "/RequestTypesManager", icon: FileText },
