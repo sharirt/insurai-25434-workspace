@@ -16,6 +16,7 @@ const gemelAltshullerShacham: ProviderMap = {
   "אשראי ואג״ח": { customTranslation: "אלטשולר שחם גמל אשראי ואג״ח", trackCode: 1376 },
   "עוקב מדדי מניות": { customTranslation: "אלטשולר שחם גמל עוקב מדדי מניות", trackCode: 14861 },
   "משולב סחיר": { customTranslation: "אלטשולר שחם גמל משולב סחיר", trackCode: 15456 },
+  "מניות סחיר": { customTranslation: "אלטשולר שחם גמל מניות סחיר", trackCode: 15540 },
   "כללי": { customTranslation: "אלטשולר שחם גמל כללי", trackCode: 1085 },
   "כספי שקלי": { customTranslation: "אלטשולר שחם גמל כספי (שקלי)", trackCode: 1396 },
   "אג״ח ממשלות": { customTranslation: "אלטשולר שחם גמל אג״ח ממשלות", trackCode: 1397 },
@@ -138,6 +139,7 @@ const gemelMeitav: ProviderMap = {
   "קיימות": { customTranslation: "מיטב גמל קיימות", trackCode: 15346 },
   "כספי שקלי": { customTranslation: "מיטב גמל כספי (שיקלי)", trackCode: 1366 },
   "אג״ח ממשלות": { customTranslation: "מיטב גמל אג״ח ממשלתי", trackCode: 1383 },
+  "עוקב מדדי אג״ח": { customTranslation: "מיטב גמל עוקב מדדי אג״ח", trackCode: 1692 },
   "אשראי ואג״ח עד 25% מניות": { customTranslation: "מיטב גמל אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 8883 },
   "אג״ח סחיר עד 25% מניות": { customTranslation: "מיטב גמל סחיר - אג״ח עם מניות (עד 25% מניות)", trackCode: 15342 },
   "עוקב מדדים אג״ח עד 25% מניות": { customTranslation: "מיטב גמל עוקב מדדי אג״ח עם מניות (עד 25% מניות)", trackCode: 15345 },
@@ -158,6 +160,7 @@ const gemelMenora: ProviderMap = {
   "מניות סחיר": { customTranslation: "מסלול מניות סחיר", trackCode: 1407 },
   "כללי": { customTranslation: "מסלול כללי", trackCode: 826 },
   "כספי שקלי": { customTranslation: "מסלול כספי (שקלי)", trackCode: 1112 },
+  "עוקב מדדי אג״ח": { customTranslation: "מסלול עוקב מדדי אג״ח", trackCode: 14679 },
   "אשראי ואג״ח עד 25% מניות": { customTranslation: "מסלול אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 9660 },
   "עוקב מדדים אג״ח עד 25% מניות": { customTranslation: "מסלול עוקב מדדים - אג״ח עם מניות (עד 25% מניות)", trackCode: 11407 },
   "בני 50 ומטה": { customTranslation: "מסלול לבני 50 ומטה", trackCode: 9793 },
@@ -242,6 +245,7 @@ const gemelLeHashkaaHaphoenix: ProviderMap = {
   "כללי": { customTranslation: "הפניקס גמל להשקעה כללי", trackCode: 9509 },
   "כספי שקלי": { customTranslation: "הפניקס גמל להשקעה כספי (שקלי)", trackCode: 9514 },
   "שריעה": { customTranslation: "הפניקס גמל להשקעה שריעה", trackCode: 9530 },
+  "עוקב מדדי אג״ח": { customTranslation: "הפניקס גמל להשקעה עוקב מדדי אג״ח", trackCode: 7907 },
   "אשראי ואג״ח עד 25% מניות": { customTranslation: "הפניקס גמל להשקעה אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 9512 },
 };
 
@@ -341,6 +345,22 @@ const gemelLeHashkaaMenora: ProviderMap = {
   "עוקב מדדים אג״ח עד 25% מניות": { customTranslation: "מסלול עוקב מדדים - אג״ח עם מניות (עד 25% מניות)", trackCode: 11411 },
 };
 
+const gemelLeHashkaaMigdal: ProviderMap = {
+  "מניות": { customTranslation: "מניות", trackCode: 7934 },
+  "עוקב מדד S&P500": { customTranslation: "עוקב מדד S&P 500", trackCode: 13563 },
+  "הלכתי": { customTranslation: "הלכה", trackCode: 7937 },
+  "עוקב מדדים גמיש": { customTranslation: "עוקב מדדים - גמיש", trackCode: 15341 },
+  "אשראי ואג״ח": { customTranslation: "אשראי ואג״ח", trackCode: 14944 },
+  "עוקב מדדי מניות": { customTranslation: "עוקב מדדי מניות", trackCode: 14943 },
+  "משולב סחיר": { customTranslation: "משולב סחיר", trackCode: 15455 },
+  "מניות סחיר": { customTranslation: "מניות סחיר", trackCode: 15456 },
+  "כללי": { customTranslation: "כללי", trackCode: 7936 },
+  "כספי שקלי": { customTranslation: "כספי (שקלי)", trackCode: 7931 },
+  "עוקב מדדי אג״ח": { customTranslation: "עוקב מדדי אג״ח", trackCode: 15457 },
+  "אג״ח ממשלות": { customTranslation: "אג״ח ממשלתי", trackCode: 7932 },
+  "אשראי ואג״ח עד 25% מניות": { customTranslation: "אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 7935 },
+};
+
 const gemelLeHashkaaProviders: ProvidersByName = {
   "אלטשולר שחם": gemelLeHashkaaAltshullerShacham,
   "הפניקס": gemelLeHashkaaHaphoenix,
@@ -350,10 +370,11 @@ const gemelLeHashkaaProviders: ProvidersByName = {
   "מור": gemelLeHashkaaMor,
   "מיטב": gemelLeHashkaaMeitav,
   "מנורה": gemelLeHashkaaMenora,
+  "מגדל": gemelLeHashkaaMigdal,
 };
 
 // =============================================
-// קרן השתלמות providers (existing - unchanged)
+// קרן השתלמות providers
 // =============================================
 
 const hishtalmutAltshullerShacham: ProviderMap = {
@@ -554,10 +575,10 @@ const pensiaHaphoenix: ProviderMap = {
   "משולב סחיר": { customTranslation: "הפניקס פנסיה מקיפה משולב סחיר", trackCode: 14285 },
   "מניות סחיר": { customTranslation: "הפניקס פנסיה מקיפה מניות סחיר", trackCode: 15218 },
   "אג״ח סחיר": { customTranslation: "הפניקס פנסיה מקיפה אג״ח סחיר", trackCode: 15217 },
-  "עוקב מדדי אג״ח": { customTranslation: "הפניקס פנסיה מקיפה עוקב מדדי אג״ח", trackCode: 9979 },
   "כללי": { customTranslation: "הפניקס פנסיה כללי", trackCode: 13918 },
   "כספי שקלי": { customTranslation: "הפניקס פנסיה כספי (שקלי)", trackCode: 13934 },
   "שריעה": { customTranslation: "הפניקס פנסיה שריעה", trackCode: 13930 },
+  "עוקב מדדי אג״ח": { customTranslation: "הפניקס פנסיה מקיפה עוקב מדדי אג״ח", trackCode: 9979 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעות משתנה ומותאם לפי גיל העמית", trackCode: 0 },
   "בני 50 ומטה": { customTranslation: "הפניקס פנסיה מקיפה לבני 50 ומטה", trackCode: 9974 },
   "בני 50 עד 60": { customTranslation: "הפניקס פנסיה מקיפה לבני 50 עד 60", trackCode: 9975 },
@@ -580,7 +601,7 @@ const pensiaHarel: ProviderMap = {
   "מניות סחיר": { customTranslation: "מניות סחיר", trackCode: 15277 },
   "אג״ח סחיר": { customTranslation: "אג״ח סחיר", trackCode: 15276 },
   "כללי": { customTranslation: "הראל פנסיה מסלול כללי", trackCode: 9852 },
-  "קיימות": { customTranslation: "קיימות", trackCode: 14200 },
+  "קיימות": { customTranslation: "הראל פנסיה מסלול קיימות", trackCode: 15372 },
   "כספי שקלי": { customTranslation: "הראל פנסיה מסלול כספי (שקלי)", trackCode: 14720 },
   "עוקב מדדי אג״ח": { customTranslation: "הראל פנסיה מסלול עוקב מדדי אג״ח", trackCode: 15374 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעה משתנה ומותאם לגילו של העמית", trackCode: 0 },
@@ -648,8 +669,8 @@ const pensiaMeitav: ProviderMap = {
   "משולב סחיר": { customTranslation: "מיטב פנסיה מקיפה משולב סחיר", trackCode: 14259 },
   "מניות סחיר": { customTranslation: "מיטב פנסיה מקיפה מניות סחיר", trackCode: 15360 },
   "אג״ח סחיר": { customTranslation: "מיטב פנסיה מקיפה אג״ח סחיר", trackCode: 15359 },
-  "קיימות": { customTranslation: "מיטב פנסיה מקיפה קיימות", trackCode: 14261 },
   "כללי": { customTranslation: "מיטב פנסיה כללי", trackCode: 9893 },
+  "קיימות": { customTranslation: "מיטב פנסיה מקיפה קיימות", trackCode: 14261 },
   "כספי שקלי": { customTranslation: "מיטב פנסיה כספי (שיקלי)", trackCode: 9896 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעות משתנה ומותאם לפי גיל העמית", trackCode: 0 },
   "בני 50 ומטה": { customTranslation: "מיטב פנסיה מקיפה לבני 50 ומטה", trackCode: 2155 },
@@ -672,10 +693,10 @@ const pensiaMenora: ProviderMap = {
   "עוקב מדדי מניות": { customTranslation: "מסלול עוקב מדדי מניות", trackCode: 14680 },
   "משולב סחיר": { customTranslation: "מסלול משולב סחיר", trackCode: 14277 },
   "מניות סחיר": { customTranslation: "מסלול מניות סחיר", trackCode: 15783 },
-  "כללי": { customTranslation: "מסלול כללי", trackCode: 9904 },
-  "קיימות": { customTranslation: "מסלול קיימות", trackCode: 14348 },
-  "כספי שקלי": { customTranslation: "מסלול כספי (שקלי)", trackCode: 9908 },
   "אג״ח ממשלות": { customTranslation: "מסלול אג״ח ממשלות", trackCode: 15342 },
+  "קיימות": { customTranslation: "מסלול קיימות", trackCode: 14348 },
+  "כללי": { customTranslation: "מסלול כללי", trackCode: 9904 },
+  "כספי שקלי": { customTranslation: "מסלול כספי (שקלי)", trackCode: 9908 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעות מותאם לפי גיל העמית", trackCode: 0 },
   "בני 50 ומטה": { customTranslation: "מסלול לבני 50 ומטה", trackCode: 9793 },
   "בני 50 עד 60": { customTranslation: "מסלול לבני 50-60", trackCode: 9792 },
@@ -697,17 +718,6 @@ const pensiaMenora: ProviderMap = {
   "עוקב מדדים למקבלי קצבה": { customTranslation: "מסלול עוקב מדדים למקבלי קצבה", trackCode: 9907 },
 };
 
-const pensiaProviders: ProvidersByName = {
-  "אלטשולר שחם": pensiaAltshullerShacham,
-  "הפניקס": pensiaHaphoenix,
-  "הראל": pensiaHarel,
-  "כלל": pensiaClal,
-  "מור": pensiaMor,
-  "מיטב": pensiaMeitav,
-  "מנורה": pensiaMenora,
-  "מגדל": pensiaMigdal,
-};
-
 const pensiaMigdal: ProviderMap = {
   "מניות": { customTranslation: "מסלול מניות", trackCode: 2142 },
   "עוקב מדד S&P500": { customTranslation: "מסלול עוקב מדד S&P 500", trackCode: 13572 },
@@ -724,6 +734,17 @@ const pensiaMigdal: ProviderMap = {
   "בני 60 ומעלה": { customTranslation: "לבני 60 ומעלה", trackCode: 8803 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מודל השקעתך תלוי גיל", trackCode: 0 },
   "זכאים קיימים": { customTranslation: "מסלול כללי - סגור למצטרפים חדשים", trackCode: 2102 },
+};
+
+const pensiaProviders: ProvidersByName = {
+  "אלטשולר שחם": pensiaAltshullerShacham,
+  "הפניקס": pensiaHaphoenix,
+  "הראל": pensiaHarel,
+  "כלל": pensiaClal,
+  "מור": pensiaMor,
+  "מיטב": pensiaMeitav,
+  "מנורה": pensiaMenora,
+  "מגדל": pensiaMigdal,
 };
 
 // =============================================
@@ -756,10 +777,10 @@ const pensiaMashlimaHaphoenix: ProviderMap = {
   "משולב סחיר": { customTranslation: "הפניקס פנסיה משלימה משולב סחיר", trackCode: 14288 },
   "מניות סחיר": { customTranslation: "הפניקס פנסיה משלימה מניות סחיר", trackCode: 15221 },
   "אג״ח סחיר": { customTranslation: "הפניקס פנסיה משלימה אג״ח סחיר", trackCode: 15220 },
-  "עוקב מדדי אג״ח": { customTranslation: "הפניקס פנסיה משלימה עוקב מדדי אג״ח", trackCode: 15222 },
   "כללי": { customTranslation: "הפניקס פנסיה משלימה כללי", trackCode: 13954 },
   "כספי שקלי": { customTranslation: "הפניקס פנסיה משלימה כספי (שקלי)", trackCode: 13958 },
   "שריעה": { customTranslation: "הפניקס פנסיה משלימה שריעה", trackCode: 14082 },
+  "עוקב מדדי אג״ח": { customTranslation: "הפניקס פנסיה משלימה עוקב מדדי אג״ח", trackCode: 15222 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעות משתנה ומותאם לפי גיל העמית", trackCode: 0 },
   "בני 50 ומטה": { customTranslation: "הפניקס פנסיה משלימה לבני 50 ומטה", trackCode: 7234 },
   "בני 50 עד 60": { customTranslation: "הפניקס פנסיה משלימה לבני 50 עד 60", trackCode: 7235 },
@@ -782,7 +803,7 @@ const pensiaMashlimaHarel: ProviderMap = {
   "מניות סחיר": { customTranslation: "מניות סחיר", trackCode: 15279 },
   "אג״ח סחיר": { customTranslation: "אג״ח סחיר", trackCode: 15280 },
   "כללי": { customTranslation: "הראל פנסיה משלימה מסלול כללי", trackCode: 14130 },
-  "קיימות": { customTranslation: "קיימות", trackCode: 14194 },
+  "קיימות": { customTranslation: "הראל פנסיה משלימה מסלול קיימות", trackCode: 15384 },
   "כספי שקלי": { customTranslation: "הראל פנסיה משלימה מסלול כספי (שקלי)", trackCode: 14722 },
   "עוקב מדדי אג״ח": { customTranslation: "הראל פנסיה משלימה מסלול עוקב מדדי אג״ח", trackCode: 15386 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מודל השקעתך תלוי גיל", trackCode: 0 },
@@ -849,8 +870,8 @@ const pensiaMashlimaMeitav: ProviderMap = {
   "עוקב מדדי מניות": { customTranslation: "מיטב פנסיה משלימה עוקב מדדי מניות", trackCode: 15392 },
   "משולב סחיר": { customTranslation: "מיטב פנסיה כללית משולב סחיר", trackCode: 14267 },
   "מניות סחיר": { customTranslation: "מיטב פנסיה כללית מניות סחיר", trackCode: 15361 },
-  "קיימות": { customTranslation: "מיטב פנסיה כללית קיימות", trackCode: 14269 },
   "כללי": { customTranslation: "מיטב פנסיה משלימה כללי", trackCode: 14055 },
+  "קיימות": { customTranslation: "מיטב פנסיה כללית קיימות", trackCode: 14269 },
   "כספי שקלי": { customTranslation: "מיטב פנסיה משלימה כספי (שיקלי)", trackCode: 14060 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מסלול השקעות משתנה ומותאם לפי גיל העמית", trackCode: 0 },
   "בני 50 ומטה": { customTranslation: "מיטב פנסיה כללית לבני 50 ומטה", trackCode: 2158 },
@@ -895,17 +916,6 @@ const pensiaMashlimaMenora: ProviderMap = {
   "עוקב מדדים למקבלי קצבה": { customTranslation: "מסלול עוקב מדדים למקבלי קצבה", trackCode: 14087 },
 };
 
-const pensiaMashlimaProviders: ProvidersByName = {
-  "אלטשולר שחם": pensiaMashlimaAltshullerShacham,
-  "הפניקס": pensiaMashlimaHaphoenix,
-  "הראל": pensiaMashlimaHarel,
-  "כלל": pensiaMashlimaClal,
-  "מור": pensiaMashlimaMor,
-  "מיטב": pensiaMashlimaMeitav,
-  "מנורה": pensiaMashlimaMenora,
-  "מגדל": pensiaMashlimaMigdal,
-};
-
 const pensiaMashlimaMigdal: ProviderMap = {
   "מניות": { customTranslation: "מסלול מניות", trackCode: 2146 },
   "עוקב מדד S&P500": { customTranslation: "מסלול עוקב מדד S&P 500", trackCode: 13627 },
@@ -922,6 +932,17 @@ const pensiaMashlimaMigdal: ProviderMap = {
   "בני 60 ומעלה": { customTranslation: "לבני 60 ומעלה", trackCode: 9455 },
   "מסלול השקעה תלוי גיל": { customTranslation: "מודל השקעתך תלוי גיל", trackCode: 0 },
   "זכאים קיימים": { customTranslation: "מסלול כללי - סגור למצטרפים חדשים", trackCode: 2145 },
+};
+
+const pensiaMashlimaProviders: ProvidersByName = {
+  "אלטשולר שחם": pensiaMashlimaAltshullerShacham,
+  "הפניקס": pensiaMashlimaHaphoenix,
+  "הראל": pensiaMashlimaHarel,
+  "כלל": pensiaMashlimaClal,
+  "מור": pensiaMashlimaMor,
+  "מיטב": pensiaMashlimaMeitav,
+  "מנורה": pensiaMashlimaMenora,
+  "מגדל": pensiaMashlimaMigdal,
 };
 
 // =============================================

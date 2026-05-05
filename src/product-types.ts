@@ -707,6 +707,16 @@ export const LoginPage = {
   pageName: "Login",
 } as const;
 
+export const MeetingChatLandingPage = {
+  pageBlockId: "69fa3430661c6ae86794e657",
+  pageName: "MeetingChatLanding",
+} as const;
+
+export const MeetingChatWorkspacePage = {
+  pageBlockId: "69fa3430661c6ae86794e662",
+  pageName: "MeetingChatWorkspace",
+} as const;
+
 export const MeetingDetailsPage = {
   pageBlockId: "69db99b07d23f0bc9a29532d",
   pageName: "MeetingDetails",
@@ -2202,4 +2212,8 @@ export const TestRoetoConnectionAction = {
 
   inputInstanceType: {} as ITestRoetoConnectionActionInput,
   outputInstanceType: {} as ITestRoetoConnectionActionOutput,
+} as const;
+
+export const MeetingAssistantAgentChat = {
+  agentChatId: "69fa33d5fb6f426ffb5e8464",
 } as const;

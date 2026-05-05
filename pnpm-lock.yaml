@@ -16,10 +16,10 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.4.4(@types/react@19.2.14)(react@19.2.4)
+        version: 1.4.5(@types/react@19.2.14)(react@19.2.4)
       '@blocksdiy/react-common':
         specifier: latest
-        version: 1.8.1(@types/react@19.2.14)
+        version: 1.9.0(@types/react@19.2.14)
       '@cyntler/react-doc-viewer':
         specifier: 1.17.1
         version: 1.17.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -448,8 +448,8 @@ packages:
     resolution: {integrity: sha512-vzsgP0682zZmjrQ0yXg4EUaspQ8Vd3JhkfdIV7PzMJtuYt4fzcBJOTa8k5qQv0wu+vPnNAsROxcsRLzIkoXitA==}
     engines: {node: '>=24.11.0'}
 
-  '@blocksdiy/blocks-client-sdk@1.4.4':
-    resolution: {integrity: sha512-mHeQvANrdw2fGL9puigqYlZOeNlxHnwz3RZI332oANQIf3L8/Pblz51iS8R+DHUfXa3CSTs9bi2otA2GEDEmQw==}
+  '@blocksdiy/blocks-client-sdk@1.4.5':
+    resolution: {integrity: sha512-fSJ77d3O1gXU1JHDKHoiNYaAwJlhlVH0YD/P4Vm0FHpQiWxmOePkGDwwqNYCVbQeJvMhhlq/1HMmNyJsFywDVw==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -460,8 +460,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@blocksdiy/react-common@1.8.1':
-    resolution: {integrity: sha512-NWPTnk/nKQHOilsOaRb5eNET0xbAjKsFCLPxhpGAgd5/KAEhTXjBN0Yiac6oS3Ieh7mi0op4vCvq05VMyEVCnQ==}
+  '@blocksdiy/react-common@1.9.0':
+    resolution: {integrity: sha512-fH7oI0RgMahd/CDBIO9RY3/53Ej8YEah8999/u+YbHGsMOgG1M/GZrL6SeZXY7O1oaEBgPOIbfwDIp1Y8vyNfw==}
     engines: {node: '>=24.11.0'}
 
   '@csstools/color-helpers@5.1.0':
@@ -5292,10 +5292,10 @@ snapshots:
       lodash: 4.17.21
       pusher-js: 8.4.0-rc2
 
-  '@blocksdiy/blocks-client-sdk@1.4.4(@types/react@19.2.14)(react@19.2.4)':
+  '@blocksdiy/blocks-client-sdk@1.4.5(@types/react@19.2.14)(react@19.2.4)':
     dependencies:
       '@blocksdiy/blocks-client-api': 1.5.0
-      '@blocksdiy/react-common': 1.8.1(@types/react@19.2.14)
+      '@blocksdiy/react-common': 1.9.0(@types/react@19.2.14)
       '@tanstack/react-query': 5.100.9(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
@@ -5310,7 +5310,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@blocksdiy/react-common@1.8.1(@types/react@19.2.14)':
+  '@blocksdiy/react-common@1.9.0(@types/react@19.2.14)':
     dependencies:
       '@blocksdiy/blocks-client-api': 1.5.0
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.4)

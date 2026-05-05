@@ -795,6 +795,9 @@ export function AgentChat({
     undefined,
   );
   const [resolvedAgentBlockId, setResolvedAgentBlockId] = useState<string>('');
+  const [shortTermMemory, setShortTermMemory] = useState<{
+    isEnabled: boolean;
+  }>({ isEnabled: true });
 
   const agentChatProps = agentChat.getAgentChatComponentProps();
   const { agentChatId, appId, token } = agentChatProps;
@@ -821,6 +824,10 @@ export function AgentChat({
       }
       setResolvedAgentBlockId(
         agentBlockData.provider ? agentBlockId : undefined,
+      );
+
+      setShortTermMemory(
+        agentChatBlockData?.shortTermMemory ?? { isEnabled: true },
       );
 
       setAgentChatData({
@@ -852,6 +859,7 @@ export function AgentChat({
       chatContext={finalChatContext}
       agentChatData={agentChatData}
       noPersistency={noPersistency || !user.isAuthenticated}
+      shortTermMemory={shortTermMemory}
       {...props}
     />
   );
