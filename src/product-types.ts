@@ -94,6 +94,8 @@ export interface IClientsEntity {
   occupation?: string;
   /** City where the client resides  */
   cityOfResidence?: string;
+  /** The client's bank account number (מספר חשבון). Stored as string to preserve leading zeros and special formats.  */
+  accountNumber?: string;
   /** Last name of the first parent or guardian of the client  */
   parent1LastName?: string;
   /** Whether the client is a smoker (מעשן). Used for insurance risk assessment purposes.  */
@@ -132,6 +134,8 @@ export interface IClientsEntity {
   notes?: string;
   /** Client's last name  */
   last_name?: string;
+  /** The bank branch number where the client's account is located (מספר סניף). Stored as string to preserve leading zeros.  */
+  branchNumber?: string;
   /** Client's postal/zip code  */
   zipCode?: string;
   /** List of email addresses of office users assigned to this client. Each entry is an email string referencing a user with the 'office' role.  */
@@ -148,6 +152,8 @@ export interface IClientsEntity {
   american?: boolean;
   /** First name of the first parent or guardian of the client  */
   parent1FirstName?: string;
+  /** The name of the client's bank (שם הבנק). Free text field for the financial institution where the client holds their account.  */
+  bankName?: string;
   /** Client's employer name  */
   employer?: string;
   /** Full name of the first parent or guardian of the client  */

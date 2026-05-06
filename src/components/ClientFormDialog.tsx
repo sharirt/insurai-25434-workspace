@@ -62,6 +62,9 @@ interface ClientFormState {
   bornInUSA: boolean;
   smoker: boolean;
   taxCountry: string;
+  bankName: string;
+  branchNumber: string;
+  accountNumber: string;
 }
 
 const INITIAL_FORM_STATE: ClientFormState = {
@@ -106,6 +109,9 @@ const INITIAL_FORM_STATE: ClientFormState = {
   bornInUSA: false,
   smoker: false,
   taxCountry: "",
+  bankName: "",
+  branchNumber: "",
+  accountNumber: "",
 };
 
 export const ClientFormDialog = ({
@@ -179,6 +185,9 @@ export const ClientFormDialog = ({
         bornInUSA: client.bornInUSA || false,
         smoker: client.smoker || false,
         taxCountry: client.taxCountry || "",
+        bankName: client.bankName || "",
+        branchNumber: client.branchNumber || "",
+        accountNumber: client.accountNumber || "",
       });
       setSelectedOfficeEmails(client.assignedOfficeEmails ?? []);
       setIdDocumentationUrl(client.idDocumentationUrl || "");
@@ -276,6 +285,9 @@ export const ClientFormDialog = ({
       data.bornInUSA = formState.bornInUSA;
       data.smoker = formState.smoker;
       if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
+      if (formState.bankName.trim()) data.bankName = formState.bankName.trim();
+      if (formState.branchNumber.trim()) data.branchNumber = formState.branchNumber.trim();
+      if (formState.accountNumber.trim()) data.accountNumber = formState.accountNumber.trim();
       if (formState.relationship) data.relationship = formState.relationship;
       if (formState.clientStatus) data.clientStatus = formState.clientStatus;
 
@@ -883,6 +895,46 @@ export const ClientFormDialog = ({
                       />
                     </label>
                   )}
+                </div>
+
+                {/* פרטי בנק */}
+                <div className="rounded-md border border-border p-4 flex flex-col gap-3">
+                  <Label className="text-sm font-semibold">פרטי בנק</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="bankName">שם בנק</Label>
+                      <Input
+                        id="bankName"
+                        value={formState.bankName}
+                        onChange={(e) => handleChange("bankName", e.target.value)}
+                        placeholder="שם בנק"
+                        disabled={isLoading}
+                        dir="rtl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="branchNumber">מספר סניף</Label>
+                      <Input
+                        id="branchNumber"
+                        value={formState.branchNumber}
+                        onChange={(e) => handleChange("branchNumber", e.target.value)}
+                        placeholder="מספר סניף"
+                        disabled={isLoading}
+                        dir="rtl"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="accountNumber">מספר חשבון</Label>
+                      <Input
+                        id="accountNumber"
+                        value={formState.accountNumber}
+                        onChange={(e) => handleChange("accountNumber", e.target.value)}
+                        placeholder="מספר חשבון"
+                        disabled={isLoading}
+                        dir="rtl"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Row 10: Notes (textarea, full width) */}

@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClientsEntity, FundsEntity, UsersEntity } from "@/product-types";
 import { useEntityGetAll } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { useState, useMemo } from "react";
-import { User, Phone, Briefcase, FileText, Calendar, Home, Users, UserCheck, Globe, IdCard, ExternalLink } from "lucide-react";
+import { User, Phone, Briefcase, FileText, Calendar, Home, Users, UserCheck, Globe, IdCard, ExternalLink, Landmark } from "lucide-react";
 import { formatDate, formatCurrency } from "@/utils/FormatUtils";
 import { differenceInYears } from "date-fns";
 
@@ -240,6 +240,30 @@ export const ClientInfoCard = ({
                 <InfoField label="ח.פ / ע.מ" value={client.companyId} />
               </div>
             </div>
+
+            {/* Bank Details - only show if any bank field has a value */}
+            {!!(client.bankName || client.branchNumber || client.accountNumber) && (
+              <>
+                <Separator />
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Landmark className="text-muted-foreground" />
+                    <h3 className="text-sm font-semibold text-muted-foreground">פרטי בנק</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {client.bankName && (
+                      <InfoField label="שם בנק" value={client.bankName} />
+                    )}
+                    {client.branchNumber && (
+                      <InfoField label="מספר סניף" value={client.branchNumber} />
+                    )}
+                    {client.accountNumber && (
+                      <InfoField label="מספר חשבון" value={client.accountNumber} />
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Parents Info - only show if any parent data exists */}
             {hasParents && (

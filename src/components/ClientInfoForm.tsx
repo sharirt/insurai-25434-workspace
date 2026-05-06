@@ -570,6 +570,25 @@ export const ClientInfoForm = ({
         />
       </div>
 
+      {/* פרטי בנק */}
+      <div className="col-span-1 md:col-span-2 rounded-md border border-border p-4 flex flex-col gap-3">
+        <Label className="text-sm font-semibold">פרטי בנק</Label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="bankName" className="text-sm font-medium">שם בנק</Label>
+            <Input id="bankName" value={formData.bankName ?? ""} onChange={handleInputChange("bankName")} placeholder="שם בנק" dir="rtl" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="branchNumber" className="text-sm font-medium">מספר סניף</Label>
+            <Input id="branchNumber" value={formData.branchNumber ?? ""} onChange={handleInputChange("branchNumber")} placeholder="מספר סניף" dir="rtl" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="accountNumber" className="text-sm font-medium">מספר חשבון</Label>
+            <Input id="accountNumber" value={formData.accountNumber ?? ""} onChange={handleInputChange("accountNumber")} placeholder="מספר חשבון" dir="rtl" />
+          </div>
+        </div>
+      </div>
+
       {/* הערות */}
       <div className="col-span-1 space-y-1.5 md:col-span-2">
         <Label htmlFor="notes" className="text-sm font-medium">
