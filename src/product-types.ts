@@ -38,6 +38,31 @@ export const AgentsEntity = {
   instanceType: {} as IAgentsEntity,
 } as const;
 
+/**
+ * Stores beneficiary records linked to a specific client. Each beneficiary has personal details including name, national ID, relationship to the client, and their allocation percentage of the insurance/fund benefits.
+ */
+export interface IBeneficiariesEntity {
+  /** שם מלא - Calculated full name combining first name and last name.  */
+  fullName?: string;
+  /** תעודת זהות - The beneficiary's national identification number.  */
+  nationalId?: string;
+  /** Reference to the client this beneficiary belongs to. Links to the Clients table by client ID.  */
+  clientId?: string;
+  /** הקצאה באחוזים - The percentage of benefits allocated to this beneficiary. Should be a floating point number between 0 and 100.  */
+  allocationPercentage?: number;
+  /** קרבה - The relationship of the beneficiary to the client (e.g., spouse, child, parent).  */
+  relationship?: string;
+  /** שם פרטי - The beneficiary's first name.  */
+  firstName?: string;
+  /** שם משפחה - The beneficiary's last name.  */
+  lastName?: string;
+}
+
+export const BeneficiariesEntity = {
+  tableBlockId: "69fb290d4da763cfff33727c",
+  instanceType: {} as IBeneficiariesEntity,
+} as const;
+
 export type ClientsEntityClientStatusEnum = "פעיל" | "טרום יעוץ";
 
 export type ClientsEntityEmploymentEnum =

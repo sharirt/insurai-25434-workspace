@@ -123,7 +123,19 @@ export const DATA_TABLES: DataTableConfig[] = [
     label: "סוכנות",
     fields: [
       { value: "agencyName", label: "שם הסוכנות" },
-      { value: "agentNumber", label: "מספר סוכן סוכנות" },
+      { value: "agentNumber", label: "מספר סוכן" },
+    ],
+  },
+  {
+    value: "beneficiaries",
+    label: "מוטבים",
+    fields: [
+      { value: "firstName", label: "שם פרטי" },
+      { value: "lastName", label: "שם משפחה" },
+      { value: "fullName", label: "שם מלא" },
+      { value: "nationalId", label: "תעודת זהות" },
+      { value: "relationship", label: "קרבה" },
+      { value: "allocationPercentage", label: "הקצאה באחוזים" },
     ],
   },
   {
