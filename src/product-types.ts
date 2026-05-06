@@ -2,6 +2,8 @@
  * Stores agency-level information such as agency name, used as a data source in field mapping for insurance form templates.
  */
 export interface IAgencyEntity {
+  /** The agency's agent number, used as a data source in field mapping for insurance form templates.  */
+  agentNumber?: string;
   /** The name of the insurance agency  */
   agencyName?: string;
 }
