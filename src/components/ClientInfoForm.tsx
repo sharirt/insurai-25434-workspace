@@ -472,6 +472,20 @@ export const ClientInfoForm = ({
         </div>
       </div>
 
+      {/* מדינת מס */}
+      <div className="space-y-1.5">
+        <Label htmlFor="taxCountry" className="text-sm font-medium">
+          מדינת מס
+        </Label>
+        <Input
+          id="taxCountry"
+          value={formData.taxCountry ?? ""}
+          onChange={handleInputChange("taxCountry")}
+          placeholder="מדינת מס"
+          dir="rtl"
+        />
+      </div>
+
       {/* מספר TIN */}
       <div className="space-y-1.5">
         <Label htmlFor="tinNumber" className="text-sm font-medium">

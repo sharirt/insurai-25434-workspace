@@ -152,6 +152,8 @@ export interface IClientsEntity {
   employer?: string;
   /** Full name of the first parent or guardian of the client  */
   parent1Name?: string;
+  /** The client's country of tax residency (מדינת מס). Free text field used to indicate if the client is a tax resident of a foreign country.  */
+  taxCountry?: string;
   /** Client's employer company registration ID number  */
   companyId?: string;
   /** Computed full name combining the client's first name and last name  */
@@ -705,11 +707,6 @@ export const FormsManagerPage = {
 export const LoginPage = {
   pageBlockId: "69db99aa7d23f0bc9a294fb0",
   pageName: "Login",
-} as const;
-
-export const MeetingChatWorkspacePage = {
-  pageBlockId: "69fa3430661c6ae86794e662",
-  pageName: "MeetingChatWorkspace",
 } as const;
 
 export const MeetingDetailsPage = {
@@ -2207,8 +2204,4 @@ export const TestRoetoConnectionAction = {
 
   inputInstanceType: {} as ITestRoetoConnectionActionInput,
   outputInstanceType: {} as ITestRoetoConnectionActionOutput,
-} as const;
-
-export const MeetingAssistantAgentChat = {
-  agentChatId: "69fa33d5fb6f426ffb5e8464",
 } as const;

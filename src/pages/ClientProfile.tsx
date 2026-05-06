@@ -1,5 +1,5 @@
 import { useEntityGetAll, useEntityGetOne, useEntityDelete, useExecuteAction, useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, MeetingChatWorkspacePage, NewRequestWizardPage, ParseMeetingSummaryAndCreateAction, SyncSingleClientAction } from "@/product-types";
+import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, NewMeetingWizardPage, NewRequestWizardPage, ParseMeetingSummaryAndCreateAction, SyncSingleClientAction } from "@/product-types";
 import { useSearchParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -263,7 +263,7 @@ export default function ClientProfile() {
               סיכום פגישה
             </Button>
             <Button asChild>
-              <Link to={`${getPageUrl(MeetingChatWorkspacePage)}?clientId=${clientId}`}>
+              <Link to={getPageUrl(NewMeetingWizardPage, { id: clientId })}>
                 <Calendar className="ml-2 h-4 w-4" />
                 צור פגישה חדשה
               </Link>

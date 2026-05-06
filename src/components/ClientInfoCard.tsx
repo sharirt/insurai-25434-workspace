@@ -307,6 +307,9 @@ export const ClientInfoCard = ({
                   label="תושב ארצות הברית לצורכי מס"
                   value={client.americanForTax ? "כן" : "לא"}
                 />
+                {client.taxCountry && (
+                  <InfoField label="מדינת מס" value={client.taxCountry} />
+                )}
                 {client.smoker != null && (
                   <InfoField
                     label="מעשן"

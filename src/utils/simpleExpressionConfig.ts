@@ -18,6 +18,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "אזרח ארה״ב", expression: "clients.american === true" },
   { label: "יליד ארה״ב", expression: "clients.bornInUSA === true" },
   { label: "תושב ארה״ב לצורכי מס", expression: "clients.americanForTax === true" },
+  { label: "תושב מדינה זרה לצורכי מס", expression: "clients.taxCountry !== ''" },
   { label: "לקוח פעיל", expression: "clients.clientStatus === 'פעיל'" },
   { label: "לקוח טרום יעוץ", expression: "clients.clientStatus === 'טרום יעוץ'" },
   { label: "זכר", expression: "clients.gender === 'זכר'" },

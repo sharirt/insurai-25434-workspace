@@ -61,6 +61,7 @@ interface ClientFormState {
   englishStreet: string;
   bornInUSA: boolean;
   smoker: boolean;
+  taxCountry: string;
 }
 
 const INITIAL_FORM_STATE: ClientFormState = {
@@ -104,6 +105,7 @@ const INITIAL_FORM_STATE: ClientFormState = {
   englishStreet: "",
   bornInUSA: false,
   smoker: false,
+  taxCountry: "",
 };
 
 export const ClientFormDialog = ({
@@ -176,6 +178,7 @@ export const ClientFormDialog = ({
         englishStreet: client.englishStreet || "",
         bornInUSA: client.bornInUSA || false,
         smoker: client.smoker || false,
+        taxCountry: client.taxCountry || "",
       });
       setSelectedOfficeEmails(client.assignedOfficeEmails ?? []);
       setIdDocumentationUrl(client.idDocumentationUrl || "");
@@ -272,6 +275,7 @@ export const ClientFormDialog = ({
       if (formState.englishStreet.trim()) data.englishStreet = formState.englishStreet.trim();
       data.bornInUSA = formState.bornInUSA;
       data.smoker = formState.smoker;
+      if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
       if (formState.relationship) data.relationship = formState.relationship;
       if (formState.clientStatus) data.clientStatus = formState.clientStatus;
 
@@ -795,6 +799,17 @@ export const ClientFormDialog = ({
                     disabled={isLoading}
                   />
                   <Label htmlFor="smoker" className="cursor-pointer">מעשן</Label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="taxCountry">מדינת מס</Label>
+                  <Input
+                    id="taxCountry"
+                    value={formState.taxCountry}
+                    onChange={(e) => handleChange("taxCountry", e.target.value)}
+                    placeholder="הזן מדינת מס"
+                    disabled={isLoading}
+                  />
                 </div>
 
                 <div className="space-y-2">
