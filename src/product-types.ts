@@ -14,6 +14,23 @@ export const AgencyEntity = {
 } as const;
 
 /**
+ * Lookup table for agency codes, mapping each code to a provider and optional description. Used to associate insurance agencies with their codes per provider for form processing and reporting.
+ */
+export interface IAgencyCodesEntity {
+  /** Foreign key reference to the Providers table — the provider this agency code belongs to.  */
+  providerId?: string;
+  /** The agent code identifier for this agency code record.  */
+  agentCode?: string;
+  /** Foreign key reference to the RequestSchemes table — the request type this agency code applies to.  */
+  requestTypeId?: string;
+}
+
+export const AgencyCodesEntity = {
+  tableBlockId: "69fca2cd49207e2070d7fb2e",
+  instanceType: {} as IAgencyCodesEntity,
+} as const;
+
+/**
  * Stores insurance agent information including agent names and identification numbers for insurance form processing
  */
 export interface IAgentsEntity {
@@ -709,6 +726,11 @@ export interface IUsersEntity {
 export const UsersEntity = {
   tableBlockId: "68760b42d4ce152c91ce0e1c",
   instanceType: {} as IUsersEntity,
+} as const;
+
+export const AgencyManagerPage = {
+  pageBlockId: "69fca46678c982d3b358127c",
+  pageName: "AgencyManager",
 } as const;
 
 export const AgentDashboard2Page = {

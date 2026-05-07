@@ -31,6 +31,7 @@ const navigationItems = [
   { title: "ניהול בקשות", url: "/RequestsManager", icon: ClipboardList },
   { title: "ניהול טפסים", url: "/FormsManager", icon: FileText },
   { title: "אימיילים ליצרנים", url: "/ProviderEmailsManager", icon: Mail },
+  { title: "ניהול סוכנות", url: "/AgencyManager", icon: Building2 },
   { title: "מנהל משרד", url: "/OfficeManager", icon: Briefcase },
   { title: "הפרופיל שלי", url: getPageUrl(AgentProfilePage), icon: User },
 ];
