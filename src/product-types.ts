@@ -113,6 +113,8 @@ export interface IClientsEntity {
   englishCity?: string;
   /** Client's apartment number (מספר דירה) within their building  */
   apartmentNumber?: string;
+  /** The client's country of birth in English (free text). Used for forms and documents that require English-language birth country information.  */
+  birthCountryEnglish?: string;
   /** Client's national identification number, 9 characters  */
   national_id?: string;
   /** Client's last name in English (שם משפחה אנגלית)  */
@@ -171,6 +173,8 @@ export interface IClientsEntity {
   assignedOfficeEmails?: string[];
   /** Client's city of birth (עיר לידה)  */
   birthCity?: string;
+  /** The client's city of birth in English (free text). Used for forms and documents that require English-language birth city information.  */
+  birthCityEnglish?: string;
   /** Whether the client is a US resident for tax purposes (תושב ארצות הברית לצורכי מס)  */
   americanForTax?: boolean;
   /** National ID number of the first parent or guardian of the client  */
