@@ -38,6 +38,7 @@ export interface PendingRequest {
   /** Set when `isTotalTransfer === false`. */
   transferAmount?: string;
   standing?: string;
+  accountType?: string;
 }
 
 interface UseNewMeetingWizardProps {
@@ -201,6 +202,7 @@ export function useNewMeetingWizard({
             transferAmount:
               req.isTotalTransfer === false ? req.transferAmount : undefined,
             standing: req.standing,
+            accountType: req.accountType || undefined,
           },
         });
         createdRequestIds.push(createdReq.id);

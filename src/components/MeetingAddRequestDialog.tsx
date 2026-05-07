@@ -82,6 +82,7 @@ export const MeetingAddRequestDialog = ({
   const [requestTypeSearch, setRequestTypeSearch] = useState("");
   const [providerSearch, setProviderSearch] = useState("");
   const [standing, setStanding] = useState("");
+  const [accountType, setAccountType] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
 
   const selectedScheme = useMemo(
@@ -132,6 +133,7 @@ export const MeetingAddRequestDialog = ({
       setRequestTypeSearch("");
       setProviderSearch("");
       setStanding("");
+      setAccountType("");
       setTrackSearch("");
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
@@ -143,6 +145,7 @@ export const MeetingAddRequestDialog = ({
       setTransferType(editingRequest.transferType || "צבירה והפקדות");
       setKerenName(editingRequest.kerenName ?? "");
       setStanding(editingRequest.standing ?? "");
+      setAccountType(editingRequest.accountType ?? "");
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -221,6 +224,7 @@ export const MeetingAddRequestDialog = ({
       isTotalTransfer,
       transferAmount: isTotalTransfer ? undefined : transferAmount.trim(),
       standing: standing || undefined,
+      accountType: accountType || undefined,
     };
 
     onAdd(newRequest);
@@ -246,6 +250,7 @@ export const MeetingAddRequestDialog = ({
     transferAmount,
     isTotalTransfer,
     standing,
+    accountType,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -480,6 +485,21 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="עצמאי">עצמאי</SelectItem>
                   <SelectItem value="שכיר בעל שליטה">שכיר בעל שליטה</SelectItem>
                   <SelectItem value="עצמאי באמצעות מעסיק">עצמאי באמצעות מעסיק</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* סוג חשבון */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">סוג חשבון</Label>
+              <Select value={accountType || "-"} onValueChange={(val) => setAccountType(val === "-" ? "" : val)} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="פרטי">פרטי</SelectItem>
+                  <SelectItem value="עסקי">עסקי</SelectItem>
                 </SelectContent>
               </Select>
             </div>

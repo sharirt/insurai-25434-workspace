@@ -471,6 +471,8 @@ export const ProvidersEntity = {
   instanceType: {} as IProvidersEntity,
 } as const;
 
+export type RequestsEntityAccountTypeEnum = "פרטי" | "עסקי";
+
 export type RequestsEntityKerenNameEnum = "" | "כללי" | "אומגה";
 
 export type RequestsEntityStatusEnum =
@@ -519,6 +521,8 @@ export type RequestsEntityChoiceDurationEnum = "" | "6" | "12" | "24";
  * Stores insurance request records including request type, associated agent, client, provider, processing status, scheme changes, and links to processed forms for tracking request lifecycle
  */
 export interface IRequestsEntity {
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: RequestsEntityAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -1060,6 +1064,8 @@ export interface IAutoProcessNewRequestActionInput {
   requestId: string;
 }
 
+export type AutoProcessNewRequestActionOutputAccountTypeEnum = "פרטי" | "עסקי";
+
 export type AutoProcessNewRequestActionOutputKerenNameEnum =
   | ""
   | "כללי"
@@ -1129,6 +1135,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -1616,6 +1624,8 @@ export interface IProcessRequestFormsActionInput {
   requestId: string;
 }
 
+export type ProcessRequestFormsActionOutputAccountTypeEnum = "פרטי" | "עסקי";
+
 export type ProcessRequestFormsActionOutputKerenNameEnum =
   | ""
   | "כללי"
@@ -1685,6 +1695,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: ProcessRequestFormsActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -1865,6 +1877,10 @@ export interface ISendCustomProviderEmailActionInput {
   recipientEmail: string;
 }
 
+export type SendCustomProviderEmailActionOutputAccountTypeEnum =
+  | "פרטי"
+  | "עסקי";
+
 export type SendCustomProviderEmailActionOutputKerenNameEnum =
   | ""
   | "כללי"
@@ -1934,6 +1950,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: SendCustomProviderEmailActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
