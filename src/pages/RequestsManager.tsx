@@ -536,6 +536,19 @@ function RequestDetail({ requestId }: { requestId: string }) {
                   </div>
                 </div>
               )}
+
+              {/* Charge Day */}
+              {request.chargeDay && request.chargeDay !== "" && (
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <Calendar className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">מועד חיוב</p>
+                    <p className="font-medium">יום {request.chargeDay}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -83,6 +83,7 @@ export const MeetingAddRequestDialog = ({
   const [providerSearch, setProviderSearch] = useState("");
   const [standing, setStanding] = useState("");
   const [accountType, setAccountType] = useState("");
+  const [chargeDay, setChargeDay] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
 
   const selectedScheme = useMemo(
@@ -134,6 +135,7 @@ export const MeetingAddRequestDialog = ({
       setProviderSearch("");
       setStanding("");
       setAccountType("");
+      setChargeDay("");
       setTrackSearch("");
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
@@ -146,6 +148,7 @@ export const MeetingAddRequestDialog = ({
       setKerenName(editingRequest.kerenName ?? "");
       setStanding(editingRequest.standing ?? "");
       setAccountType(editingRequest.accountType ?? "");
+      setChargeDay(editingRequest.chargeDay ?? "");
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -225,6 +228,7 @@ export const MeetingAddRequestDialog = ({
       transferAmount: isTotalTransfer ? undefined : transferAmount.trim(),
       standing: standing || undefined,
       accountType: accountType || undefined,
+      chargeDay: chargeDay || undefined,
     };
 
     onAdd(newRequest);
@@ -251,6 +255,7 @@ export const MeetingAddRequestDialog = ({
     isTotalTransfer,
     standing,
     accountType,
+    chargeDay,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -500,6 +505,25 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="-">ללא</SelectItem>
                   <SelectItem value="פרטי">פרטי</SelectItem>
                   <SelectItem value="עסקי">עסקי</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* מועד חיוב */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">מועד חיוב</Label>
+              <Select value={chargeDay || "-"} onValueChange={(val) => setChargeDay(val === "-" ? "" : val)} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="1">1</SelectItem>
+                  <SelectItem value="5">5</SelectItem>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="15">15</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
                 </SelectContent>
               </Select>
             </div>

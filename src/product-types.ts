@@ -486,6 +486,8 @@ export type RequestsEntityStatusEnum =
   | "הושלם"
   | "נדחה";
 
+export type RequestsEntityChargeDayEnum = "1" | "5" | "10" | "15" | "20" | "25";
+
 /**
  * undefined
  */
@@ -529,6 +531,8 @@ export interface IRequestsEntity {
   kerenName?: RequestsEntityKerenNameEnum;
   /** Current processing status of the request  */
   status?: RequestsEntityStatusEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: RequestsEntityChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
   /** Array of processed form documents with their URL links  */
@@ -1082,6 +1086,14 @@ export type AutoProcessNewRequestActionOutputStatusEnum =
   | "הושלם"
   | "נדחה";
 
+export type AutoProcessNewRequestActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
+
 /**
  * undefined
  */
@@ -1143,6 +1155,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   kerenName?: AutoProcessNewRequestActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: AutoProcessNewRequestActionOutputStatusEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: AutoProcessNewRequestActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
   /** Array of processed form documents with their URL links  */
@@ -1642,6 +1656,14 @@ export type ProcessRequestFormsActionOutputStatusEnum =
   | "הושלם"
   | "נדחה";
 
+export type ProcessRequestFormsActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
+
 /**
  * undefined
  */
@@ -1703,6 +1725,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   kerenName?: ProcessRequestFormsActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: ProcessRequestFormsActionOutputStatusEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: ProcessRequestFormsActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
   /** Array of processed form documents with their URL links  */
@@ -1897,6 +1921,14 @@ export type SendCustomProviderEmailActionOutputStatusEnum =
   | "הושלם"
   | "נדחה";
 
+export type SendCustomProviderEmailActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
+
 /**
  * undefined
  */
@@ -1958,6 +1990,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   kerenName?: SendCustomProviderEmailActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: SendCustomProviderEmailActionOutputStatusEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: SendCustomProviderEmailActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
   /** Array of processed form documents with their URL links  */

@@ -149,6 +149,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "tracks", label: "מסלולים" },
       { value: "transferAmount", label: "סכום העברה" },
       { value: "accountType", label: "סוג חשבון" },
+      { value: "chargeDay", label: "מועד חיוב" },
     ],
   },
 ];
