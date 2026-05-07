@@ -129,6 +129,8 @@ export interface IClientsEntity {
   accountNumber?: string;
   /** Last name of the first parent or guardian of the client  */
   parent1LastName?: string;
+  /** The client's bank code (קוד בנק). Numeric or alphanumeric code identifying the client's bank.  */
+  bankName?: string;
   /** Whether the client is a smoker (מעשן). Used for insurance risk assessment purposes.  */
   smoker?: boolean;
   /** Client's employment type - whether they are self-employed or an employee  */
@@ -185,8 +187,6 @@ export interface IClientsEntity {
   american?: boolean;
   /** First name of the first parent or guardian of the client  */
   parent1FirstName?: string;
-  /** The name of the client's bank (שם הבנק). Free text field for the financial institution where the client holds their account.  */
-  bankName?: string;
   /** Client's employer name  */
   employer?: string;
   /** Full name of the first parent or guardian of the client  */

@@ -902,12 +902,12 @@ export const ClientFormDialog = ({
                   <Label className="text-sm font-semibold">פרטי בנק</Label>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="bankName">שם בנק</Label>
+                      <Label htmlFor="bankName">קוד בנק</Label>
                       <Input
                         id="bankName"
                         value={formState.bankName}
                         onChange={(e) => handleChange("bankName", e.target.value)}
-                        placeholder="שם בנק"
+                        placeholder="קוד בנק"
                         disabled={isLoading}
                         dir="rtl"
                       />

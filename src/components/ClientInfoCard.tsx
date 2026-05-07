@@ -252,7 +252,7 @@ export const ClientInfoCard = ({
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {client.bankName && (
-                      <InfoField label="שם בנק" value={client.bankName} />
+                      <InfoField label="קוד בנק" value={client.bankName} />
                     )}
                     {client.branchNumber && (
                       <InfoField label="מספר סניף" value={client.branchNumber} />
