@@ -136,6 +136,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "nationalId", label: "תעודת זהות" },
       { value: "relationship", label: "קרבה" },
       { value: "allocationPercentage", label: "הקצאה באחוזים" },
+      { value: "birthDate", label: "תאריך לידה" },
     ],
   },
   {

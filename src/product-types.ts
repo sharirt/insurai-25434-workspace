@@ -52,6 +52,8 @@ export interface IBeneficiariesEntity {
   allocationPercentage?: number;
   /** קרבה - The relationship of the beneficiary to the client (e.g., spouse, child, parent).  */
   relationship?: string;
+  /** תאריך לידה - The beneficiary's date of birth.. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  birthDate?: string;
   /** שם פרטי - The beneficiary's first name.  */
   firstName?: string;
   /** שם משפחה - The beneficiary's last name.  */
