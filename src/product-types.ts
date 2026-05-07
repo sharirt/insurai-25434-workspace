@@ -2,8 +2,6 @@
  * Stores agency-level information such as agency name, used as a data source in field mapping for insurance form templates.
  */
 export interface IAgencyEntity {
-  /** The agency's agent number, used as a data source in field mapping for insurance form templates.  */
-  agentNumber?: string;
   /** The name of the insurance agency  */
   agencyName?: string;
 }
@@ -1090,130 +1088,7 @@ export interface IAutoProcessNewRequestActionInput {
   requestId: string;
 }
 
-export type AutoProcessNewRequestActionOutputAccountTypeEnum = "פרטי" | "עסקי";
-
-export type AutoProcessNewRequestActionOutputKerenNameEnum =
-  | ""
-  | "כללי"
-  | "אומגה";
-
-export type AutoProcessNewRequestActionOutputStatusEnum =
-  | "מעבד"
-  | "מוכן לשליחה ללקוח"
-  | "נשלח ללקוח"
-  | "מוכן לשליחה לסוכן"
-  | "נשלח לסוכן"
-  | "מוכן לשליחה ליצרן"
-  | "נשלח ליצרן"
-  | "הושלם"
-  | "נדחה";
-
-export type AutoProcessNewRequestActionOutputChargeDayEnum =
-  | "1"
-  | "5"
-  | "10"
-  | "15"
-  | "20"
-  | "25";
-
-/**
- * undefined
- */
-export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputFormsItemObject {
-  /** Reference to the form template used  */
-  formId?: string;
-  /** URL link to the processed/filled form PDF  */
-  url: string;
-  /** ISO timestamp when the form was processed  */
-  processedAt?: string;
-}
-
-export type AutoProcessNewRequestActionOutputTransferTypeEnum =
-  | ""
-  | "צבירה והפקדות"
-  | "צבירה בלבד"
-  | "הפקדות בלבד";
-
-/**
- * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
- */
-export interface IAutoProcessNewRequestActionOutputTracksObject {}
-
-export type AutoProcessNewRequestActionOutputStandingEnum =
-  | "שכיר"
-  | "עצמאי"
-  | "שכיר בעל שליטה"
-  | "עצמאי באמצעות מעסיק";
-
-export type AutoProcessNewRequestActionOutputChoiceDurationEnum =
-  | ""
-  | "6"
-  | "12"
-  | "24";
-
-/**
- * The item updated in the table, keys are the column names, values are the column values
- */
-export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputItemsItemObject {
-  /** The id of the item to update. Must be an existing id in the table.  */
-  id?: string;
-  /** Item created at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  createdAt?: string;
-  /** Item updated at. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  updatedAt?: string;
-  /** Item created by user id  */
-  createdBy?: string;
-  /** Item updated by user id  */
-  updatedBy?: string;
-  /** Item updated by agent id  */
-  updatedByAgentId?: string;
-  /** Item tenant id  */
-  tenantId?: string;
-  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
-  accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
-  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
-  isTotalTransfer?: boolean;
-  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
-  kerenName?: AutoProcessNewRequestActionOutputKerenNameEnum;
-  /** Current processing status of the request  */
-  status?: AutoProcessNewRequestActionOutputStatusEnum;
-  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
-  chargeDay?: AutoProcessNewRequestActionOutputChargeDayEnum;
-  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
-  transferAmount?: string;
-  /** Array of processed form documents with their URL links  */
-  forms?: IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputFormsItemObject[];
-  /** Reference to the client submitting this request from Clients table  */
-  clientId?: string;
-  /** Reference to the healthcare provider associated with this request from Providers table  */
-  providerId?: string;
-  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
-  transferType?: AutoProcessNewRequestActionOutputTransferTypeEnum;
-  /** Reference to the insurance agent handling this request from Agents table  */
-  agentId?: string;
-  /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
-  isStandalone?: boolean;
-  /** Reference to the request scheme type from RequestSchemes table  */
-  requestTypeId?: string;
-  /** Management fee (דמי ניהול) associated with this insurance request, representing the fee percentage or amount charged for managing the fund  */
-  managementFee?: number;
-  /** Reference to a specific insurance fund from the Funds table associated with this request  */
-  fundId?: string;
-  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
-  tracks?: IAutoProcessNewRequestActionOutputTracksObject;
-  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
-  standing?: AutoProcessNewRequestActionOutputStandingEnum;
-  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
-  choiceDuration?: AutoProcessNewRequestActionOutputChoiceDurationEnum;
-}
-
-/**
- * AutoProcessNewRequest output payload
- */
-export interface IAutoProcessNewRequestActionOutput {
-  /** The items updated in the table  */
-  items: IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputItemsItemObject[];
-}
+export type AutoProcessNewRequestActionOutput = any;
 
 /**
  * AutoProcessNewRequestAction

@@ -21,12 +21,10 @@ export const AgencyDetailsCard = () => {
   const agency = agencies?.[0];
 
   const [agencyName, setAgencyName] = useState("");
-  const [agentNumber, setAgentNumber] = useState("");
 
   useEffect(() => {
     if (agency) {
       setAgencyName(agency.agencyName || "");
-      setAgentNumber(agency.agentNumber || "");
     }
   }, [agency]);
 
@@ -35,11 +33,11 @@ export const AgencyDetailsCard = () => {
       if (agency) {
         await updateFunction({
           id: agency.id,
-          data: { agencyName, agentNumber },
+          data: { agencyName },
         });
       } else {
         await createFunction({
-          data: { agencyName, agentNumber },
+          data: { agencyName },
         });
       }
       toast.success("פרטי הסוכנות נשמרו בהצלחה");
@@ -58,7 +56,6 @@ export const AgencyDetailsCard = () => {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
         </CardContent>
       </Card>
     );
@@ -70,25 +67,14 @@ export const AgencyDetailsCard = () => {
         <CardTitle>פרטי הסוכנות</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="agencyName">שם הסוכנות</Label>
-            <Input
-              id="agencyName"
-              value={agencyName}
-              onChange={(e) => setAgencyName(e.target.value)}
-              placeholder="הזן שם סוכנות"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="agentNumber">מספר סוכן</Label>
-            <Input
-              id="agentNumber"
-              value={agentNumber}
-              onChange={(e) => setAgentNumber(e.target.value)}
-              placeholder="הזן מספר סוכן"
-            />
-          </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="agencyName">שם הסוכנות</Label>
+          <Input
+            id="agencyName"
+            value={agencyName}
+            onChange={(e) => setAgencyName(e.target.value)}
+            placeholder="הזן שם סוכנות"
+          />
         </div>
         <div className="flex justify-start">
           <Button onClick={handleSave} disabled={isSaving}>
