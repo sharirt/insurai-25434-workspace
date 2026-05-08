@@ -111,7 +111,8 @@ export const PendingRequestCard = ({
               tracks: "מסלולים",
             };
             return (
-              <div className="flex flex-wrap gap-1 mt-2">
+              <div className="flex flex-wrap items-center gap-1 mt-2">
+                <span className="text-xs text-amber-600">פרטים חסרים:</span>
                 {Object.keys(request.missingFields!).map((key) => (
                   <span key={key} className="bg-amber-50 text-amber-700 text-xs px-2 py-0.5 rounded-full">
                     {fieldLabels[key] || key}
