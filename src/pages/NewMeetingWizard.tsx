@@ -16,7 +16,9 @@ import { ClientProfilePage, ClientsEntity } from "@/product-types";
 import type { IClientsEntity } from "@/product-types";
 import {
   useEntityGetOne,
+  useEntityGetAll,
   useEntityUpdate,
+  useEntityCreate,
 } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { toast } from "sonner";
 import { useNewMeetingWizard } from "@/hooks/useNewMeetingWizard";
@@ -26,6 +28,11 @@ import { MeetingStep1Content } from "@/components/MeetingStep1Content";
 import { MeetingStep3Content } from "@/components/MeetingStep3Content";
 import { MeetingAddRequestDialog } from "@/components/MeetingAddRequestDialog";
 import { ClientInfoForm } from "@/components/ClientInfoForm";
+import { ClientSelectorCombobox } from "@/components/ClientSelectorCombobox";
+import {
+  mapClientToFormData,
+  createEmptyClientFormData,
+} from "@/utils/ClientFormDataMapper";
 
 export default function NewMeetingWizard() {
   const [searchParams] = useSearchParams();
@@ -44,26 +51,39 @@ export default function NewMeetingWizard() {
     }
   }, [fromSummary]);
 
-  const clientId =
+  const initialClientId =
     fromSummary && summaryData?.clientId
       ? String(summaryData.clientId)
       : searchParams.get("id") || "";
+
+  // Selected client ID state - can change when user picks from combobox
+  const [selectedClientId, setSelectedClientId] = useState(initialClientId);
 
   const navigateToClientProfile = useCallback(() => {
     if (fromSummary && !searchParams.get("id")) {
       navigate("/ClientsManager");
     } else {
-      navigate(getPageUrl(ClientProfilePage, { id: clientId }));
+      navigate(
+        getPageUrl(ClientProfilePage, {
+          id: selectedClientId || initialClientId,
+        })
+      );
     }
-  }, [navigate, clientId, fromSummary, searchParams]);
+  }, [navigate, selectedClientId, initialClientId, fromSummary, searchParams]);
 
-  // Fetch client data for Step 2
+  // Fetch single client data (for initial load when clientId is known)
   const { data: clientData, isLoading: isLoadingClient } = useEntityGetOne(
     ClientsEntity,
-    { id: clientId },
-    { enabled: !!clientId }
+    { id: initialClientId },
+    { enabled: !!initialClientId }
   );
+
+  // Fetch all clients for the combobox
+  const { data: allClients, isLoading: isLoadingAllClients } =
+    useEntityGetAll(ClientsEntity);
+
   const { updateFunction: updateClient } = useEntityUpdate(ClientsEntity);
+  const { createFunction: createClient } = useEntityCreate(ClientsEntity);
 
   // Local form state for client info (Step 2)
   const [clientFormData, setClientFormData] = useState<
@@ -73,45 +93,24 @@ export default function NewMeetingWizard() {
 
   // Add Request dialog state
   const [isAddRequestDialogOpen, setIsAddRequestDialogOpen] = useState(false);
-  const [editingRequest, setEditingRequest] = useState<PendingRequest | null>(null);
+  const [editingRequest, setEditingRequest] = useState<PendingRequest | null>(
+    null
+  );
 
-  // Populate form data when client data loads
+  // Populate form data when client data loads (initial load)
   useEffect(() => {
     if (clientData) {
-      const baseData: Partial<IClientsEntity> = {
-        first_name: clientData.first_name ?? "",
-        last_name: clientData.last_name ?? "",
-        national_id: clientData.national_id ?? "",
-        idIssueDate: clientData.idIssueDate ?? "",
-        dateOfBirth: clientData.dateOfBirth ?? "",
-        gender: clientData.gender,
-        relationship: clientData.relationship,
-        phone_number: clientData.phone_number ?? "",
-        email: clientData.email ?? "",
-        cityOfResidence: clientData.cityOfResidence ?? "",
-        address: clientData.address ?? "",
-        apartmentNumber: clientData.apartmentNumber ?? "",
-        zipCode: clientData.zipCode ?? "",
-        employment: clientData.employment,
-        occupation: clientData.occupation ?? "",
-        employer: clientData.employer ?? "",
-        companyId: clientData.companyId ?? "",
-        american: clientData.american ?? false,
-        americanForTax: clientData.americanForTax ?? false,
-        tinNumber: clientData.tinNumber ?? "",
-        englishFirstName: clientData.englishFirstName ?? "",
-        englishLastName: clientData.englishLastName ?? "",
-        englishCity: clientData.englishCity ?? "",
-        englishCountry: clientData.englishCountry ?? "",
-        clientStatus: clientData.clientStatus,
-        notes: clientData.notes ?? "",
-      };
+      const baseData = mapClientToFormData(clientData);
 
       // Merge clientUpdates from summary data if present
       if (summaryData?.clientUpdates) {
         const updates = summaryData.clientUpdates;
         for (const key of Object.keys(updates)) {
-          if (updates[key] !== undefined && updates[key] !== null && updates[key] !== "") {
+          if (
+            updates[key] !== undefined &&
+            updates[key] !== null &&
+            updates[key] !== ""
+          ) {
             (baseData as any)[key] = updates[key];
           }
         }
@@ -120,6 +119,19 @@ export default function NewMeetingWizard() {
       setClientFormData(baseData);
     }
   }, [clientData, summaryData]);
+
+  // Handle client selection from combobox
+  const handleSelectClient = (id: string | null) => {
+    setSelectedClientId(id ?? "");
+    if (id && allClients) {
+      const client = allClients.find((c) => c.id === id);
+      if (client) {
+        setClientFormData(mapClientToFormData(client));
+      }
+    } else if (!id) {
+      setClientFormData(createEmptyClientFormData());
+    }
+  };
 
   const handleClientFieldChange = useCallback(
     (field: keyof IClientsEntity, value: string | boolean) => {
@@ -155,7 +167,7 @@ export default function NewMeetingWizard() {
     handleSubmit,
     isSubmitting,
   } = useNewMeetingWizard({
-    clientId,
+    clientId: selectedClientId,
     onSuccess: navigateToClientProfile,
     initialData: summaryData
       ? {
@@ -166,15 +178,24 @@ export default function NewMeetingWizard() {
       : undefined,
   });
 
-  // Handle Step 2 Next: save client data then proceed
+  // Handle Step 2 Next: save/create client data then proceed
   const handleStep2Next = useCallback(async () => {
     setIsSavingClient(true);
     try {
-      await updateClient({
-        id: clientId,
-        data: clientFormData,
-      });
-      handleNext(); // move to step 3
+      if (selectedClientId) {
+        // Update existing client
+        await updateClient({
+          id: selectedClientId,
+          data: clientFormData,
+        });
+      } else {
+        // Create new client
+        const newClient = await createClient({
+          data: clientFormData,
+        });
+        setSelectedClientId(newClient.id);
+      }
+      handleNext();
     } catch (err: any) {
       toast.error(err?.message || "שגיאה בשמירת פרטי הלקוח");
       // Still allow proceeding even on error
@@ -182,7 +203,13 @@ export default function NewMeetingWizard() {
     } finally {
       setIsSavingClient(false);
     }
-  }, [clientId, clientFormData, updateClient, handleNext]);
+  }, [
+    selectedClientId,
+    clientFormData,
+    updateClient,
+    createClient,
+    handleNext,
+  ]);
 
   const stepTitles: Record<1 | 2 | 3, string> = {
     1: "פגישה חדשה - שלב 1 מתוך 3",
@@ -276,21 +303,29 @@ export default function NewMeetingWizard() {
                 sortedAgents={sortedAgents}
               />
             ) : step === 2 ? (
-              isLoadingClient ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div key={i} className="space-y-1.5">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-10 w-full" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <ClientInfoForm
-                  formData={clientFormData}
-                  onFieldChange={handleClientFieldChange}
+              <div className="flex flex-col gap-6">
+                <ClientSelectorCombobox
+                  clients={allClients ?? []}
+                  isLoading={isLoadingAllClients}
+                  selectedClientId={selectedClientId}
+                  onSelectClient={handleSelectClient}
                 />
-              )
+                {isLoadingClient && !!initialClientId ? (
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {Array.from({ length: 12 }).map((_, i) => (
+                      <div key={i} className="flex flex-col gap-1.5">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-10 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <ClientInfoForm
+                    formData={clientFormData}
+                    onFieldChange={handleClientFieldChange}
+                  />
+                )}
+              </div>
             ) : (
               <MeetingStep3Content
                 pendingRequests={pendingRequests}
@@ -314,10 +349,7 @@ export default function NewMeetingWizard() {
                 >
                   ביטול
                 </Button>
-                <Button
-                  onClick={handleNext}
-                  disabled={!isStep1Valid}
-                >
+                <Button onClick={handleNext} disabled={!isStep1Valid}>
                   הבא
                 </Button>
               </>
@@ -341,7 +373,7 @@ export default function NewMeetingWizard() {
                 </div>
                 <Button
                   onClick={handleStep2Next}
-                  disabled={isSavingClient || isLoadingClient}
+                  disabled={isSavingClient || (isLoadingClient && !!initialClientId)}
                 >
                   {isSavingClient ? (
                     <>
