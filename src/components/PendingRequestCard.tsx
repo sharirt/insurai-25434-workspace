@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Pencil } from "lucide-react";
+import { X, Pencil, Quote, AlertTriangle } from "lucide-react";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import { getFieldLabel } from "@/utils/fieldTranslations";
 import { formatCurrency } from "@/utils/FormatUtils";
@@ -42,6 +42,42 @@ export const PendingRequestCard = ({
             </h4>
             <Badge variant="secondary">{request.providerName}</Badge>
           </div>
+          {request.sourceQuote && (
+            <div className="border-r-2 border-accent bg-muted/40 rounded px-2.5 py-1.5 mt-2">
+              <div className="flex items-center gap-1 mb-0.5">
+                <Quote className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">ציטוט:</span>
+              </div>
+              <p className="text-sm italic text-muted-foreground">{request.sourceQuote}</p>
+            </div>
+          )}
+          {request.missingFields && Object.keys(request.missingFields).length > 0 && (() => {
+            const fieldLabels: Record<string, string> = {
+              providerId: "יצרן",
+              requestTypeId: "סוג בקשה",
+              managementFee: "דמי ניהול",
+              transferType: "סוג העברה",
+              choiceDuration: "תקופת בחירה",
+              kerenName: "שם קרן",
+              transferAmount: "יתרת העברה",
+              tracks: "מסלולים",
+            };
+            return (
+              <div className="bg-amber-50 border border-amber-200 rounded-md p-2.5 mt-2">
+                <div className="flex items-center gap-1 mb-1">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                  <span className="text-xs font-semibold text-amber-800">שדות חסרים</span>
+                </div>
+                <ul className="flex flex-col gap-0.5">
+                  {Object.entries(request.missingFields!).map(([key, explanation]) => (
+                    <li key={key} className="text-xs text-amber-800">
+                      <span className="font-medium">{fieldLabels[key] || key}</span>: {explanation}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
           {request.fundName && (
             <p className="text-sm text-muted-foreground mt-1 truncate">
               {request.fundName}

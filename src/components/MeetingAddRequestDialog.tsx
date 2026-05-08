@@ -22,7 +22,7 @@ import { FundCombobox } from "@/components/FundCombobox";
 import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
-import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search } from "lucide-react";
+import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle } from "lucide-react";
 
 interface MeetingAddRequestDialogProps {
   open: boolean;
@@ -67,6 +67,17 @@ export const MeetingAddRequestDialog = ({
   editingRequest,
 }: MeetingAddRequestDialogProps) => {
   const isEditMode = !!editingRequest;
+  const missingFields = editingRequest?.missingFields;
+
+  const MissingFieldHint = ({ fieldKey }: { fieldKey: string }) => {
+    if (!missingFields?.[fieldKey]) return null;
+    return (
+      <div className="flex items-center gap-1 mt-1">
+        <AlertTriangle className="w-3 h-3 text-amber-600 flex-shrink-0" />
+        <span className="text-xs text-amber-600">{missingFields[fieldKey]}</span>
+      </div>
+    );
+  };
   const [selectedFundId, setSelectedFundId] = useState("");
   const [selectedRequestTypeId, setSelectedRequestTypeId] = useState("");
   const [selectedProviderId, setSelectedProviderId] = useState("");
@@ -206,6 +217,21 @@ export const MeetingAddRequestDialog = ({
     );
     const fund = sortedFunds.find((f) => f.id === selectedFundId);
 
+    // Compute updated missingFields — remove fields the user changed
+    let updatedMissingFields: Record<string, string> | undefined;
+    if (isEditMode && editingRequest?.missingFields) {
+      updatedMissingFields = { ...editingRequest.missingFields };
+      if (selectedProviderId !== editingRequest.providerId) delete updatedMissingFields.providerId;
+      if (selectedRequestTypeId !== editingRequest.requestTypeId) delete updatedMissingFields.requestTypeId;
+      if (managementFee !== editingRequest.managementFee) delete updatedMissingFields.managementFee;
+      if (transferType !== (editingRequest.transferType || "צבירה והפקדות")) delete updatedMissingFields.transferType;
+      if (choiceDuration !== (editingRequest.choiceDuration ?? "")) delete updatedMissingFields.choiceDuration;
+      if (kerenName !== (editingRequest.kerenName ?? "")) delete updatedMissingFields.kerenName;
+      if (transferAmount !== (editingRequest.transferAmount ?? "")) delete updatedMissingFields.transferAmount;
+      if (JSON.stringify(tracksValues) !== JSON.stringify(editingRequest.tracks)) delete updatedMissingFields.tracks;
+      if (Object.keys(updatedMissingFields).length === 0) updatedMissingFields = undefined;
+    }
+
     const newRequest: PendingRequest = {
       id: isEditMode ? editingRequest!.id : crypto.randomUUID(),
       fundId: selectedFundId,
@@ -229,6 +255,8 @@ export const MeetingAddRequestDialog = ({
       standing: standing || undefined,
       accountType: accountType || undefined,
       chargeDay: chargeDay || undefined,
+      sourceQuote: editingRequest?.sourceQuote,
+      missingFields: updatedMissingFields,
     };
 
     onAdd(newRequest);
@@ -404,6 +432,7 @@ export const MeetingAddRequestDialog = ({
                   </SelectContent>
                 </Select>
               )}
+              <MissingFieldHint fieldKey="requestTypeId" />
             </div>
 
             {/* Provider */}
@@ -448,6 +477,7 @@ export const MeetingAddRequestDialog = ({
                   </SelectContent>
                 </Select>
               )}
+              <MissingFieldHint fieldKey="providerId" />
             </div>
 
             {/* Management Fee */}
@@ -475,6 +505,7 @@ export const MeetingAddRequestDialog = ({
                   %
                 </span>
               </div>
+              <MissingFieldHint fieldKey="managementFee" />
             </div>
 
             {/* מעמד */}
@@ -551,6 +582,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="24">24</SelectItem>
                 </SelectContent>
               </Select>
+              <MissingFieldHint fieldKey="choiceDuration" />
             </div>
 
             {/* Transfer Type */}
@@ -573,6 +605,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="הפקדות בלבד">הפקדות בלבד</SelectItem>
                 </SelectContent>
               </Select>
+              <MissingFieldHint fieldKey="transferType" />
             </div>
           </div>}
 
@@ -624,6 +657,7 @@ export const MeetingAddRequestDialog = ({
                   className="mt-2"
                 />
               )}
+              <MissingFieldHint fieldKey="transferAmount" />
             </div>
 
             {/* שם קרן — RIGHT column (col 2), visually under סוג העברה */}
@@ -642,6 +676,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="אומגה">אומגה</SelectItem>
                 </SelectContent>
               </Select>
+              <MissingFieldHint fieldKey="kerenName" />
             </div>
           </div>}
 
@@ -653,6 +688,12 @@ export const MeetingAddRequestDialog = ({
                 className="rounded-lg p-4 space-y-4"
                 style={{ background: "hsl(var(--muted) / 0.4)" }}
               >
+                {missingFields?.tracks && (
+                  <div className="flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-amber-600 flex-shrink-0" />
+                    <span className="text-xs text-amber-600">{missingFields.tracks}</span>
+                  </div>
+                )}
                 {/* Tracks section header */}
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">

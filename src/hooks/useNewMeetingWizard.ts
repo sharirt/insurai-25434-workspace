@@ -40,6 +40,8 @@ export interface PendingRequest {
   standing?: string;
   accountType?: string;
   chargeDay?: string;
+  sourceQuote?: string;
+  missingFields?: Record<string, string>;
 }
 
 interface UseNewMeetingWizardProps {
@@ -59,6 +61,8 @@ interface UseNewMeetingWizardProps {
       kerenName?: string;
       transferAmount?: string;
       tracks?: Record<string, string>;
+      sourceQuote?: string;
+      missingFields?: Record<string, string>;
     }>;
   };
 }
@@ -98,6 +102,8 @@ export function useNewMeetingWizard({
           choiceDuration: req.choiceDuration,
           kerenName: req.kerenName,
           transferAmount: req.transferAmount,
+          sourceQuote: req.sourceQuote,
+          missingFields: req.missingFields,
           tracks,
           tracksCount: Object.keys(tracks).length,
           fundId: "",

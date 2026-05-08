@@ -1642,6 +1642,11 @@ export interface IParseMeetingSummaryActionActionOutputClientUpdatesObject {
 export interface IParseMeetingSummaryActionActionOutputTracksObject {}
 
 /**
+ * Map of field name to Hebrew explanation of why it is missing or unclear
+ */
+export interface IParseMeetingSummaryActionActionOutputMissingFieldsObject {}
+
+/**
  * undefined
  */
 export interface IParseMeetingSummaryActionActionOutputParseMeetingSummaryActionActionOutputRequestsItemObject {
@@ -1655,6 +1660,10 @@ export interface IParseMeetingSummaryActionActionOutputParseMeetingSummaryAction
   kerenName?: string;
   transferAmount?: string;
   tracks?: IParseMeetingSummaryActionActionOutputTracksObject;
+  /** Exact quote from the summary that triggered this request  */
+  sourceQuote?: string;
+  /** Map of field name to Hebrew explanation of why it is missing or unclear  */
+  missingFields?: IParseMeetingSummaryActionActionOutputMissingFieldsObject;
 }
 
 /**
@@ -1670,7 +1679,7 @@ export interface IParseMeetingSummaryActionActionOutput {
 
 /**
  * ParseMeetingSummaryActionAction
- * Receives a Hebrew meeting summary text and uses AI to parse it into structured meeting data. Returns a JSON object with meetingDate, meetingNotes, clientUpdates (personal info fields), clientId (resolved from clients list if name/ID found), and requests array (each with resolved providerId, requestTypeId, managementFee, transferType, choiceDuration, kerenName, transferAmount, tracks). Designed to pre-fill the NewMeetingWizard UI.
+ * Receives a Hebrew meeting summary text and uses AI to parse it into structured meeting data. Returns a JSON object with meetingDate, meetingNotes, clientUpdates (personal info fields), clientId (resolved from clients list if name/ID found), and requests array (each with resolved providerId, requestTypeId, managementFee, transferType, choiceDuration, kerenName, transferAmount, tracks, sourceQuote, and missingFields). Designed to pre-fill the NewMeetingWizard UI.
  */
 export const ParseMeetingSummaryActionAction = {
   actionBlockId: "69fda98c5dcc712d87bb250a",
