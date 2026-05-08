@@ -45,23 +45,67 @@ export interface PendingRequest {
 interface UseNewMeetingWizardProps {
   clientId: string;
   onSuccess?: () => void;
+  initialData?: {
+    meetingDate?: string;
+    meetingNotes?: string;
+    requests?: Array<{
+      providerId?: any;
+      providerName?: string;
+      requestTypeId?: any;
+      requestTypeName?: string;
+      managementFee?: any;
+      transferType?: string;
+      choiceDuration?: string;
+      kerenName?: string;
+      transferAmount?: string;
+      tracks?: Record<string, string>;
+    }>;
+  };
 }
 
 export function useNewMeetingWizard({
   clientId,
   onSuccess,
+  initialData,
 }: UseNewMeetingWizardProps) {
   const user = useUser();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   // Step 1 state
-  const [meetingDate, setMeetingDate] = useState("");
+  const [meetingDate, setMeetingDate] = useState(
+    () => initialData?.meetingDate || ""
+  );
   const [selectedAgentId, setSelectedAgentId] = useState("");
-  const [meetingNotes, setMeetingNotes] = useState("");
+  const [meetingNotes, setMeetingNotes] = useState(
+    () => initialData?.meetingNotes || ""
+  );
   const [isAgentAutoFilled, setIsAgentAutoFilled] = useState(false);
 
   // Step 3 state
-  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>(
+    () => {
+      if (!initialData?.requests?.length) return [];
+      return initialData.requests.map((req, index) => {
+        const tracks = (req.tracks as Record<string, string>) || {};
+        return {
+          id: `${Date.now()}_${index}`,
+          providerId: req.providerId ?? "",
+          providerName: req.providerName ?? "",
+          requestTypeId: req.requestTypeId ?? "",
+          requestTypeName: req.requestTypeName ?? "",
+          managementFee: req.managementFee,
+          transferType: req.transferType,
+          choiceDuration: req.choiceDuration,
+          kerenName: req.kerenName,
+          transferAmount: req.transferAmount,
+          tracks,
+          tracksCount: Object.keys(tracks).length,
+          fundId: "",
+          fundName: "",
+        };
+      });
+    }
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Data fetching

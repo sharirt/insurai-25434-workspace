@@ -1,5 +1,5 @@
 import { useSearchParams, useNavigate } from "react-router";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,12 +29,33 @@ import { ClientInfoForm } from "@/components/ClientInfoForm";
 
 export default function NewMeetingWizard() {
   const [searchParams] = useSearchParams();
-  const clientId = searchParams.get("id") || "";
+  const fromSummary = searchParams.get("fromSummary") === "true";
   const navigate = useNavigate();
 
+  // Read and clear sessionStorage summary data
+  const summaryData = useMemo(() => {
+    if (!fromSummary) return null;
+    try {
+      const raw = sessionStorage.getItem("meetingSummaryData");
+      sessionStorage.removeItem("meetingSummaryData");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, [fromSummary]);
+
+  const clientId =
+    fromSummary && summaryData?.clientId
+      ? String(summaryData.clientId)
+      : searchParams.get("id") || "";
+
   const navigateToClientProfile = useCallback(() => {
-    navigate(getPageUrl(ClientProfilePage, { id: clientId }));
-  }, [navigate, clientId]);
+    if (fromSummary && !searchParams.get("id")) {
+      navigate("/ClientsManager");
+    } else {
+      navigate(getPageUrl(ClientProfilePage, { id: clientId }));
+    }
+  }, [navigate, clientId, fromSummary, searchParams]);
 
   // Fetch client data for Step 2
   const { data: clientData, isLoading: isLoadingClient } = useEntityGetOne(
@@ -57,7 +78,7 @@ export default function NewMeetingWizard() {
   // Populate form data when client data loads
   useEffect(() => {
     if (clientData) {
-      setClientFormData({
+      const baseData: Partial<IClientsEntity> = {
         first_name: clientData.first_name ?? "",
         last_name: clientData.last_name ?? "",
         national_id: clientData.national_id ?? "",
@@ -84,9 +105,21 @@ export default function NewMeetingWizard() {
         englishCountry: clientData.englishCountry ?? "",
         clientStatus: clientData.clientStatus,
         notes: clientData.notes ?? "",
-      });
+      };
+
+      // Merge clientUpdates from summary data if present
+      if (summaryData?.clientUpdates) {
+        const updates = summaryData.clientUpdates;
+        for (const key of Object.keys(updates)) {
+          if (updates[key] !== undefined && updates[key] !== null && updates[key] !== "") {
+            (baseData as any)[key] = updates[key];
+          }
+        }
+      }
+
+      setClientFormData(baseData);
     }
-  }, [clientData]);
+  }, [clientData, summaryData]);
 
   const handleClientFieldChange = useCallback(
     (field: keyof IClientsEntity, value: string | boolean) => {
@@ -124,6 +157,13 @@ export default function NewMeetingWizard() {
   } = useNewMeetingWizard({
     clientId,
     onSuccess: navigateToClientProfile,
+    initialData: summaryData
+      ? {
+          meetingDate: summaryData.meetingDate,
+          meetingNotes: summaryData.meetingNotes,
+          requests: summaryData.requests,
+        }
+      : undefined,
   });
 
   // Handle Step 2 Next: save client data then proceed
