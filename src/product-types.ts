@@ -786,11 +786,6 @@ export const MeetingSummaryPage = {
   pageName: "MeetingSummary",
 } as const;
 
-export const MeetingSummaryReviewPage = {
-  pageBlockId: "69ff5ce54b9b3addd39215b7",
-  pageName: "MeetingSummaryReview",
-} as const;
-
 export const NewMeetingWizardPage = {
   pageBlockId: "69db99ac7d23f0bc9a2950a3",
   pageName: "NewMeetingWizard",
