@@ -53,22 +53,23 @@ export const MeetingStep1Content = ({
 
   return (
     <div className="space-y-6">
-      {/* Date & Time */}
-      <div className="space-y-2">
-        <Label htmlFor="meetingDate" className="text-base font-medium">
-          תאריך ושעת פגישה
-        </Label>
-        <Input
-          id="meetingDate"
-          type="datetime-local"
-          value={meetingDate}
-          onChange={handleDateChange}
-          dir="rtl"
-        />
-      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {/* Date & Time */}
+        <div className="space-y-2">
+          <Label htmlFor="meetingDate" className="text-base font-medium">
+            תאריך ושעת פגישה
+          </Label>
+          <Input
+            id="meetingDate"
+            type="datetime-local"
+            value={meetingDate}
+            onChange={handleDateChange}
+            dir="rtl"
+          />
+        </div>
 
-      {/* Agent */}
-      <div className="space-y-2">
+        {/* Agent */}
+        <div className="space-y-2">
         <Label className="text-base font-medium">סוכן</Label>
         {isLoadingAgents ? (
           <Skeleton className="h-10 w-full" />
@@ -99,6 +100,7 @@ export const MeetingStep1Content = ({
             </AlertDescription>
           </Alert>
         )}
+        </div>
       </div>
 
       {/* Notes */}
@@ -111,7 +113,7 @@ export const MeetingStep1Content = ({
           value={meetingNotes}
           onChange={handleNotesChange}
           placeholder="הזן הערות לפגישה (אופציונלי)"
-          rows={4}
+          rows={8}
           dir="rtl"
         />
       </div>
