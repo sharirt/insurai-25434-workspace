@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Inbox } from "lucide-react";
 import { PendingRequestCard } from "@/components/PendingRequestCard";
@@ -20,9 +19,10 @@ export const MeetingStep3Content = ({
   disabled = false,
 }: MeetingStep3ContentProps) => {
   return (
-    <div className="space-y-4">
-      {/* Add Request button */}
-      <div className="flex justify-start">
+    <div>
+      {/* Sticky header with title and add button */}
+      <div className="flex items-center justify-between sticky top-0 bg-background z-10 pb-3">
+        <h2 className="text-lg font-semibold">בקשות</h2>
         <Button
           variant="outline"
           onClick={onOpenAddDialog}
@@ -45,7 +45,7 @@ export const MeetingStep3Content = ({
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex flex-col gap-3">
           {pendingRequests.map((request) => (
             <PendingRequestCard
               key={request.id}

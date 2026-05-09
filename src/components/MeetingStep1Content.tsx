@@ -53,9 +53,9 @@ export const MeetingStep1Content = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex flex-row gap-4">
         {/* Date & Time */}
-        <div className="space-y-2">
+        <div className="flex-1 space-y-2">
           <Label htmlFor="meetingDate" className="text-base font-medium">
             תאריך ושעת פגישה
           </Label>
@@ -69,7 +69,7 @@ export const MeetingStep1Content = ({
         </div>
 
         {/* Agent */}
-        <div className="space-y-2">
+        <div className="flex-1 space-y-2">
         <Label className="text-base font-medium">סוכן</Label>
         {isLoadingAgents ? (
           <Skeleton className="h-10 w-full" />
