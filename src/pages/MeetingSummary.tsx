@@ -134,27 +134,29 @@ export default function MeetingSummary() {
               placeholder="הדבק כאן את סיכום הפגישה..."
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || !!processedResult}
               className="min-h-[220px] resize-y"
             />
             <p className="text-sm text-muted-foreground">
               הסיכום יכול לכלול: שם לקוח, תאריך פגישה, פרטי בקשות ביטוח,
               יצרנים, מסלולים ועוד
             </p>
-            <Button
-              onClick={handleProcess}
-              disabled={!summary.trim() || isLoading}
-              className="w-full"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="animate-spin" data-icon="inline-start" />
-                  מעבד...
-                </>
-              ) : (
-                "עבד סיכום"
-              )}
-            </Button>
+            {!processedResult && (
+              <Button
+                onClick={handleProcess}
+                disabled={!summary.trim() || isLoading}
+                className="w-full"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" data-icon="inline-start" />
+                    מעבד...
+                  </>
+                ) : (
+                  "עבד סיכום"
+                )}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

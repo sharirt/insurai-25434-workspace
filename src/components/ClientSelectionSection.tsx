@@ -154,7 +154,7 @@ export const ClientSelectionSection = ({
             disabled={!canContinue}
             className="w-full"
           >
-            המשך לאשף
+            המשך
             <ArrowLeft data-icon="inline-end" />
           </Button>
         </CardContent>
