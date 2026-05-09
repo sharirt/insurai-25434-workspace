@@ -26,6 +26,7 @@ import {
 } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { ClientSelectionSection } from "@/components/ClientSelectionSection";
+import { MeetingSummaryReview } from "@/components/MeetingSummaryReview";
 
 export default function MeetingSummary() {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ export default function MeetingSummary() {
   const clientId = searchParams.get("id");
   const [summary, setSummary] = useState("");
   const [processedResult, setProcessedResult] = useState<any>(null);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [resolvedClientId, setResolvedClientId] = useState<string | null>(null);
+  const [isExistingClient, setIsExistingClient] = useState(false);
 
   const { data: clientRecord } = useEntityGetOne(ClientsEntity, { id: clientId || "" }, { enabled: !!clientId });
 
@@ -44,11 +48,11 @@ export default function MeetingSummary() {
     ParseMeetingSummaryActionAction
   );
 
-  const navigateToWizard = (result: any, resolvedClientId: string | null, createNew?: boolean) => {
-    sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId: resolvedClientId }));
+  const navigateToWizard = (result: any, navClientId: string | null, createNew?: boolean) => {
+    sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId: navClientId }));
     let wizardUrl = getPageUrl(NewMeetingWizardPage) + "?fromSummary=true";
-    if (resolvedClientId) {
-      wizardUrl += `&id=${resolvedClientId}`;
+    if (navClientId) {
+      wizardUrl += `&id=${navClientId}`;
     }
     if (createNew) {
       wizardUrl += "&createNewClient=true";
@@ -81,13 +85,19 @@ export default function MeetingSummary() {
 
       // Case 1: Pre-selected clientId from URL
       if (clientId) {
-        navigateToWizard(result, clientId);
+        setProcessedResult(result);
+        setResolvedClientId(clientId);
+        setIsExistingClient(true);
+        setReviewMode(true);
         return;
       }
 
       // Case 2: AI matched a client
       if (result?.clientId) {
-        navigateToWizard(result, result.clientId);
+        setProcessedResult(result);
+        setResolvedClientId(result.clientId);
+        setIsExistingClient(true);
+        setReviewMode(true);
         return;
       }
 
@@ -100,11 +110,44 @@ export default function MeetingSummary() {
 
   const handleClientSelectionContinue = (selectedClientId: string | null, createNew: boolean) => {
     if (!processedResult) return;
-    navigateToWizard(processedResult, selectedClientId, createNew);
+    if (createNew) {
+      setResolvedClientId(null);
+      setIsExistingClient(false);
+    } else {
+      setResolvedClientId(selectedClientId);
+      setIsExistingClient(true);
+    }
+    setReviewMode(true);
   };
 
+  const handleReviewContinue = () => {
+    if (!processedResult) return;
+    const createNew = !isExistingClient && !resolvedClientId;
+    navigateToWizard(processedResult, resolvedClientId, createNew);
+  };
+
+  const handleReviewBack = () => {
+    setReviewMode(false);
+  };
+
+  if (reviewMode && processedResult) {
+    return (
+      <div className="min-h-screen bg-background" style={{ direction: "rtl" }}>
+        <div className="mx-auto max-w-[700px] px-4 py-8">
+          <MeetingSummaryReview
+            processedResult={processedResult}
+            resolvedClientId={resolvedClientId}
+            isExistingClient={isExistingClient}
+            onContinue={handleReviewContinue}
+            onBack={handleReviewBack}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background" style={{ direction: "rtl" }}>
       <div className="mx-auto max-w-[700px] px-4 py-8 flex flex-col gap-6">
         <Card>
           <CardHeader>
@@ -153,7 +196,7 @@ export default function MeetingSummary() {
           </CardContent>
         </Card>
 
-        {processedResult && !clientId && (
+        {processedResult && !clientId && !reviewMode && (
           <ClientSelectionSection
             clients={(clients || []).map((c) => ({ ...c, id: c.id }))}
             onContinue={handleClientSelectionContinue}
