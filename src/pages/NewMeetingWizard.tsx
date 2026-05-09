@@ -296,9 +296,11 @@ export default function NewMeetingWizard() {
               : ""
           }
         >
-          <CardHeader className="shrink-0">
-            <CardTitle className="text-lg">{cardTitles[step]}</CardTitle>
-          </CardHeader>
+          {step !== 3 && (
+            <CardHeader className="shrink-0">
+              <CardTitle className="text-lg">{cardTitles[step]}</CardTitle>
+            </CardHeader>
+          )}
 
           <CardContent
             className={
