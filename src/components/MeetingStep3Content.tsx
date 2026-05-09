@@ -20,8 +20,7 @@ export const MeetingStep3Content = ({
 }: MeetingStep3ContentProps) => {
   return (
     <div>
-      {/* Sticky header with title and add button */}
-      <div className="flex items-center justify-end sticky top-0 bg-background z-10 pb-3">
+      <div className="flex items-center justify-start pt-4 pb-3">
         <Button
           variant="outline"
           onClick={onOpenAddDialog}
