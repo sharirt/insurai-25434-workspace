@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2, UserPlus } from "lucide-react";
 import { getPageUrl } from "@/lib/utils";
 import { ClientProfilePage, ClientsEntity } from "@/product-types";
 import type { IClientsEntity } from "@/product-types";
@@ -37,6 +37,7 @@ import {
 export default function NewMeetingWizard() {
   const [searchParams] = useSearchParams();
   const fromSummary = searchParams.get("fromSummary") === "true";
+  const createNewClientParam = searchParams.get("createNewClient") === "true";
   const navigate = useNavigate();
 
   // Read and clear sessionStorage summary data
@@ -119,6 +120,24 @@ export default function NewMeetingWizard() {
       setClientFormData(baseData);
     }
   }, [clientData, summaryData]);
+
+  // Populate form data from summaryData.clientUpdates when creating a new client
+  useEffect(() => {
+    if (createNewClientParam && summaryData?.clientUpdates && !initialClientId) {
+      const updates = summaryData.clientUpdates;
+      const formData: Partial<IClientsEntity> = {};
+      for (const key of Object.keys(updates)) {
+        if (
+          updates[key] !== undefined &&
+          updates[key] !== null &&
+          updates[key] !== ""
+        ) {
+          (formData as any)[key] = updates[key];
+        }
+      }
+      setClientFormData(formData);
+    }
+  }, [createNewClientParam, summaryData, initialClientId]);
 
   // Handle client selection from combobox
   const handleSelectClient = (id: string | null) => {
@@ -304,12 +323,21 @@ export default function NewMeetingWizard() {
               />
             ) : step === 2 ? (
               <div className="flex flex-col gap-6">
-                <ClientSelectorCombobox
-                  clients={allClients ?? []}
-                  isLoading={isLoadingAllClients}
-                  selectedClientId={selectedClientId}
-                  onSelectClient={handleSelectClient}
-                />
+                {createNewClientParam ? (
+                  <div className="flex items-center gap-2 rounded-md border border-accent bg-accent/20 px-3 py-2">
+                    <UserPlus className="h-4 w-4 shrink-0 text-accent-foreground" />
+                    <span className="text-sm text-accent-foreground">
+                      יוצר לקוח חדש על בסיס פרטי הסיכום
+                    </span>
+                  </div>
+                ) : (
+                  <ClientSelectorCombobox
+                    clients={allClients ?? []}
+                    isLoading={isLoadingAllClients}
+                    selectedClientId={selectedClientId}
+                    onSelectClient={handleSelectClient}
+                  />
+                )}
                 {isLoadingClient && !!initialClientId ? (
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {Array.from({ length: 12 }).map((_, i) => (

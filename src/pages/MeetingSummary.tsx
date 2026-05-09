@@ -25,12 +25,14 @@ import {
   ParseMeetingSummaryActionAction,
 } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
+import { ClientSelectionSection } from "@/components/ClientSelectionSection";
 
 export default function MeetingSummary() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("id");
   const [summary, setSummary] = useState("");
+  const [processedResult, setProcessedResult] = useState<any>(null);
 
   const { data: clientRecord } = useEntityGetOne(ClientsEntity, { id: clientId || "" }, { enabled: !!clientId });
 
@@ -41,6 +43,18 @@ export default function MeetingSummary() {
   const { executeFunction, isLoading } = useExecuteAction(
     ParseMeetingSummaryActionAction
   );
+
+  const navigateToWizard = (result: any, resolvedClientId: string | null, createNew?: boolean) => {
+    sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId: resolvedClientId }));
+    let wizardUrl = getPageUrl(NewMeetingWizardPage) + "?fromSummary=true";
+    if (resolvedClientId) {
+      wizardUrl += `&id=${resolvedClientId}`;
+    }
+    if (createNew) {
+      wizardUrl += "&createNewClient=true";
+    }
+    navigate(wizardUrl);
+  };
 
   const handleProcess = async () => {
     if (!summary.trim()) return;
@@ -65,17 +79,33 @@ export default function MeetingSummary() {
         })),
       });
 
-      sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId }));
-      const wizardUrl = getPageUrl(NewMeetingWizardPage) + (clientId ? `?fromSummary=true&id=${clientId}` : "?fromSummary=true");
-      navigate(wizardUrl);
+      // Case 1: Pre-selected clientId from URL
+      if (clientId) {
+        navigateToWizard(result, clientId);
+        return;
+      }
+
+      // Case 2: AI matched a client
+      if (result?.clientId) {
+        navigateToWizard(result, result.clientId);
+        return;
+      }
+
+      // Case 3: No client found - show selection UI
+      setProcessedResult(result);
     } catch (err: any) {
       toast.error(err?.message || "שגיאה בעיבוד הסיכום. נסה שוב.");
     }
   };
 
+  const handleClientSelectionContinue = (selectedClientId: string | null, createNew: boolean) => {
+    if (!processedResult) return;
+    navigateToWizard(processedResult, selectedClientId, createNew);
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
-      <div className="mx-auto max-w-[700px] px-4 py-8">
+      <div className="mx-auto max-w-[700px] px-4 py-8 flex flex-col gap-6">
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -122,6 +152,13 @@ export default function MeetingSummary() {
             </Button>
           </CardContent>
         </Card>
+
+        {processedResult && !clientId && (
+          <ClientSelectionSection
+            clients={(clients || []).map((c) => ({ ...c, id: c.id }))}
+            onContinue={handleClientSelectionContinue}
+          />
+        )}
       </div>
     </div>
   );
