@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
-import { Sparkles, Loader2 } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router";
+import { Sparkles, Loader2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { getPageUrl } from "@/lib/utils";
 import {
   useEntityGetAll,
+  useEntityGetOne,
   useExecuteAction,
 } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import {
@@ -27,7 +28,11 @@ import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 
 export default function MeetingSummary() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const clientId = searchParams.get("id");
   const [summary, setSummary] = useState("");
+
+  const { data: clientRecord } = useEntityGetOne(ClientsEntity, { id: clientId || "" }, { enabled: !!clientId });
 
   const { data: providers } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes } = useEntityGetAll(RequestSchemesEntity);
@@ -60,10 +65,9 @@ export default function MeetingSummary() {
         })),
       });
 
-      sessionStorage.setItem("meetingSummaryData", JSON.stringify(result));
-      navigate(
-        getPageUrl(NewMeetingWizardPage) + "?fromSummary=true"
-      );
+      sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId }));
+      const wizardUrl = getPageUrl(NewMeetingWizardPage) + (clientId ? `?fromSummary=true&id=${clientId}` : "?fromSummary=true");
+      navigate(wizardUrl);
     } catch (err: any) {
       toast.error(err?.message || "שגיאה בעיבוד הסיכום. נסה שוב.");
     }
@@ -83,6 +87,14 @@ export default function MeetingSummary() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
+            {clientRecord && (
+              <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  פגישה עבור: <span className="font-medium text-foreground">{clientRecord.first_name} {clientRecord.last_name}</span>
+                </span>
+              </div>
+            )}
             <Textarea
               placeholder="הדבק כאן את סיכום הפגישה..."
               value={summary}

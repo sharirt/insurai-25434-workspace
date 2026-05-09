@@ -1,11 +1,9 @@
-import { useEntityGetAll, useEntityGetOne, useEntityDelete, useExecuteAction, useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, NewMeetingWizardPage, NewRequestWizardPage, ParseMeetingSummaryAndCreateAction, SyncSingleClientAction } from "@/product-types";
+import { useEntityGetAll, useEntityGetOne, useEntityDelete, useExecuteAction } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { ClientsEntity, FundsEntity, MeetingsEntity, RequestsEntity, RequestSchemesEntity, ProvidersEntity, ClientProfilePage, ClientsManagerPage, NewMeetingWizardPage, NewRequestWizardPage, MeetingSummaryPage, SyncSingleClientAction } from "@/product-types";
 import { useSearchParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, AlertCircle, Calendar, Sparkles, Loader2, FileUp, Plus, Pencil, RefreshCw } from "lucide-react";
 import { getPageUrl } from "@/lib/utils";
 import { FundsTable, FundsTableSkeleton } from "@/components/FundsTable";
@@ -25,14 +23,10 @@ export default function ClientProfile() {
   const clientId = searchParams.get("id");
   const [isDeleteMeetingDialogOpen, setIsDeleteMeetingDialogOpen] = useState(false);
   const [meetingToDelete, setMeetingToDelete] = useState<typeof MeetingsEntity['instanceType'] | null>(null);
-  const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(false);
-  const [summaryText, setSummaryText] = useState("");
   const [isImportFundsDialogOpen, setIsImportFundsDialogOpen] = useState(false);
   const [isImportTracksDialogOpen, setIsImportTracksDialogOpen] = useState(false);
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
 
-  const user = useUser();
-  const { executeFunction: executeParseSummary, isLoading: isParsingSummary } = useExecuteAction(ParseMeetingSummaryAndCreateAction);
   const { executeFunction: executeSyncClient, isLoading: isSyncing } = useExecuteAction(SyncSingleClientAction);
 
   const { data: client, isLoading: isLoadingClient, error: clientError, refetch: refetchClient } = useEntityGetOne(
@@ -121,30 +115,6 @@ export default function ClientProfile() {
     setMeetingToDelete(null);
     refetchMeetings();
   };
-
-  const handleSummaryDialogClose = useCallback(() => {
-    setIsSummaryDialogOpen(false);
-    setSummaryText("");
-  }, []);
-
-  const handleSummarySubmit = useCallback(async () => {
-    if (!summaryText.trim() || !clientId || !user?.email) return;
-
-    try {
-      const response = await executeParseSummary({
-        summary: summaryText.trim(),
-        clientId,
-        agentEmail: user.email,
-      });
-
-      const requestCount = response?.items?.[0]?.requests?.length || 0;
-      toast.success(`הפגישה נוצרה בהצלחה עם ${requestCount} בקשות`);
-      handleSummaryDialogClose();
-      refetchMeetings();
-    } catch (err: any) {
-      toast.error(err?.message || "שגיאה ביצירת הפגישה מהסיכום");
-    }
-  }, [summaryText, clientId, user?.email, executeParseSummary, handleSummaryDialogClose, refetchMeetings]);
 
   const handleEditClientClose = useCallback(() => {
     setIsEditClientDialogOpen(false);
@@ -258,9 +228,11 @@ export default function ClientProfile() {
               )}
               {isSyncing ? "מסנכרן..." : "סנכרון מ-Roeto"}
             </Button>
-            <Button variant="outline" onClick={() => setIsSummaryDialogOpen(true)}>
-              <Sparkles className="ml-2 h-4 w-4" />
-              סיכום פגישה
+            <Button variant="outline" asChild>
+              <Link to={getPageUrl(MeetingSummaryPage) + `?id=${clientId}`}>
+                <Sparkles className="ml-2 h-4 w-4" />
+                סיכום פגישה
+              </Link>
             </Button>
             <Button asChild>
               <Link to={getPageUrl(NewMeetingWizardPage, { id: clientId })}>
@@ -368,49 +340,6 @@ export default function ClientProfile() {
         client={client}
       />
 
-      <Dialog open={isSummaryDialogOpen} onOpenChange={(open) => { if (!open) handleSummaryDialogClose(); }}>
-        <DialogContent className="sm:max-w-xl" dir="rtl">
-          <DialogHeader>
-            <DialogTitle>יצירת פגישה מסיכום</DialogTitle>
-            <DialogDescription>
-              הדבק את סיכום הפגישה בעברית וייווצרו פגישה ובקשות באופן אוטומטי
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <Textarea
-              dir="rtl"
-              rows={8}
-              placeholder="הדבק כאן את סיכום הפגישה בעברית..."
-              value={summaryText}
-              onChange={(e) => setSummaryText(e.target.value)}
-              disabled={isParsingSummary}
-              className="resize-y min-h-[200px] text-base leading-relaxed"
-            />
-          </div>
-          <DialogFooter className="flex flex-row-reverse gap-2 sm:flex-row-reverse">
-            <Button
-              variant="outline"
-              onClick={handleSummaryDialogClose}
-              disabled={isParsingSummary}
-            >
-              ביטול
-            </Button>
-            <Button
-              onClick={handleSummarySubmit}
-              disabled={!summaryText.trim() || isParsingSummary}
-            >
-              {isParsingSummary ? (
-                <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  יוצר פגישה...
-                </>
-              ) : (
-                "צור פגישה"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
