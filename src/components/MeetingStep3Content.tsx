@@ -21,8 +21,7 @@ export const MeetingStep3Content = ({
   return (
     <div>
       {/* Sticky header with title and add button */}
-      <div className="flex items-center justify-between sticky top-0 bg-background z-10 pb-3">
-        <h2 className="text-lg font-semibold">בקשות</h2>
+      <div className="flex items-center justify-start sticky top-0 bg-background z-10 pb-3">
         <Button
           variant="outline"
           onClick={onOpenAddDialog}
