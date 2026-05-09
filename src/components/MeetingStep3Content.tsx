@@ -20,7 +20,7 @@ export const MeetingStep3Content = ({
 }: MeetingStep3ContentProps) => {
   return (
     <div>
-      <div className="flex items-center justify-start pt-4 pb-3">
+      <div className="flex items-center justify-end pt-4 pb-3">
         <Button
           variant="outline"
           onClick={onOpenAddDialog}
