@@ -106,13 +106,13 @@ export const MeetingStep1Content = ({
       {/* Notes */}
       <div className="space-y-2">
         <Label htmlFor="meetingNotes" className="text-base font-medium">
-          הערות
+          סיכום פגישה
         </Label>
         <Textarea
           id="meetingNotes"
           value={meetingNotes}
           onChange={handleNotesChange}
-          placeholder="הזן הערות לפגישה (אופציונלי)"
+          placeholder="הכנס סיכום פגישה..."
           rows={8}
           dir="rtl"
         />
