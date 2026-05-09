@@ -27,7 +27,7 @@ export const MeetingStep3Content = ({
           disabled={disabled}
         >
           <Plus className="ml-2 h-4 w-4" />
-          הוסף בקשה
+          בקשה חדשה
         </Button>
       </div>
 
