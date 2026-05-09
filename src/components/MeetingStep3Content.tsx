@@ -20,9 +20,10 @@ export const MeetingStep3Content = ({
 }: MeetingStep3ContentProps) => {
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center justify-end pt-4 pb-3 bg-background">
+      <div className="sticky top-0 z-10 flex items-center justify-end pt-4 pb-3 bg-card">
         <Button
           variant="outline"
+          className="bg-card"
           onClick={onOpenAddDialog}
           disabled={disabled}
         >
