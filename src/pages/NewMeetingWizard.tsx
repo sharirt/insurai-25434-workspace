@@ -237,8 +237,8 @@ export default function NewMeetingWizard() {
   };
 
   const cardTitles: Record<1 | 2 | 3, string> = {
-    1: "פרטי פגישה",
-    2: "פרטי לקוח",
+    1: "פרטי לקוח",
+    2: "פרטי פגישה",
     3: "בקשות",
   };
 
@@ -285,13 +285,13 @@ export default function NewMeetingWizard() {
 
         {/* Step Indicator */}
         <div className="mb-8">
-          <WizardStepIndicator currentStep={step} totalSteps={3} />
+          <WizardStepIndicator currentStep={step} totalSteps={3} stepLabels={["פרטי לקוח", "פרטי פגישה", "בקשות"]} />
         </div>
 
         {/* Main Content Card */}
         <Card
           className={
-            step === 2 || step === 3
+            step === 1 || step === 3
               ? "flex flex-col max-h-[calc(100vh-220px)]"
               : ""
           }
@@ -302,7 +302,7 @@ export default function NewMeetingWizard() {
 
           <CardContent
             className={
-              step === 2
+              step === 1
                 ? "min-h-0 flex-1 overflow-y-auto max-h-[calc(100vh-280px)]"
                 : step === 3
                   ? "min-h-0 flex-1 overflow-y-auto max-h-[calc(100vh-280px)]"
@@ -310,18 +310,6 @@ export default function NewMeetingWizard() {
             }
           >
             {step === 1 ? (
-              <MeetingStep1Content
-                meetingDate={meetingDate}
-                setMeetingDate={setMeetingDate}
-                selectedAgentId={selectedAgentId}
-                setSelectedAgentId={setSelectedAgentId}
-                meetingNotes={meetingNotes}
-                setMeetingNotes={setMeetingNotes}
-                isAgentAutoFilled={isAgentAutoFilled}
-                isLoadingAgents={isLoadingAgents}
-                sortedAgents={sortedAgents}
-              />
-            ) : step === 2 ? (
               <div className="flex flex-col gap-6">
                 {createNewClientParam ? (
                   <div className="flex items-center gap-2 rounded-md border border-accent bg-accent/20 px-3 py-2">
@@ -354,6 +342,18 @@ export default function NewMeetingWizard() {
                   />
                 )}
               </div>
+            ) : step === 2 ? (
+              <MeetingStep1Content
+                meetingDate={meetingDate}
+                setMeetingDate={setMeetingDate}
+                selectedAgentId={selectedAgentId}
+                setSelectedAgentId={setSelectedAgentId}
+                meetingNotes={meetingNotes}
+                setMeetingNotes={setMeetingNotes}
+                isAgentAutoFilled={isAgentAutoFilled}
+                isLoadingAgents={isLoadingAgents}
+                sortedAgents={sortedAgents}
+              />
             ) : (
               <MeetingStep3Content
                 pendingRequests={pendingRequests}
@@ -373,32 +373,10 @@ export default function NewMeetingWizard() {
                 <Button
                   variant="outline"
                   onClick={navigateToClientProfile}
-                  disabled={isSubmitting}
+                  disabled={isSavingClient}
                 >
                   ביטול
                 </Button>
-                <Button onClick={handleNext} disabled={!isStep1Valid}>
-                  הבא
-                </Button>
-              </>
-            ) : step === 2 ? (
-              <>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={navigateToClientProfile}
-                    disabled={isSavingClient}
-                  >
-                    ביטול
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleBack}
-                    disabled={isSavingClient}
-                  >
-                    חזרה
-                  </Button>
-                </div>
                 <Button
                   onClick={handleStep2Next}
                   disabled={isSavingClient || (isLoadingClient && !!initialClientId)}
@@ -411,6 +389,28 @@ export default function NewMeetingWizard() {
                   ) : (
                     "הבא"
                   )}
+                </Button>
+              </>
+            ) : step === 2 ? (
+              <>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={navigateToClientProfile}
+                    disabled={isSubmitting}
+                  >
+                    ביטול
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleBack}
+                    disabled={isSubmitting}
+                  >
+                    חזרה
+                  </Button>
+                </div>
+                <Button onClick={handleNext} disabled={!isStep1Valid}>
+                  הבא
                 </Button>
               </>
             ) : (

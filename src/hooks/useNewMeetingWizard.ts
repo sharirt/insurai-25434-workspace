@@ -184,9 +184,9 @@ export function useNewMeetingWizard({
   const isStep1Valid = !!meetingDate && !!selectedAgentId;
 
   const handleNext = useCallback(() => {
-    if (step === 1 && isStep1Valid) {
+    if (step === 1) {
       setStep(2);
-    } else if (step === 2) {
+    } else if (step === 2 && isStep1Valid) {
       setStep(3);
     }
   }, [step, isStep1Valid]);
