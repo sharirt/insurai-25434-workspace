@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -40,26 +42,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Plus, Pencil, Trash2, FileText, Loader2 } from "lucide-react";
 
 type AgencyCodeForm = {
   agentCode: string;
-  providerId: string;
-  requestTypeId: string;
+  providerIds: string[];
+  requestTypeIds: string[];
 };
 
 const emptyForm: AgencyCodeForm = {
   agentCode: "",
-  providerId: "",
-  requestTypeId: "",
+  providerIds: [],
+  requestTypeIds: [],
 };
+
+function getIdsArray(code: any, arrayField: string, singleField: string): string[] {
+  if (Array.isArray(code[arrayField]) && code[arrayField].length > 0) {
+    return code[arrayField];
+  }
+  if (code[singleField]) {
+    return [code[singleField]];
+  }
+  return [];
+}
+
+function renderNames(ids: string[], lookup: (id: string) => string, max: number = 2): React.ReactNode {
+  if (!ids.length) return "—";
+  const names = ids.map(lookup);
+  if (names.length <= max) return names.join(", ");
+  return (
+    <span className="flex items-center gap-1 flex-wrap">
+      {names.slice(0, max).join(", ")}
+      <Badge variant="secondary">+{names.length - max}</Badge>
+    </span>
+  );
+}
 
 export const AgencyCodesSection = () => {
   const { data: codes, isLoading: codesLoading } = useEntityGetAll(AgencyCodesEntity);
@@ -81,6 +98,24 @@ export const AgencyCodesSection = () => {
   const getRequestTypeName = (id?: string) =>
     requestSchemes?.find((r) => r.id === id)?.requestTypeName || "לא ידוע";
 
+  const toggleProvider = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      providerIds: f.providerIds.includes(id)
+        ? f.providerIds.filter((x) => x !== id)
+        : [...f.providerIds, id],
+    }));
+  };
+
+  const toggleRequestType = (id: string) => {
+    setForm((f) => ({
+      ...f,
+      requestTypeIds: f.requestTypeIds.includes(id)
+        ? f.requestTypeIds.filter((x) => x !== id)
+        : [...f.requestTypeIds, id],
+    }));
+  };
+
   const openAdd = () => {
     setEditingId(null);
     setForm(emptyForm);
@@ -91,19 +126,24 @@ export const AgencyCodesSection = () => {
     setEditingId(code.id);
     setForm({
       agentCode: code.agentCode || "",
-      providerId: code.providerId || "",
-      requestTypeId: code.requestTypeId || "",
+      providerIds: getIdsArray(code, "providerIds", "providerId"),
+      requestTypeIds: getIdsArray(code, "requestTypeIds", "requestTypeId"),
     });
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
     try {
+      const data = {
+        agentCode: form.agentCode,
+        providerIds: form.providerIds,
+        requestTypeIds: form.requestTypeIds,
+      };
       if (editingId) {
-        await updateFunction({ id: editingId, data: form });
+        await updateFunction({ id: editingId, data });
         toast.success("קוד סוכן עודכן בהצלחה");
       } else {
-        await createFunction({ data: form });
+        await createFunction({ data });
         toast.success("קוד סוכן נוסף בהצלחה");
       }
       setDialogOpen(false);
@@ -168,43 +208,47 @@ export const AgencyCodesSection = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {codes.map((code) => (
-                <TableRow key={code.id}>
-                  <TableCell>{code.agentCode || "-"}</TableCell>
-                  <TableCell>{getProviderName(code.providerId)}</TableCell>
-                  <TableCell>{getRequestTypeName(code.requestTypeId)}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEdit(code)}
-                      >
-                        <Pencil />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteId(code.id)}
-                        disabled={deletingId === code.id}
-                      >
-                        {deletingId === code.id ? (
-                          <Loader2 className="animate-spin" />
-                        ) : (
-                          <Trash2 className="text-destructive" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {codes.map((code) => {
+                const pIds = getIdsArray(code, "providerIds", "providerId");
+                const rIds = getIdsArray(code, "requestTypeIds", "requestTypeId");
+                return (
+                  <TableRow key={code.id}>
+                    <TableCell>{code.agentCode || "-"}</TableCell>
+                    <TableCell>{renderNames(pIds, getProviderName)}</TableCell>
+                    <TableCell>{renderNames(rIds, getRequestTypeName)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEdit(code)}
+                        >
+                          <Pencil />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setDeleteId(code.id)}
+                          disabled={deletingId === code.id}
+                        >
+                          {deletingId === code.id ? (
+                            <Loader2 className="animate-spin" />
+                          ) : (
+                            <Trash2 className="text-destructive" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingId ? "עריכת קוד סוכן" : "הוספת קוד סוכן"}</DialogTitle>
           </DialogHeader>
@@ -220,39 +264,79 @@ export const AgencyCodesSection = () => {
             </div>
             <div className="flex flex-col gap-2">
               <Label>יצרן</Label>
-              <Select
-                value={form.providerId}
-                onValueChange={(v) => setForm((f) => ({ ...f, providerId: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר יצרן" />
-                </SelectTrigger>
-                <SelectContent>
-                  {providers?.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.provider_name || "ללא שם"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      providerIds: providers?.map((p) => p.id) || [],
+                    }))
+                  }
+                >
+                  בחר הכל
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm((f) => ({ ...f, providerIds: [] }))}
+                >
+                  נקה הכל
+                </Button>
+              </div>
+              <div className="rounded-md border bg-muted/50 max-h-[200px] overflow-y-auto">
+                {providers?.map((p) => (
+                  <label
+                    key={p.id}
+                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                  >
+                    <Checkbox
+                      checked={form.providerIds.includes(p.id)}
+                      onCheckedChange={() => toggleProvider(p.id)}
+                    />
+                    <span className="text-sm">{p.provider_name || "ללא שם"}</span>
+                  </label>
+                ))}
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <Label>סוג בקשה</Label>
-              <Select
-                value={form.requestTypeId}
-                onValueChange={(v) => setForm((f) => ({ ...f, requestTypeId: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="בחר סוג בקשה" />
-                </SelectTrigger>
-                <SelectContent>
-                  {requestSchemes?.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.requestTypeName || "ללא שם"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setForm((f) => ({
+                      ...f,
+                      requestTypeIds: requestSchemes?.map((r) => r.id) || [],
+                    }))
+                  }
+                >
+                  בחר הכל
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm((f) => ({ ...f, requestTypeIds: [] }))}
+                >
+                  נקה הכל
+                </Button>
+              </div>
+              <div className="rounded-md border bg-muted/50 max-h-[200px] overflow-y-auto">
+                {requestSchemes?.map((r) => (
+                  <label
+                    key={r.id}
+                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                  >
+                    <Checkbox
+                      checked={form.requestTypeIds.includes(r.id)}
+                      onCheckedChange={() => toggleRequestType(r.id)}
+                    />
+                    <span className="text-sm">{r.requestTypeName || "ללא שם"}</span>
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
           <DialogFooter>

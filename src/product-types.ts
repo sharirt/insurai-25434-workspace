@@ -15,12 +15,12 @@ export const AgencyEntity = {
  * Lookup table for agency codes, mapping each code to a provider and optional description. Used to associate insurance agencies with their codes per provider for form processing and reporting.
  */
 export interface IAgencyCodesEntity {
-  /** Foreign key reference to the Providers table — the provider this agency code belongs to.  */
-  providerId?: string;
+  /** Array of request type IDs this agency code applies to. Supports multiple request types per code.  */
+  requestTypeIds?: string[];
   /** The agent code identifier for this agency code record.  */
   agentCode?: string;
-  /** Foreign key reference to the RequestSchemes table — the request type this agency code applies to.  */
-  requestTypeId?: string;
+  /** Array of provider IDs this agency code applies to. Supports multiple providers per code.  */
+  providerIds?: string[];
 }
 
 export const AgencyCodesEntity = {
