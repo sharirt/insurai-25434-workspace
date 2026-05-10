@@ -20,6 +20,8 @@ interface WizardStep1ContentProps {
   setSelectedFundId: (val: string) => void;
   managementFee: number | undefined;
   setManagementFee: (val: number | undefined) => void;
+  managementFeeAccumulation: number | undefined;
+  setManagementFeeAccumulation: (val: number | undefined) => void;
   choiceDuration: string;
   setChoiceDuration: (val: string) => void;
   transferType: string;
@@ -47,6 +49,8 @@ export const WizardStep1Content = ({
   setSelectedFundId,
   managementFee,
   setManagementFee,
+  managementFeeAccumulation,
+  setManagementFeeAccumulation,
   choiceDuration,
   setChoiceDuration,
   transferType,
@@ -200,6 +204,20 @@ export const WizardStep1Content = ({
           value={managementFee ?? ""}
           onChange={handleManagementFeeChange}
           placeholder="הזן דמי ניהול מהפקדה (אופציונלי)"
+          dir="rtl"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-base font-medium">דמי ניהול מצבירה</Label>
+        <Input
+          type="number"
+          value={managementFeeAccumulation ?? ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            setManagementFeeAccumulation(val === "" ? undefined : Number(val));
+          }}
+          placeholder="הזן דמי ניהול מצבירה (אופציונלי)"
           dir="rtl"
         />
       </div>

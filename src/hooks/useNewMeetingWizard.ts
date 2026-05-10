@@ -30,6 +30,7 @@ export interface PendingRequest {
   tracks: Record<string, string>;
   tracksCount: number;
   managementFee?: number;
+  managementFeeAccumulation?: number;
   choiceDuration?: string;
   transferType?: string;
   kerenName?: string;
@@ -56,6 +57,7 @@ interface UseNewMeetingWizardProps {
       requestTypeId?: any;
       requestTypeName?: string;
       managementFee?: any;
+      managementFeeAccumulation?: any;
       transferType?: string;
       choiceDuration?: string;
       kerenName?: string;
@@ -98,6 +100,7 @@ export function useNewMeetingWizard({
           requestTypeId: req.requestTypeId ?? "",
           requestTypeName: req.requestTypeName ?? "",
           managementFee: req.managementFee,
+          managementFeeAccumulation: req.managementFeeAccumulation,
           transferType: req.transferType,
           choiceDuration: req.choiceDuration,
           kerenName: req.kerenName,
@@ -246,6 +249,7 @@ export function useNewMeetingWizard({
             status: "מעבד" as const,
             tracks: req.tracks,
             managementFee: req.managementFee ?? undefined,
+            managementFeeAccumulation: req.managementFeeAccumulation ?? undefined,
             choiceDuration: req.choiceDuration,
             transferType: req.transferType,
             kerenName: req.kerenName,

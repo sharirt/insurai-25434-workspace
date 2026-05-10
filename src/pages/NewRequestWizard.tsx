@@ -90,6 +90,8 @@ export default function NewRequestWizard() {
     setSelectedFundId,
     managementFee,
     setManagementFee,
+    managementFeeAccumulation,
+    setManagementFeeAccumulation,
     choiceDuration,
     setChoiceDuration,
     transferType,
@@ -229,6 +231,8 @@ export default function NewRequestWizard() {
                 setSelectedFundId={setSelectedFundId}
                 managementFee={managementFee}
                 setManagementFee={setManagementFee}
+                managementFeeAccumulation={managementFeeAccumulation}
+                setManagementFeeAccumulation={setManagementFeeAccumulation}
               choiceDuration={choiceDuration}
               setChoiceDuration={setChoiceDuration}
               transferType={transferType}

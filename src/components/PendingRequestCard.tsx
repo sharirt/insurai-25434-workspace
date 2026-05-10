@@ -79,6 +79,11 @@ export const PendingRequestCard = ({
               דמי ניהול מהפקדה: {request.managementFee}%
             </p>
           )}
+          {request.managementFeeAccumulation != null && (
+            <p className="text-xs text-muted-foreground mt-1">
+              דמי ניהול מצבירה: {request.managementFeeAccumulation}%
+            </p>
+          )}
           {activeTracks.length > 0 && (
             <div className="mt-2">
               <p className="text-xs font-medium text-muted-foreground mb-1">

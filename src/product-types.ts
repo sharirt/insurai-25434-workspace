@@ -542,6 +542,8 @@ export interface IRequestsEntity {
   accountType?: RequestsEntityAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
   /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
   managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -1176,6 +1178,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
   /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
   managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -1853,6 +1857,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   accountType?: ProcessRequestFormsActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
   /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
   managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
@@ -2118,6 +2124,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   accountType?: SendCustomProviderEmailActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
   /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
   managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */

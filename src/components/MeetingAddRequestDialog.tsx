@@ -85,6 +85,9 @@ export const MeetingAddRequestDialog = ({
   const [managementFee, setManagementFee] = useState<number | undefined>(
     undefined
   );
+  const [managementFeeAccumulation, setManagementFeeAccumulation] = useState<number | undefined>(
+    undefined
+  );
   const [choiceDuration, setChoiceDuration] = useState<string>("");
   const [transferType, setTransferType] = useState<string>("צבירה והפקדות");
   const [kerenName, setKerenName] = useState<string>("");
@@ -137,6 +140,7 @@ export const MeetingAddRequestDialog = ({
       setSelectedProviderId("");
       setTracksValues({});
       setManagementFee(undefined);
+      setManagementFeeAccumulation(undefined);
       setChoiceDuration("");
       setTransferType("צבירה והפקדות");
       setKerenName("");
@@ -154,6 +158,7 @@ export const MeetingAddRequestDialog = ({
       setSelectedProviderId(editingRequest.providerId ?? "");
       setTracksValues(editingRequest.tracks ?? {});
       setManagementFee(editingRequest.managementFee);
+      setManagementFeeAccumulation(editingRequest.managementFeeAccumulation);
       setChoiceDuration(editingRequest.choiceDuration ?? "");
       setTransferType(editingRequest.transferType || "צבירה והפקדות");
       setKerenName(editingRequest.kerenName ?? "");
@@ -247,6 +252,7 @@ export const MeetingAddRequestDialog = ({
       tracks: tracksValues,
       tracksCount: tracksKeys.length,
       managementFee,
+      managementFeeAccumulation,
       choiceDuration,
       transferType,
       kerenName: kerenName === "-" ? "" : kerenName,
@@ -271,6 +277,7 @@ export const MeetingAddRequestDialog = ({
     tracksValues,
     tracksKeys.length,
     managementFee,
+    managementFeeAccumulation,
     sortedProviders,
     sortedRequestTypes,
     sortedFunds,
@@ -506,6 +513,39 @@ export const MeetingAddRequestDialog = ({
                 </span>
               </div>
               <MissingFieldHint fieldKey="managementFee" />
+            </div>
+
+            {/* Management Fee Accumulation */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">
+                דמי ניהול מצבירה
+              </Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={managementFeeAccumulation ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") { setManagementFeeAccumulation(undefined); return; }
+                    const num = Number(val);
+                    if (num < 0) return;
+                    setManagementFeeAccumulation(num);
+                  }}
+                  placeholder="0.00"
+                  dir="rtl"
+                  min={0}
+                  step={0.01}
+                  onKeyDown={(e) => {
+                    if (e.key === "-" || e.key === "e" || e.key === "E") {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="pl-8"
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+                  %
+                </span>
+              </div>
             </div>
 
             {/* מעמד */}

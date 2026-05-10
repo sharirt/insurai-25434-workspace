@@ -42,6 +42,9 @@ export function useNewRequestWizard({
   const [managementFee, setManagementFee] = useState<number | undefined>(
     undefined
   );
+  const [managementFeeAccumulation, setManagementFeeAccumulation] = useState<number | undefined>(
+    undefined
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [standing, setStanding] = useState("");
 
@@ -91,6 +94,7 @@ export function useNewRequestWizard({
       setSelectedRequestTypeId("");
       setSelectedFundId("");
       setManagementFee(undefined);
+      setManagementFeeAccumulation(undefined);
       setTracksValues({});
       setIsSubmitting(false);
       setStanding("");
@@ -136,6 +140,7 @@ export function useNewRequestWizard({
           tracks: tracksValues,
           fundId: selectedFundId || undefined,
           managementFee: managementFee ?? undefined,
+          managementFeeAccumulation: managementFeeAccumulation ?? undefined,
           standing: standing || undefined,
         },
       });
@@ -158,6 +163,7 @@ export function useNewRequestWizard({
     selectedRequestTypeId,
     selectedFundId,
     managementFee,
+    managementFeeAccumulation,
     standing,
     isStandalone,
     clientId,
@@ -178,6 +184,8 @@ export function useNewRequestWizard({
     setSelectedFundId,
     managementFee,
     setManagementFee,
+    managementFeeAccumulation,
+    setManagementFeeAccumulation,
     tracksValues,
     tracksKeys,
     handleTrackValue,

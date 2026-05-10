@@ -55,6 +55,7 @@ export const EditRequestDialog = ({
   const [selectedProviderId, setSelectedProviderId] = useState("");
   const [tracksValues, setTracksValues] = useState<Record<string, string>>({});
   const [managementFee, setManagementFee] = useState<number | undefined>(undefined);
+  const [managementFeeAccumulation, setManagementFeeAccumulation] = useState<number | undefined>(undefined);
   const [choiceDuration, setChoiceDuration] = useState<string>("");
   const [transferType, setTransferType] = useState<string>("");
   const [kerenName, setKerenName] = useState<string>("");
@@ -117,6 +118,7 @@ export const EditRequestDialog = ({
     setSelectedProviderId(request.providerId ?? "");
     setSelectedStatus(request.status ?? "מעבד");
     setManagementFee(request.managementFee ?? undefined);
+    setManagementFeeAccumulation((request as any).managementFeeAccumulation ?? undefined);
     setChoiceDuration(request.choiceDuration ?? "");
     setTransferType(request.transferType ?? "");
     setKerenName(request.kerenName ?? "");
@@ -191,6 +193,7 @@ export const EditRequestDialog = ({
           requestTypeId: selectedRequestTypeId,
           fundId: selectedFundId || undefined,
           managementFee: managementFee ?? undefined,
+          managementFeeAccumulation: managementFeeAccumulation ?? undefined,
           choiceDuration: (choiceDuration === "-" ? "" : choiceDuration) as any,
           transferType: (transferType === "-" ? "" : transferType) as any,
           kerenName: (kerenName === "-" ? "" : kerenName) as any,
@@ -351,6 +354,31 @@ export const EditRequestDialog = ({
                     const num = Number(val);
                     if (num < 0) return;
                     setManagementFee(num);
+                  }}
+                  placeholder="0.00"
+                  dir="rtl"
+                  min={0}
+                  step={0.01}
+                  onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                  className="pl-8"
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">%</span>
+              </div>
+            </div>
+
+            {/* Management Fee Accumulation */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-foreground">דמי ניהול מצבירה</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={managementFeeAccumulation ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") { setManagementFeeAccumulation(undefined); return; }
+                    const num = Number(val);
+                    if (num < 0) return;
+                    setManagementFeeAccumulation(num);
                   }}
                   placeholder="0.00"
                   dir="rtl"

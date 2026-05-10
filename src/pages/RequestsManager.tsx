@@ -478,6 +478,19 @@ function RequestDetail({ requestId }: { requestId: string }) {
                 </div>
               )}
 
+              {/* Management fee accumulation */}
+              {request.managementFeeAccumulation != null && (
+                <div className="flex items-center gap-3">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    <Percent className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">דמי ניהול מצבירה</p>
+                    <p className="font-medium">{request.managementFeeAccumulation}%</p>
+                  </div>
+                </div>
+              )}
+
               {/* Choice duration */}
               {request.choiceDuration && request.choiceDuration !== "" && (
                 <div className="flex items-center gap-3">
