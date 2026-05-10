@@ -1260,6 +1260,27 @@ export const CleanClientPhoneNumbersAction = {
 } as const;
 
 /**
+ * createClientContext input payload
+ */
+export interface ICreateClientContextActionInput {
+  /** The ID of the request from the Requests table to build context for  */
+  requestId: string;
+}
+
+export type CreateClientContextActionOutput = any;
+
+/**
+ * createClientContextAction
+ * Builds a complete clientContext object for a given requestId. Fetches the request, then in parallel fetches the specific client, agent, provider, the specific fund linked to the request, and the agency. Outputs the full clientContext object: clients (specific client data), agents (specific agent data), providers (specific provider data), funds (specific fund data), requests (full request data), agency (agency data).
+ */
+export const CreateClientContextAction = {
+  actionBlockId: "69db99ac7d23f0bc9a2950e5",
+
+  inputInstanceType: {} as ICreateClientContextActionInput,
+  outputInstanceType: {} as ICreateClientContextActionOutput,
+} as const;
+
+/**
  * DescribeFormPdfFields input payload
  */
 export interface IDescribeFormPdfFieldsActionInput {

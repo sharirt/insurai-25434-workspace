@@ -16,10 +16,10 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.4.7(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)
+        version: 1.4.8(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)
       '@blocksdiy/react-common':
         specifier: latest
-        version: 1.11.0(@types/react@19.2.14)(zod@4.3.6)
+        version: 1.11.1(@types/react@19.2.14)(zod@4.3.6)
       '@cyntler/react-doc-viewer':
         specifier: 1.17.1
         version: 1.17.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -478,14 +478,12 @@ packages:
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
     engines: {node: '>=6.9.0'}
 
-  '@blocksdiy/blocks-client-api@1.10.0':
-    resolution: {integrity: sha512-vnw5BHhHjdhU5tMT/j3hPQ+my03GqK31pMCvZKZ1WzMTk8V79jRFjNMi0+7v7CdnkNUU7HgC8JieRrhobmz/YA==}
+  '@blocksdiy/blocks-client-api@1.5.0':
+    resolution: {integrity: sha512-vzsgP0682zZmjrQ0yXg4EUaspQ8Vd3JhkfdIV7PzMJtuYt4fzcBJOTa8k5qQv0wu+vPnNAsROxcsRLzIkoXitA==}
     engines: {node: '>=24.11.0'}
-    peerDependencies:
-      react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.4.7':
-    resolution: {integrity: sha512-7c6Jh0tqhuB4C1nSo5Iq36W+iZzVVpvsIBjQTph1VLgK1i2b6Bit1FmwIE7u2/uMq0KUtZp0iIoT9vDMZ72t3A==}
+  '@blocksdiy/blocks-client-sdk@1.4.8':
+    resolution: {integrity: sha512-Co1Zevi3HYgrCQRiX8hvp9mLq3BJCUt/anonOkq1/lesPGAiqGOt5Gpde4qadrTmwZ9eUQTX9fGFxSClm9UfeQ==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -496,8 +494,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@blocksdiy/react-common@1.11.0':
-    resolution: {integrity: sha512-jJVK8XhpG/rcXDvvme8JWHqWXSGpbaDkzwQtrLqMQ+eUdbMiYLFQbJYg/dq9r1+7+j7hgM6MCmf0CiXmahDwqA==}
+  '@blocksdiy/react-common@1.11.1':
+    resolution: {integrity: sha512-N9kd3xN2BRMiAqS1RXDMpbVq73CEuK4DNV6dsWQJFwV6ZYa316vDNiBorpWXC7kG+dswe1cxaTlUGWL8ptSIJw==}
     engines: {node: '>=24.11.0'}
 
   '@braintree/sanitize-url@7.1.2':
@@ -6119,16 +6117,15 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@blocksdiy/blocks-client-api@1.10.0(react@19.2.4)':
+  '@blocksdiy/blocks-client-api@1.5.0':
     dependencies:
       lodash: 4.17.21
       pusher-js: 8.4.0-rc2
-      react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.4.7(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)':
+  '@blocksdiy/blocks-client-sdk@1.4.8(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)':
     dependencies:
-      '@blocksdiy/blocks-client-api': 1.10.0(react@19.2.4)
-      '@blocksdiy/react-common': 1.11.0(@types/react@19.2.14)(zod@4.3.6)
+      '@blocksdiy/blocks-client-api': 1.5.0
+      '@blocksdiy/react-common': 1.11.1(@types/react@19.2.14)(zod@4.3.6)
       '@tanstack/react-query': 5.100.9(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
@@ -6144,10 +6141,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@blocksdiy/react-common@1.11.0(@types/react@19.2.14)(zod@4.3.6)':
+  '@blocksdiy/react-common@1.11.1(@types/react@19.2.14)(zod@4.3.6)':
     dependencies:
       '@ai-sdk/react': 3.0.179(react@19.2.4)(zod@4.3.6)
-      '@blocksdiy/blocks-client-api': 1.10.0(react@19.2.4)
+      '@blocksdiy/blocks-client-api': 1.5.0
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.4)
       '@vapi-ai/web': 2.5.2
       ai: 6.0.177(zod@4.3.6)
