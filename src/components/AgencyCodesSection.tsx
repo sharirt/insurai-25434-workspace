@@ -293,17 +293,17 @@ export const AgencyCodesSection = () => {
                 value={providerSearch}
                 onChange={(e) => setProviderSearch(e.target.value)}
               />
-              <div className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
+              <div dir="rtl" className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
                 {providers?.filter((p) => (p.provider_name || "").toLowerCase().includes(providerSearch.toLowerCase())).map((p) => (
                   <label
                     key={p.id}
-                    className="flex flex-row-reverse items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
                   >
                     <Checkbox
                       checked={form.providerIds.includes(p.id)}
                       onCheckedChange={() => toggleProvider(p.id)}
                     />
-                    <span className="text-sm">{p.provider_name || "ללא שם"}</span>
+                    <span className="text-sm text-right">{p.provider_name || "ללא שם"}</span>
                   </label>
                 ))}
               </div>
@@ -336,17 +336,17 @@ export const AgencyCodesSection = () => {
                 value={requestTypeSearch}
                 onChange={(e) => setRequestTypeSearch(e.target.value)}
               />
-              <div className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
+              <div dir="rtl" className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
                 {requestSchemes?.filter((r) => (r.requestTypeName || "").toLowerCase().includes(requestTypeSearch.toLowerCase())).map((r) => (
                   <label
                     key={r.id}
-                    className="flex flex-row-reverse items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
                   >
                     <Checkbox
                       checked={form.requestTypeIds.includes(r.id)}
                       onCheckedChange={() => toggleRequestType(r.id)}
                     />
-                    <span className="text-sm">{r.requestTypeName || "ללא שם"}</span>
+                    <span className="text-sm text-right">{r.requestTypeName || "ללא שם"}</span>
                   </label>
                 ))}
               </div>
