@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import {
   useEntityGetAll,
@@ -87,6 +88,8 @@ export const AgencyCodesSection = () => {
   const { deleteFunction } = useEntityDelete(AgencyCodesEntity);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [providerSearch, setProviderSearch] = useState("");
+  const [requestTypeSearch, setRequestTypeSearch] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AgencyCodeForm>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -247,8 +250,8 @@ export const AgencyCodesSection = () => {
         </div>
       )}
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setProviderSearch(""); setRequestTypeSearch(""); } }}>
+        <DialogContent className="max-w-lg" dir="rtl">
           <DialogHeader>
             <DialogTitle>{editingId ? "עריכת קוד סוכן" : "הוספת קוד סוכן"}</DialogTitle>
           </DialogHeader>
@@ -285,11 +288,16 @@ export const AgencyCodesSection = () => {
                   נקה הכל
                 </Button>
               </div>
-              <div className="rounded-md border bg-muted/50 max-h-[200px] overflow-y-auto">
-                {providers?.map((p) => (
+              <Input
+                placeholder="חפש יצרן..."
+                value={providerSearch}
+                onChange={(e) => setProviderSearch(e.target.value)}
+              />
+              <div className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
+                {providers?.filter((p) => (p.provider_name || "").toLowerCase().includes(providerSearch.toLowerCase())).map((p) => (
                   <label
                     key={p.id}
-                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                    className="flex flex-row-reverse items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
                   >
                     <Checkbox
                       checked={form.providerIds.includes(p.id)}
@@ -323,11 +331,16 @@ export const AgencyCodesSection = () => {
                   נקה הכל
                 </Button>
               </div>
-              <div className="rounded-md border bg-muted/50 max-h-[200px] overflow-y-auto">
-                {requestSchemes?.map((r) => (
+              <Input
+                placeholder="חפש סוג בקשה..."
+                value={requestTypeSearch}
+                onChange={(e) => setRequestTypeSearch(e.target.value)}
+              />
+              <div className="rounded-md border bg-muted/50 max-h-[180px] overflow-y-auto">
+                {requestSchemes?.filter((r) => (r.requestTypeName || "").toLowerCase().includes(requestTypeSearch.toLowerCase())).map((r) => (
                   <label
                     key={r.id}
-                    className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
+                    className="flex flex-row-reverse items-center gap-2 px-3 py-2 cursor-pointer hover:bg-accent/50"
                   >
                     <Checkbox
                       checked={form.requestTypeIds.includes(r.id)}
