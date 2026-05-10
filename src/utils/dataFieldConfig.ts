@@ -128,6 +128,13 @@ export const DATA_TABLES: DataTableConfig[] = [
     ],
   },
   {
+    value: "agencyCodes",
+    label: "קודי סוכנות",
+    fields: [
+      { value: "agentCode", label: "קוד סוכן" },
+    ],
+  },
+  {
     value: "beneficiaries",
     label: "מוטבים",
     fields: [
