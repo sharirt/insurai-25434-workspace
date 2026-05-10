@@ -542,6 +542,8 @@ export interface IRequestsEntity {
   accountType?: RequestsEntityAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
   kerenName?: RequestsEntityKerenNameEnum;
   /** Current processing status of the request  */
@@ -564,8 +566,6 @@ export interface IRequestsEntity {
   isStandalone?: boolean;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
-  /** Management fee (דמי ניהול) associated with this insurance request, representing the fee percentage or amount charged for managing the fund  */
-  managementFee?: number;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
@@ -1176,6 +1176,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
   kerenName?: AutoProcessNewRequestActionOutputKerenNameEnum;
   /** Current processing status of the request  */
@@ -1198,8 +1200,6 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   isStandalone?: boolean;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
-  /** Management fee (דמי ניהול) associated with this insurance request, representing the fee percentage or amount charged for managing the fund  */
-  managementFee?: number;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
@@ -1853,6 +1853,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   accountType?: ProcessRequestFormsActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
   kerenName?: ProcessRequestFormsActionOutputKerenNameEnum;
   /** Current processing status of the request  */
@@ -1875,8 +1877,6 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   isStandalone?: boolean;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
-  /** Management fee (דמי ניהול) associated with this insurance request, representing the fee percentage or amount charged for managing the fund  */
-  managementFee?: number;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
@@ -2118,6 +2118,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   accountType?: SendCustomProviderEmailActionOutputAccountTypeEnum;
   /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
   isTotalTransfer?: boolean;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
   /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
   kerenName?: SendCustomProviderEmailActionOutputKerenNameEnum;
   /** Current processing status of the request  */
@@ -2140,8 +2142,6 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   isStandalone?: boolean;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
-  /** Management fee (דמי ניהול) associated with this insurance request, representing the fee percentage or amount charged for managing the fund  */
-  managementFee?: number;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */

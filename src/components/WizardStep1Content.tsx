@@ -194,12 +194,12 @@ export const WizardStep1Content = ({
       </div>
 
       <div className="space-y-2">
-        <Label className="text-base font-medium">דמי ניהול</Label>
+        <Label className="text-base font-medium">דמי ניהול מהפקדה</Label>
         <Input
           type="number"
           value={managementFee ?? ""}
           onChange={handleManagementFeeChange}
-          placeholder="הזן דמי ניהול (אופציונלי)"
+          placeholder="הזן דמי ניהול מהפקדה (אופציונלי)"
           dir="rtl"
         />
       </div>

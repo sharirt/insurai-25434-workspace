@@ -76,7 +76,7 @@ export const PendingRequestCard = ({
           )}
           {request.managementFee != null && (
             <p className="text-xs text-muted-foreground mt-1">
-              דמי ניהול: {request.managementFee}%
+              דמי ניהול מהפקדה: {request.managementFee}%
             </p>
           )}
           {activeTracks.length > 0 && (
@@ -103,7 +103,7 @@ export const PendingRequestCard = ({
             const fieldLabels: Record<string, string> = {
               providerId: "יצרן",
               requestTypeId: "סוג בקשה",
-              managementFee: "דמי ניהול",
+              managementFee: "דמי ניהול מהפקדה",
               transferType: "סוג העברה",
               choiceDuration: "תקופת בחירה",
               kerenName: "שם קרן",

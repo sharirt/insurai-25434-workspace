@@ -483,7 +483,7 @@ export const MeetingAddRequestDialog = ({
             {/* Management Fee */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-foreground">
-                דמי ניהול
+                דמי ניהול מהפקדה
               </Label>
               <div className="relative">
                 <Input

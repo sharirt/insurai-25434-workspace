@@ -472,7 +472,7 @@ function RequestDetail({ requestId }: { requestId: string }) {
                     <Percent className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">דמי ניהול</p>
+                    <p className="text-sm text-muted-foreground">דמי ניהול מהפקדה</p>
                     <p className="font-medium">{request.managementFee}%</p>
                   </div>
                 </div>

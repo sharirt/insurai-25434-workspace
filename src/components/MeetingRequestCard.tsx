@@ -88,7 +88,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
             )}
             {request.managementFee != null && (
               <div>
-                <span className="text-muted-foreground">דמי ניהול: </span>
+                <span className="text-muted-foreground">דמי ניהול מהפקדה: </span>
                 <span className="font-medium">{request.managementFee}%</span>
               </div>
             )}

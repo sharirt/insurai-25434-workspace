@@ -151,7 +151,7 @@ export const DATA_TABLES: DataTableConfig[] = [
     value: "requests",
     label: "בקשה",
     fields: [
-      { value: "managementFee", label: "דמי ניהול" },
+      { value: "managementFee", label: "דמי ניהול מהפקדה" },
       { value: "tracks", label: "מסלולים" },
       { value: "transferAmount", label: "סכום העברה" },
       { value: "accountType", label: "סוג חשבון" },

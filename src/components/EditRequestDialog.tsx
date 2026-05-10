@@ -340,7 +340,7 @@ export const EditRequestDialog = ({
 
             {/* Management Fee */}
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-semibold text-foreground">דמי ניהול</Label>
+              <Label className="text-sm font-semibold text-foreground">דמי ניהול מהפקדה</Label>
               <div className="relative">
                 <Input
                   type="number"
