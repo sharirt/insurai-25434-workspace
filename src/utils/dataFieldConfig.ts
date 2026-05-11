@@ -157,6 +157,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "transferAmount", label: "סכום העברה" },
       { value: "accountType", label: "סוג חשבון" },
       { value: "chargeDay", label: "מועד חיוב" },
+      { value: "independentTransferType", label: "סוג העברה עצמאית" },
+      { value: "independentTransferAmount", label: "סכום העברה עצמאי" },
     ],
   },
 ];

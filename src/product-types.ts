@@ -526,6 +526,10 @@ export type RequestsEntityTransferTypeEnum =
  */
 export interface IRequestsEntityTracksObject {}
 
+export type RequestsEntityIndependentTransferTypeEnum =
+  | "הוראת קבע"
+  | "הפקדה חד פעמית";
+
 export type RequestsEntityStandingEnum =
   | "שכיר"
   | "עצמאי"
@@ -554,6 +558,8 @@ export interface IRequestsEntity {
   chargeDay?: RequestsEntityChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
   /** Array of processed form documents with their URL links  */
   forms?: IRequestsEntityRequestsEntityFormsItemObject[];
   /** Reference to the client submitting this request from Clients table  */
@@ -572,6 +578,8 @@ export interface IRequestsEntity {
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IRequestsEntityTracksObject;
+  /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
+  independentTransferType?: RequestsEntityIndependentTransferTypeEnum;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: RequestsEntityStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
@@ -1144,6 +1152,10 @@ export type AutoProcessNewRequestActionOutputTransferTypeEnum =
  */
 export interface IAutoProcessNewRequestActionOutputTracksObject {}
 
+export type AutoProcessNewRequestActionOutputIndependentTransferTypeEnum =
+  | "הוראת קבע"
+  | "הפקדה חד פעמית";
+
 export type AutoProcessNewRequestActionOutputStandingEnum =
   | "שכיר"
   | "עצמאי"
@@ -1190,6 +1202,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   chargeDay?: AutoProcessNewRequestActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
   /** Array of processed form documents with their URL links  */
   forms?: IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputFormsItemObject[];
   /** Reference to the client submitting this request from Clients table  */
@@ -1208,6 +1222,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IAutoProcessNewRequestActionOutputTracksObject;
+  /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
+  independentTransferType?: AutoProcessNewRequestActionOutputIndependentTransferTypeEnum;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: AutoProcessNewRequestActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
@@ -1823,6 +1839,10 @@ export type ProcessRequestFormsActionOutputTransferTypeEnum =
  */
 export interface IProcessRequestFormsActionOutputTracksObject {}
 
+export type ProcessRequestFormsActionOutputIndependentTransferTypeEnum =
+  | "הוראת קבע"
+  | "הפקדה חד פעמית";
+
 export type ProcessRequestFormsActionOutputStandingEnum =
   | "שכיר"
   | "עצמאי"
@@ -1869,6 +1889,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   chargeDay?: ProcessRequestFormsActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
   /** Array of processed form documents with their URL links  */
   forms?: IProcessRequestFormsActionOutputProcessRequestFormsActionOutputFormsItemObject[];
   /** Reference to the client submitting this request from Clients table  */
@@ -1887,6 +1909,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: IProcessRequestFormsActionOutputTracksObject;
+  /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
+  independentTransferType?: ProcessRequestFormsActionOutputIndependentTransferTypeEnum;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: ProcessRequestFormsActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
@@ -2090,6 +2114,10 @@ export type SendCustomProviderEmailActionOutputTransferTypeEnum =
  */
 export interface ISendCustomProviderEmailActionOutputTracksObject {}
 
+export type SendCustomProviderEmailActionOutputIndependentTransferTypeEnum =
+  | "הוראת קבע"
+  | "הפקדה חד פעמית";
+
 export type SendCustomProviderEmailActionOutputStandingEnum =
   | "שכיר"
   | "עצמאי"
@@ -2136,6 +2164,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   chargeDay?: SendCustomProviderEmailActionOutputChargeDayEnum;
   /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
   transferAmount?: string;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
   /** Array of processed form documents with their URL links  */
   forms?: ISendCustomProviderEmailActionOutputSendCustomProviderEmailActionOutputFormsItemObject[];
   /** Reference to the client submitting this request from Clients table  */
@@ -2154,6 +2184,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   fundId?: string;
   /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
   tracks?: ISendCustomProviderEmailActionOutputTracksObject;
+  /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
+  independentTransferType?: SendCustomProviderEmailActionOutputIndependentTransferTypeEnum;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: SendCustomProviderEmailActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */

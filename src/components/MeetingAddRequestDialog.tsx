@@ -98,6 +98,8 @@ export const MeetingAddRequestDialog = ({
   const [standing, setStanding] = useState("");
   const [accountType, setAccountType] = useState("");
   const [chargeDay, setChargeDay] = useState("");
+  const [independentTransferType, setIndependentTransferType] = useState("");
+  const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
 
   const selectedScheme = useMemo(
@@ -151,6 +153,8 @@ export const MeetingAddRequestDialog = ({
       setStanding("");
       setAccountType("");
       setChargeDay("");
+      setIndependentTransferType("");
+      setIndependentTransferAmount("");
       setTrackSearch("");
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
@@ -165,6 +169,8 @@ export const MeetingAddRequestDialog = ({
       setStanding(editingRequest.standing ?? "");
       setAccountType(editingRequest.accountType ?? "");
       setChargeDay(editingRequest.chargeDay ?? "");
+      setIndependentTransferType(editingRequest.independentTransferType ?? "");
+      setIndependentTransferAmount(editingRequest.independentTransferAmount ?? "");
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -261,6 +267,8 @@ export const MeetingAddRequestDialog = ({
       standing: standing || undefined,
       accountType: accountType || undefined,
       chargeDay: chargeDay || undefined,
+      independentTransferType: independentTransferType || undefined,
+      independentTransferAmount: independentTransferAmount || undefined,
       sourceQuote: editingRequest?.sourceQuote,
       missingFields: updatedMissingFields,
     };
@@ -291,6 +299,8 @@ export const MeetingAddRequestDialog = ({
     standing,
     accountType,
     chargeDay,
+    independentTransferType,
+    independentTransferAmount,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -597,6 +607,32 @@ export const MeetingAddRequestDialog = ({
                   <SelectItem value="25">25</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* סוג העברה עצמאית */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">סוג העברה עצמאית</Label>
+              <Select value={independentTransferType || "-"} onValueChange={(val) => setIndependentTransferType(val === "-" ? "" : val)} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="הוראת קבע">הוראת קבע</SelectItem>
+                  <SelectItem value="הפקדה חד פעמית">הפקדה חד פעמית</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* סכום העברה עצמאי */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-foreground">סכום העברה עצמאי</Label>
+              <Input
+                value={independentTransferAmount}
+                onChange={(e) => setIndependentTransferAmount(e.target.value)}
+                placeholder="הכנס סכום"
+                dir="rtl"
+              />
             </div>
           </div>
 

@@ -63,6 +63,8 @@ export const EditRequestDialog = ({
   const [isTotalTransfer, setIsTotalTransfer] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState("מעבד");
   const [selectedStanding, setSelectedStanding] = useState("");
+  const [independentTransferType, setIndependentTransferType] = useState("");
+  const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
 
   const { data: providers, isLoading: isLoadingProviders } = useEntityGetAll(ProvidersEntity);
@@ -123,6 +125,8 @@ export const EditRequestDialog = ({
     setTransferType(request.transferType ?? "");
     setKerenName(request.kerenName ?? "");
     setSelectedStanding(request.standing ?? "");
+    setIndependentTransferType(request.independentTransferType ?? "");
+    setIndependentTransferAmount(request.independentTransferAmount ?? "");
 
     // Tracks
     if (request.tracks) {
@@ -201,6 +205,8 @@ export const EditRequestDialog = ({
           transferAmount: isTotalTransfer ? undefined : transferAmount.trim(),
           tracks: tracksObj,
           standing: (selectedStanding === "-" || selectedStanding === "") ? undefined : selectedStanding as any,
+          independentTransferType: (independentTransferType === "-" || independentTransferType === "") ? undefined : independentTransferType as any,
+          independentTransferAmount: independentTransferAmount || undefined,
         },
       });
 
@@ -406,6 +412,32 @@ export const EditRequestDialog = ({
                   <SelectItem value="עצמאי באמצעות מעסיק">עצמאי באמצעות מעסיק</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* סוג העברה עצמאית */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-foreground">סוג העברה עצמאית</Label>
+              <Select value={independentTransferType || "-"} onValueChange={(val) => setIndependentTransferType(val === "-" ? "" : val)} dir="rtl">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="ללא" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-">ללא</SelectItem>
+                  <SelectItem value="הוראת קבע">הוראת קבע</SelectItem>
+                  <SelectItem value="הפקדה חד פעמית">הפקדה חד פעמית</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* סכום העברה עצמאי */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-sm font-semibold text-foreground">סכום העברה עצמאי</Label>
+              <Input
+                value={independentTransferAmount}
+                onChange={(e) => setIndependentTransferAmount(e.target.value)}
+                placeholder="הכנס סכום"
+                dir="rtl"
+              />
             </div>
           </div>
 

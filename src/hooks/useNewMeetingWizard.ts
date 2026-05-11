@@ -41,6 +41,8 @@ export interface PendingRequest {
   standing?: string;
   accountType?: string;
   chargeDay?: string;
+  independentTransferType?: string;
+  independentTransferAmount?: string;
   sourceQuote?: string;
   missingFields?: Record<string, string>;
 }
@@ -259,6 +261,8 @@ export function useNewMeetingWizard({
             standing: req.standing,
             accountType: req.accountType || undefined,
             chargeDay: req.chargeDay || undefined,
+            independentTransferType: req.independentTransferType || undefined,
+            independentTransferAmount: req.independentTransferAmount || undefined,
           },
         });
         createdRequestIds.push(createdReq.id);
