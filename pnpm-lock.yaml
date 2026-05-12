@@ -16,10 +16,10 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.4.10(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)
+        version: 1.4.12(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)
       '@blocksdiy/react-common':
         specifier: latest
-        version: 1.13.0(@types/react@19.2.14)(zod@4.3.6)
+        version: 1.14.1(@types/react@19.2.14)(zod@4.3.6)
       '@cyntler/react-doc-viewer':
         specifier: 1.17.1
         version: 1.17.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -482,8 +482,8 @@ packages:
     resolution: {integrity: sha512-vzsgP0682zZmjrQ0yXg4EUaspQ8Vd3JhkfdIV7PzMJtuYt4fzcBJOTa8k5qQv0wu+vPnNAsROxcsRLzIkoXitA==}
     engines: {node: '>=24.11.0'}
 
-  '@blocksdiy/blocks-client-sdk@1.4.10':
-    resolution: {integrity: sha512-6m91/HhbPnr4HUaVzOQZIZ7s7ea27lswOUJov1SoVOVBRQlD4YYnV8j7Ex8oaX2v6s3N0Gbc8WuLg+w1K6SbYA==}
+  '@blocksdiy/blocks-client-sdk@1.4.12':
+    resolution: {integrity: sha512-C6N2zLopv065gia02VhEkAckYmhJMMmBW+j59aijqjfrysbz99kAbvoyy+uDi4qUGfxaxW6BuX+J0DemsDyeFQ==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -494,8 +494,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@blocksdiy/react-common@1.13.0':
-    resolution: {integrity: sha512-FIt6c1Glr7PlUq+6ZfguLitoquOUBBPYNZVzbMKQ04cas8UPBY3GSmlqjN43ohYS71rs/JBvfuKXV8wMw+JvSQ==}
+  '@blocksdiy/react-common@1.14.1':
+    resolution: {integrity: sha512-ZCW+GbJYAP3ybiEZgCifWCPKt24EiK3EZLddD70GcOwTNkPD9/2+yx0ph/rukAbW5QZGdLcubPEM3vivWeljbg==}
     engines: {node: '>=24.11.0'}
 
   '@braintree/sanitize-url@7.1.2':
@@ -6077,10 +6077,10 @@ snapshots:
       lodash: 4.17.21
       pusher-js: 8.4.0-rc2
 
-  '@blocksdiy/blocks-client-sdk@1.4.10(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)':
+  '@blocksdiy/blocks-client-sdk@1.4.12(@types/react@19.2.14)(react@19.2.4)(zod@4.3.6)':
     dependencies:
       '@blocksdiy/blocks-client-api': 1.5.0
-      '@blocksdiy/react-common': 1.13.0(@types/react@19.2.14)(zod@4.3.6)
+      '@blocksdiy/react-common': 1.14.1(@types/react@19.2.14)(zod@4.3.6)
       '@tanstack/react-query': 5.100.10(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
@@ -6096,7 +6096,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@blocksdiy/react-common@1.13.0(@types/react@19.2.14)(zod@4.3.6)':
+  '@blocksdiy/react-common@1.14.1(@types/react@19.2.14)(zod@4.3.6)':
     dependencies:
       '@ai-sdk/react': 3.0.179(react@19.2.4)(zod@4.3.6)
       '@blocksdiy/blocks-client-api': 1.5.0

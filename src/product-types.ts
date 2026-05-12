@@ -132,6 +132,8 @@ export interface IClientsEntity {
   birthCountryEnglish?: string;
   /** Client's national identification number, 9 characters  */
   national_id?: string;
+  /** Computed English street address with number — combines englishStreet and streetNumber fields (רחוב באנגלית עם מספר)  */
+  englishStreetWithNumber?: string;
   /** Client's last name in English (שם משפחה אנגלית)  */
   englishLastName?: string;
   /** National ID number of the second parent or guardian of the client  */
