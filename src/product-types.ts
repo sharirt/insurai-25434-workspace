@@ -1291,7 +1291,7 @@ export type CreateClientContextActionOutput = any;
 
 /**
  * createClientContextAction
- * Builds a complete clientContext object for a given requestId. Fetches the request, then in parallel fetches the specific client, agent, provider, the specific fund linked to the request, and the agency. Outputs the full clientContext object: clients (specific client data), agents (specific agent data), providers (specific provider data), funds (specific fund data), requests (full request data), agency (agency data).
+ * Builds a complete clientContext object for a given requestId. Fetches the request, then in parallel fetches the specific client, agent, provider, the specific fund linked to the request, the agency, all agency codes, and all beneficiaries for the client. Finds the matching agency code entry where requestTypeIds includes the request's requestTypeId AND providerIds includes the request's providerId, and extracts the agentCode. Outputs the full clientContext object: clients, agents, providers, funds, requests, agency, agencyCodes (with agentCode), and beneficiaries (array).
  */
 export const CreateClientContextAction = {
   actionBlockId: "69db99ac7d23f0bc9a2950e5",

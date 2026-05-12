@@ -15,6 +15,7 @@ import { ImportFundsDialog } from "@/components/ImportFundsDialog";
 import { ImportInvestmentTracksDialog } from "@/components/ImportInvestmentTracksDialog";
 import { FundsProviderPieChart } from "@/components/FundsProviderPieChart";
 import { StandaloneRequestsSection } from "@/components/StandaloneRequestsSection";
+import { BeneficiariesSection } from "@/components/BeneficiariesSection";
 import { toast } from "sonner";
 import { useMemo, useState, useCallback } from "react";
 
@@ -292,6 +293,8 @@ export default function ClientProfile() {
         ) : (
           <FundsTable funds={sortedFunds} />
         )}
+
+        <BeneficiariesSection clientId={clientId} />
 
         <StandaloneRequestsSection
           requests={standaloneRequests}
