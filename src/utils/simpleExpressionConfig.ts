@@ -27,6 +27,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "רווק", expression: "clients.relationship === 'רווק'" },
   { label: "גרוש", expression: "clients.relationship === 'גרוש'" },
   { label: "אלמן", expression: "clients.relationship === 'אלמן'" },
+  { label: "ידוע בציבור", expression: "clients.relationship === 'ידוע בציבור'" },
   { label: "שכיר", expression: "clients.employment === 'שכיר'" },
   { label: "עצמאי", expression: "clients.employment === 'עצמאי'" },
   { label: "סטודנט", expression: "clients.employment === 'סטודנט'" },

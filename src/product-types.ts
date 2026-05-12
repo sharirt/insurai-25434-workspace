@@ -94,9 +94,14 @@ export type ClientsEntityEmploymentEnum =
   | "גמלאי"
   | "שכיר בעל שליטה";
 
-export type ClientsEntityRelationshipEnum = "רווק" | "נשוי" | "גרוש" | "אלמן";
-
 export type ClientsEntityGenderEnum = "זכר" | "נקבה";
+
+export type ClientsEntityRelationshipEnum =
+  | "רווק"
+  | "נשוי"
+  | "גרוש"
+  | "אלמן"
+  | "ידוע בציבור";
 
 /**
  * Stores client personal details including national identification number, contact information for insurance form processing
@@ -158,8 +163,6 @@ export interface IClientsEntity {
   idDocumentationUrl?: string;
   /** Client's email address for communication  */
   email?: string;
-  /** Client's marital/relationship status  */
-  relationship?: ClientsEntityRelationshipEnum;
   /** Client's street address in English (רחוב באנגלית)  */
   englishStreet?: string;
   /** Full name of the second parent or guardian of the client  */
@@ -206,6 +209,8 @@ export interface IClientsEntity {
   parent1FirstName?: string;
   /** Client's employer name  */
   employer?: string;
+  /** Client's marital/relationship status  */
+  relationship?: ClientsEntityRelationshipEnum;
   /** Full name of the first parent or guardian of the client  */
   parent1Name?: string;
   /** The client's country of tax residency (מדינת מס). Free text field used to indicate if the client is a tax resident of a foreign country.  */
