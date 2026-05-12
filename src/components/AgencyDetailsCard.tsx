@@ -21,10 +21,12 @@ export const AgencyDetailsCard = () => {
   const agency = agencies?.[0];
 
   const [agencyName, setAgencyName] = useState("");
+  const [agencyCode, setAgencyCode] = useState("");
 
   useEffect(() => {
     if (agency) {
       setAgencyName(agency.agencyName || "");
+      setAgencyCode(agency.agencyCode || "");
     }
   }, [agency]);
 
@@ -33,11 +35,11 @@ export const AgencyDetailsCard = () => {
       if (agency) {
         await updateFunction({
           id: agency.id,
-          data: { agencyName },
+          data: { agencyName, agencyCode },
         });
       } else {
         await createFunction({
-          data: { agencyName },
+          data: { agencyName, agencyCode },
         });
       }
       toast.success("פרטי הסוכנות נשמרו בהצלחה");
@@ -74,6 +76,15 @@ export const AgencyDetailsCard = () => {
             value={agencyName}
             onChange={(e) => setAgencyName(e.target.value)}
             placeholder="הזן שם סוכנות"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="agencyCode">ח.פ סוכנות</Label>
+          <Input
+            id="agencyCode"
+            value={agencyCode}
+            onChange={(e) => setAgencyCode(e.target.value)}
+            placeholder="הזן ח.פ סוכנות"
           />
         </div>
         <div className="flex justify-start">

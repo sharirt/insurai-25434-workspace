@@ -126,6 +126,7 @@ export const DATA_TABLES: DataTableConfig[] = [
     label: "סוכנות",
     fields: [
       { value: "agencyName", label: "שם הסוכנות" },
+      { value: "agencyCode", label: "ח.פ סוכנות" },
     ],
   },
   {
