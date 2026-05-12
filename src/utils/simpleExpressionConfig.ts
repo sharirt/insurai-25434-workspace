@@ -39,6 +39,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "שכיר בעל שליטה", expression: "clients.employment === 'שכיר בעל שליטה'" },
   { label: "בגיר", expression: "clients.age >= 18" },
   { label: "קטין", expression: "clients.age < 18" },
+  { label: "בעל מוטבים", expression: "beneficiaries && beneficiaries.length > 0" },
   { label: `מסלול ${FIELD_TRANSLATIONS["clali"]} נבחר`, expression: "requests.tracks.clali !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["menayot"]} נבחר`, expression: "requests.tracks.menayot !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["okev_madad_sp"]} נבחר`, expression: "requests.tracks.okev_madad_sp !== ''" },
