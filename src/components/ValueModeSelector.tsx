@@ -55,10 +55,10 @@ function detectMode(value: string | undefined): ValueMode {
   return "text";
 }
 
-function parseTableField(value: string): { table: string; field: string; trackKey: string } {
+function parseTableField(value: string): { table: string; field: string; trackKey: string; beneficiaryIndex: string } {
   const parsed = parseDataFieldExpression(value);
-  if (parsed) return { table: parsed.table, field: parsed.field, trackKey: parsed.trackKey || "" };
-  return { table: "", field: "", trackKey: "" };
+  if (parsed) return { table: parsed.table, field: parsed.field, trackKey: parsed.trackKey || "", beneficiaryIndex: parsed.beneficiaryIndex !== undefined ? String(parsed.beneficiaryIndex) : "" };
+  return { table: "", field: "", trackKey: "", beneficiaryIndex: "" };
 }
 
 export const ValueModeSelector = ({
@@ -85,6 +85,10 @@ export const ValueModeSelector = ({
   });
   const [selectedTrackKey, setSelectedTrackKey] = useState(() => {
     if (initialMode === "dataField") return parseTableField(value).trackKey;
+    return "";
+  });
+  const [selectedBeneficiaryIndex, setSelectedBeneficiaryIndex] = useState(() => {
+    if (initialMode === "dataField") return parseTableField(value).beneficiaryIndex;
     return "";
   });
 
@@ -114,6 +118,7 @@ export const ValueModeSelector = ({
         setSelectedTable("");
         setSelectedField("");
         setSelectedTrackKey("");
+        setSelectedBeneficiaryIndex("");
       }
 
       if (newMode === "empty") {
@@ -130,6 +135,8 @@ export const ValueModeSelector = ({
         if (selectedTable && selectedField) {
           if (selectedTable === "requests" && selectedField === "tracks" && selectedTrackKey) {
             onChange(`${selectedTable}.${selectedField}.${selectedTrackKey}`);
+          } else if (selectedTable === "beneficiaries" && selectedBeneficiaryIndex !== "") {
+            onChange(`beneficiaries[${selectedBeneficiaryIndex}]?.${selectedField}`);
           } else {
             onChange(`${selectedTable}.${selectedField}`);
           }
@@ -138,7 +145,7 @@ export const ValueModeSelector = ({
         }
       }
     },
-    [onChange, textValue, selectedTable, selectedField, selectedTrackKey]
+    [onChange, textValue, selectedTable, selectedField, selectedTrackKey, selectedBeneficiaryIndex]
   );
 
   const handleTextChange = useCallback(
@@ -164,6 +171,7 @@ export const ValueModeSelector = ({
       setSelectedTable(newTable);
       setSelectedField("");
       setSelectedTrackKey("");
+      setSelectedBeneficiaryIndex("");
       onChange("");
     },
     [onChange]
@@ -177,11 +185,15 @@ export const ValueModeSelector = ({
         onChange("");
         return;
       }
+      if (selectedTable === "beneficiaries" && selectedBeneficiaryIndex !== "" && newField) {
+        onChange(`beneficiaries[${selectedBeneficiaryIndex}]?.${newField}`);
+        return;
+      }
       if (selectedTable && newField) {
         onChange(`${selectedTable}.${newField}`);
       }
     },
-    [onChange, selectedTable]
+    [onChange, selectedTable, selectedBeneficiaryIndex]
   );
 
   const handleTrackKeyChange = useCallback(
@@ -192,6 +204,15 @@ export const ValueModeSelector = ({
       }
     },
     [onChange, selectedTable, selectedField]
+  );
+
+  const handleBeneficiaryIndexChange = useCallback(
+    (newIndex: string) => {
+      setSelectedBeneficiaryIndex(newIndex);
+      setSelectedField("");
+      onChange("");
+    },
+    [onChange]
   );
 
   // Sync from external value changes (e.g. when parent resets)
@@ -206,6 +227,7 @@ export const ValueModeSelector = ({
         setSelectedTable(parsed.table);
         setSelectedField(parsed.field);
         setSelectedTrackKey(parsed.trackKey);
+        setSelectedBeneficiaryIndex(parsed.beneficiaryIndex);
       }
     } else if (newMode === "text" && value !== textValue) {
       setTextValue(value);
@@ -297,10 +319,25 @@ export const ValueModeSelector = ({
             </SelectContent>
           </Select>
 
+          {selectedTable === "beneficiaries" && (
+            <Select value={selectedBeneficiaryIndex} onValueChange={handleBeneficiaryIndexChange}>
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="בחר מוטב" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <SelectItem key={i} value={String(i)}>
+                    מוטב {i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
           <Select
             value={selectedField}
             onValueChange={handleFieldChange}
-            disabled={!selectedTable}
+            disabled={!selectedTable || (selectedTable === "beneficiaries" && selectedBeneficiaryIndex === "")}
           >
             <SelectTrigger className="text-sm">
               <SelectValue placeholder="בחר שדה" />

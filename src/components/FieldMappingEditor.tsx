@@ -46,6 +46,7 @@ interface ParsedValue {
   dataFieldTable: string;
   dataFieldField: string;
   dataFieldTrackKey: string;
+  dataFieldBeneficiaryIndex: string;
   simpleConditionExpression: string;
   simpleThenValue: string;
   simpleElseValue: string;
@@ -61,6 +62,7 @@ function parseStoredValue(storedValue: any): ParsedValue {
     dataFieldTable: "",
     dataFieldField: "",
     dataFieldTrackKey: "",
+    dataFieldBeneficiaryIndex: "",
     simpleConditionExpression: "",
     simpleConditionExpressions: [""],
     simpleConditionOperators: [],
@@ -109,6 +111,7 @@ function parseStoredValue(storedValue: any): ParsedValue {
         dataFieldTable: dataField.table,
         dataFieldField: dataField.field,
         dataFieldTrackKey: dataField.trackKey || "",
+        dataFieldBeneficiaryIndex: dataField.beneficiaryIndex !== undefined ? String(dataField.beneficiaryIndex) : "",
       };
     }
 
@@ -141,7 +144,8 @@ function buildStoredValue(
   simpleConditionExpressions: string[],
   simpleThenValue: string,
   simpleElseValue: string,
-  simpleConditionOperators: ('AND' | 'OR')[]
+  simpleConditionOperators: ('AND' | 'OR')[],
+  dataFieldBeneficiaryIndex?: string
 ): string {
   if (ruleType === "empty") return "";
   if (ruleType === "text") return textValue;
@@ -151,6 +155,9 @@ function buildStoredValue(
   if (ruleType === "dataField" && dataFieldTable && dataFieldField) {
     if (dataFieldTable === "requests" && dataFieldField === "tracks" && dataFieldTrackKey) {
       return `{{${dataFieldTable}.${dataFieldField}.${dataFieldTrackKey}}}`;
+    }
+    if (dataFieldTable === "beneficiaries" && dataFieldBeneficiaryIndex !== undefined && dataFieldBeneficiaryIndex !== "") {
+      return `{{beneficiaries[${dataFieldBeneficiaryIndex}]?.${dataFieldField}}}`;
     }
     return `{{${dataFieldTable}.${dataFieldField}}}`;
   }
@@ -177,6 +184,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
   const [dataFieldTable, setDataFieldTable] = useState(parsed.dataFieldTable);
   const [dataFieldField, setDataFieldField] = useState(parsed.dataFieldField);
   const [dataFieldTrackKey, setDataFieldTrackKey] = useState(parsed.dataFieldTrackKey);
+  const [dataFieldBeneficiaryIndex, setDataFieldBeneficiaryIndex] = useState(parsed.dataFieldBeneficiaryIndex);
   const [simpleConditionExpressions, setSimpleConditionExpressions] = useState<string[]>(
     parsed.simpleConditionExpressions
   );
@@ -212,6 +220,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
       setDataFieldTable("");
       setDataFieldField("");
       setDataFieldTrackKey("");
+      setDataFieldBeneficiaryIndex("");
     }
     if (newRuleType !== "simpleExpression") {
       setSimpleConditionExpressions([""]);
@@ -231,6 +240,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
     setDataFieldTable(newTable);
     setDataFieldField("");
     setDataFieldTrackKey("");
+    setDataFieldBeneficiaryIndex("");
     setFieldSearch("");
   }, []);
 
@@ -258,7 +268,8 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
         simpleConditionExpressions,
         simpleThenValue,
         simpleElseValue,
-        simpleConditionOperators
+        simpleConditionOperators,
+        dataFieldBeneficiaryIndex
       );
 
       await updateFunction({
@@ -285,6 +296,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
     dataFieldTable,
     dataFieldField,
     dataFieldTrackKey,
+    dataFieldBeneficiaryIndex,
     simpleConditionExpressions,
     simpleConditionOperators,
     simpleThenValue,
@@ -301,6 +313,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
     setDataFieldTable(parsed.dataFieldTable);
     setDataFieldField(parsed.dataFieldField);
     setDataFieldTrackKey(parsed.dataFieldTrackKey);
+    setDataFieldBeneficiaryIndex(parsed.dataFieldBeneficiaryIndex);
     setSimpleConditionExpressions(parsed.simpleConditionExpressions);
     setSimpleConditionOperators(parsed.simpleConditionOperators);
     setSimpleThenValue(parsed.simpleThenValue);
@@ -321,7 +334,7 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
     if (parsed.ruleType === "todayDate") return "תאריך היום";
     if (parsed.ruleType === "canonicalBirthday") return "תאריך לידה קאנוני";
     if (parsed.ruleType === "dataField") {
-      return getDataFieldDisplayLabel(parsed.dataFieldTable, parsed.dataFieldField, parsed.dataFieldTrackKey);
+      return getDataFieldDisplayLabel(parsed.dataFieldTable, parsed.dataFieldField, parsed.dataFieldTrackKey, parsed.dataFieldBeneficiaryIndex !== "" ? parseInt(parsed.dataFieldBeneficiaryIndex, 10) : undefined);
     }
     if (parsed.ruleType === "simpleExpression") {
       const condLabels = parsed.simpleConditionExpressions.map((expr) => {
@@ -447,7 +460,25 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
                   </Select>
                 </div>
 
-                {dataFieldTable && (
+                {dataFieldTable === "beneficiaries" && (
+                  <div>
+                    <label className="text-xs font-medium mb-1 block">מוטב</label>
+                    <Select value={dataFieldBeneficiaryIndex} onValueChange={(val) => { setDataFieldBeneficiaryIndex(val); setDataFieldField(""); }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="בחר מוטב" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 6 }, (_, i) => (
+                          <SelectItem key={i} value={String(i)}>
+                            מוטב {i + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {dataFieldTable && (dataFieldTable !== "beneficiaries" || dataFieldBeneficiaryIndex !== "") && (
                   <div>
                     <label className="text-xs font-medium mb-1 block">שדה</label>
                     <Select value={dataFieldField} onValueChange={handleFieldChange} onOpenChange={(open) => { if (!open) setFieldSearch(""); }}>

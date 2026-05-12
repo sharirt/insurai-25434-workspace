@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { useEntityCreate, useEntityUpdate } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { BeneficiariesEntity } from "@/product-types";

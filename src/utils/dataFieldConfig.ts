@@ -168,6 +168,7 @@ export interface ParsedDataField {
   table: string;
   field: string;
   trackKey?: string;
+  beneficiaryIndex?: number;
 }
 
 /**
@@ -187,9 +188,22 @@ export function getTrackOptions(): DataFieldOption[] {
  * Returns the table, field, and optional trackKey, or null if not a valid data field pattern.
  */
 export function parseDataFieldExpression(expression: string): ParsedDataField | null {
+  // Check for beneficiary indexed pattern: beneficiaries[N]?.fieldName
+  const beneficiaryMatch = expression.match(/^beneficiaries\[(\d+)\]\?\.(\w+)$/);
+  if (beneficiaryMatch) {
+    const index = parseInt(beneficiaryMatch[1], 10);
+    const fieldName = beneficiaryMatch[2];
+    const beneficiaryTable = DATA_TABLES.find(t => t.value === "beneficiaries");
+    if (beneficiaryTable?.fields.some(f => f.value === fieldName)) {
+      return { table: "beneficiaries", field: fieldName, beneficiaryIndex: index };
+    }
+  }
+
   const tableNames = DATA_TABLES.map((t) => t.value);
   for (const tableName of tableNames) {
     if (expression.startsWith(`${tableName}.`)) {
+      // Skip beneficiaries dot-notation — only indexed pattern is valid
+      if (tableName === "beneficiaries") continue;
       const rest = expression.slice(tableName.length + 1);
       const tableConfig = DATA_TABLES.find((t) => t.value === tableName);
       if (!tableConfig) continue;
@@ -219,7 +233,8 @@ export function parseDataFieldExpression(expression: string): ParsedDataField | 
 export function getDataFieldDisplayLabel(
   table: string,
   field: string,
-  trackKey?: string
+  trackKey?: string,
+  beneficiaryIndex?: number
 ): string {
   const tableConfig = DATA_TABLES.find((t) => t.value === table);
   if (!tableConfig) return `${table}.${field}`;
@@ -230,6 +245,10 @@ export function getDataFieldDisplayLabel(
   if (trackKey && field === "tracks") {
     const trackLabel = FIELD_TRANSLATIONS[trackKey] || trackKey;
     return `${tableConfig.label} > ${fieldConfig.label} > ${trackLabel}`;
+  }
+
+  if (table === "beneficiaries" && beneficiaryIndex !== undefined) {
+    return `${tableConfig.label} > מוטב ${beneficiaryIndex + 1} > ${fieldConfig.label}`;
   }
 
   return `${tableConfig.label} > ${fieldConfig.label}`;

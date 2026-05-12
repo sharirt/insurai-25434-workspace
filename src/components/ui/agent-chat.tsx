@@ -1414,7 +1414,7 @@ const AgentChatRootPrimitive =
     chatContextFiles?: Attachment[];
     agentChatData?: AgentChatData;
     noPersistency?: boolean;
-    shortTermMemory?: { isEnabled: boolean };
+    shortTermMemory?: { isEnabled: boolean; isPersistent?: boolean };
     useAgentBlockDirectChat?: boolean;
     children?: React.ReactNode;
   }>;
