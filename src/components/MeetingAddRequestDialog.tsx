@@ -433,6 +433,8 @@ export const MeetingAddRequestDialog = ({
                         value={requestTypeSearch}
                         onChange={(e) => setRequestTypeSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
@@ -478,6 +480,8 @@ export const MeetingAddRequestDialog = ({
                         value={providerSearch}
                         onChange={(e) => setProviderSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
