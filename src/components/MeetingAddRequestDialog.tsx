@@ -202,7 +202,7 @@ export const MeetingAddRequestDialog = ({
   }, 0);
 
   const TRACKS_SUM_EPSILON = 0.01;
-  const isTracksSumValid = tracksSum < TRACKS_SUM_EPSILON || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
+  const isTracksSumValid = Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
 
   const isPartialAmountValid =
     isTotalTransfer ||
@@ -326,6 +326,13 @@ export const MeetingAddRequestDialog = ({
     []
   );
 
+  const handleSelectSearchRowMouseDown = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
+    if ((e.target as HTMLElement).closest("input")) return;
+    e.preventDefault();
+  };
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="p-0 overflow-hidden" dir="rtl" style={{ width: '90vw', maxWidth: '90vw', height: '85vh' }}>
@@ -425,7 +432,10 @@ export const MeetingAddRequestDialog = ({
                     <SelectValue placeholder="בחר סוג בקשה" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border" onMouseDown={(e) => e.preventDefault()}>
+                    <div
+                      className="flex items-center gap-2 px-3 py-2 border-b border-border"
+                      onMouseDown={handleSelectSearchRowMouseDown}
+                    >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
                         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -470,7 +480,10 @@ export const MeetingAddRequestDialog = ({
                     <SelectValue placeholder="בחר יצרן" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border" onMouseDown={(e) => e.preventDefault()}>
+                    <div
+                      className="flex items-center gap-2 px-3 py-2 border-b border-border"
+                      onMouseDown={handleSelectSearchRowMouseDown}
+                    >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
                         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
