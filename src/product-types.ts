@@ -530,6 +530,13 @@ export type RequestsEntityTransferTypeEnum =
   | "צבירה בלבד"
   | "הפקדות בלבד";
 
+export type RequestsEntityStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק"
+  | "חבר קיבוץ";
+
 /**
  * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
  */
@@ -538,12 +545,6 @@ export interface IRequestsEntityTracksObject {}
 export type RequestsEntityIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type RequestsEntityStandingEnum =
-  | "שכיר"
-  | "עצמאי"
-  | "שכיר בעל שליטה"
-  | "עצמאי באמצעות מעסיק";
 
 export type RequestsEntityChoiceDurationEnum = "" | "6" | "12" | "24";
 
@@ -581,6 +582,8 @@ export interface IRequestsEntity {
   agentId?: string;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: RequestsEntityStandingEnum;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
@@ -589,8 +592,6 @@ export interface IRequestsEntity {
   tracks?: IRequestsEntityTracksObject;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: RequestsEntityIndependentTransferTypeEnum;
-  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
-  standing?: RequestsEntityStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: RequestsEntityChoiceDurationEnum;
 }
@@ -1156,6 +1157,13 @@ export type AutoProcessNewRequestActionOutputTransferTypeEnum =
   | "צבירה בלבד"
   | "הפקדות בלבד";
 
+export type AutoProcessNewRequestActionOutputStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק"
+  | "חבר קיבוץ";
+
 /**
  * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
  */
@@ -1164,12 +1172,6 @@ export interface IAutoProcessNewRequestActionOutputTracksObject {}
 export type AutoProcessNewRequestActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type AutoProcessNewRequestActionOutputStandingEnum =
-  | "שכיר"
-  | "עצמאי"
-  | "שכיר בעל שליטה"
-  | "עצמאי באמצעות מעסיק";
 
 export type AutoProcessNewRequestActionOutputChoiceDurationEnum =
   | ""
@@ -1225,6 +1227,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   agentId?: string;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: AutoProcessNewRequestActionOutputStandingEnum;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
@@ -1233,8 +1237,6 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   tracks?: IAutoProcessNewRequestActionOutputTracksObject;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: AutoProcessNewRequestActionOutputIndependentTransferTypeEnum;
-  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
-  standing?: AutoProcessNewRequestActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: AutoProcessNewRequestActionOutputChoiceDurationEnum;
 }
@@ -1843,6 +1845,13 @@ export type ProcessRequestFormsActionOutputTransferTypeEnum =
   | "צבירה בלבד"
   | "הפקדות בלבד";
 
+export type ProcessRequestFormsActionOutputStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק"
+  | "חבר קיבוץ";
+
 /**
  * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
  */
@@ -1851,12 +1860,6 @@ export interface IProcessRequestFormsActionOutputTracksObject {}
 export type ProcessRequestFormsActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type ProcessRequestFormsActionOutputStandingEnum =
-  | "שכיר"
-  | "עצמאי"
-  | "שכיר בעל שליטה"
-  | "עצמאי באמצעות מעסיק";
 
 export type ProcessRequestFormsActionOutputChoiceDurationEnum =
   | ""
@@ -1912,6 +1915,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   agentId?: string;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: ProcessRequestFormsActionOutputStandingEnum;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
@@ -1920,8 +1925,6 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   tracks?: IProcessRequestFormsActionOutputTracksObject;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: ProcessRequestFormsActionOutputIndependentTransferTypeEnum;
-  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
-  standing?: ProcessRequestFormsActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: ProcessRequestFormsActionOutputChoiceDurationEnum;
 }
@@ -2118,6 +2121,13 @@ export type SendCustomProviderEmailActionOutputTransferTypeEnum =
   | "צבירה בלבד"
   | "הפקדות בלבד";
 
+export type SendCustomProviderEmailActionOutputStandingEnum =
+  | "שכיר"
+  | "עצמאי"
+  | "שכיר בעל שליטה"
+  | "עצמאי באמצעות מעסיק"
+  | "חבר קיבוץ";
+
 /**
  * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
  */
@@ -2126,12 +2136,6 @@ export interface ISendCustomProviderEmailActionOutputTracksObject {}
 export type SendCustomProviderEmailActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type SendCustomProviderEmailActionOutputStandingEnum =
-  | "שכיר"
-  | "עצמאי"
-  | "שכיר בעל שליטה"
-  | "עצמאי באמצעות מעסיק";
 
 export type SendCustomProviderEmailActionOutputChoiceDurationEnum =
   | ""
@@ -2187,6 +2191,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   agentId?: string;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
+  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
+  standing?: SendCustomProviderEmailActionOutputStandingEnum;
   /** Reference to the request scheme type from RequestSchemes table  */
   requestTypeId?: string;
   /** Reference to a specific insurance fund from the Funds table associated with this request  */
@@ -2195,8 +2201,6 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   tracks?: ISendCustomProviderEmailActionOutputTracksObject;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: SendCustomProviderEmailActionOutputIndependentTransferTypeEnum;
-  /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
-  standing?: SendCustomProviderEmailActionOutputStandingEnum;
   /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
   choiceDuration?: SendCustomProviderEmailActionOutputChoiceDurationEnum;
 }

@@ -1,4 +1,4 @@
-import 'streamdown/styles.css';
+// import 'streamdown/styles.css';
 
 import { AgentChat as SDKAgentChat } from '@blocksdiy/blocks-client-sdk';
 import { useClient } from '@blocksdiy/blocks-client-sdk/reactSdk';
@@ -503,8 +503,9 @@ const getFileIcon = (fileType: string) => {
 export type Message = AgentChatPrimitive.MessageItem;
 export type Attachment = AgentChatPrimitive.Attachment;
 
-interface AgentChatSdkPart {
+interface AgentChatToolCallData {
   id?: string;
+  name?: string;
   type: string;
   state?: string;
   title?: string;
@@ -533,30 +534,10 @@ type LegacyMessageItem = MessageItem & {
   };
 };
 
-type V1AiSdkMessageItem = Omit<MessageItem, 'msg'> & {
-  msg: {
-    id: string;
-    role: 'user' | 'assistant';
-    parts: AgentChatSdkPart[];
-    metadata?: {
-      version?: 1;
-      hiddenPrompt?: string;
-    };
-  };
-};
-
-const isV1AiSdkMessageItem = (message: MessageItem): boolean => {
-  const maybeV1Message = message as MessageItem & {
-    msg?: { metadata?: { version?: 1 } };
-  };
-
-  return maybeV1Message.msg?.metadata?.version === 1;
-};
-
 type AgentChatSize = AgentChatToolCardSize;
 type AgentChatVariant = AgentChatToolCardVariant;
 
-const messagePartsGapClasses: Record<AgentChatSize, string> = {
+const messageContentGapClasses: Record<AgentChatSize, string> = {
   sm: 'gap-1.5',
   md: 'gap-2',
   lg: 'gap-2.5',
@@ -603,27 +584,18 @@ function AgentChatAttachmentBadge({
   );
 }
 
-const isToolPart = (part: AgentChatSdkPart) =>
-  part.type === 'dynamic-tool' || part.type.startsWith('tool-');
+const isGenerateDynamicChatComponentToolCall = (
+  toolCall: AgentChatToolCallData,
+) =>
+  toolCall.type === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_TYPE ||
+  toolCall.toolName === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME;
 
-const isFilePart = (part: AgentChatSdkPart) => part.type === 'file' && part.url;
+const getRawToolName = (toolCall: AgentChatToolCallData) =>
+  toolCall.toolName ||
+  toolCall.type.replace(/^tool-/, '').replace(/^dynamic-tool$/, 'tool');
 
-const filePartToAttachment = (part: AgentChatSdkPart): Attachment => ({
-  url: part.url ?? '',
-  fileName: part.filename ?? 'File',
-  fileType: part.mediaType ?? 'application/octet-stream',
-});
-
-const isGenerateDynamicChatComponentPart = (part: AgentChatSdkPart) =>
-  part.type === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_TYPE ||
-  part.toolName === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME;
-
-const getRawToolName = (part: AgentChatSdkPart) =>
-  part.toolName ||
-  part.type.replace(/^tool-/, '').replace(/^dynamic-tool$/, 'tool');
-
-const formatToolName = (part: AgentChatSdkPart) => {
-  const rawName = getRawToolName(part);
+const formatToolName = (toolCall: AgentChatToolCallData) => {
+  const rawName = getRawToolName(toolCall);
 
   return rawName
     .replace(/[_-]+/g, ' ')
@@ -638,10 +610,12 @@ interface AgentChatToolStatus {
   value: AgentChatToolStatusIconValue;
 }
 
-const getToolStatus = (part: AgentChatSdkPart): AgentChatToolStatus => {
-  const toolName = formatToolName(part);
+const getToolStatus = (
+  toolCall: AgentChatToolCallData,
+): AgentChatToolStatus => {
+  const toolName = formatToolName(toolCall);
 
-  switch (part.state) {
+  switch (toolCall.state) {
     case 'input-streaming':
       return {
         label: toolName,
@@ -675,17 +649,47 @@ const getToolStatus = (part: AgentChatSdkPart): AgentChatToolStatus => {
   }
 };
 
-const getToolDescription = (part: AgentChatSdkPart) =>
-  part.description || part.output?.description || part.input?.description;
+const getToolDescription = (toolCall: AgentChatToolCallData) =>
+  toolCall.description ||
+  toolCall.output?.description ||
+  toolCall.input?.description;
+
+const getMessageToolCalls = (
+  message: LegacyMessageItem,
+): AgentChatToolCallData[] => {
+  const toolCalls = message.msg.payload?.toolCalls;
+  if (!Array.isArray(toolCalls)) {
+    return [];
+  }
+
+  return toolCalls
+    .filter((toolCall): toolCall is AgentChatToolCallData =>
+      Boolean(toolCall && typeof toolCall === 'object'),
+    )
+    .map((toolCall) => {
+      const toolName =
+        toolCall.toolName ||
+        toolCall.name ||
+        toolCall.type?.replace(/^tool-/, '') ||
+        'tool';
+
+      return {
+        ...toolCall,
+        toolName,
+        toolCallId: toolCall.toolCallId || toolCall.id,
+        type: toolCall.type || `tool-${toolName}`,
+      };
+    });
+};
 
 function AgentChatToolDescribe({
-  part,
+  toolCall,
   status,
 }: {
-  part: AgentChatSdkPart;
+  toolCall: AgentChatToolCallData;
   status: ReturnType<typeof getToolStatus>;
 }) {
-  const description = getToolDescription(part);
+  const description = getToolDescription(toolCall);
   if (!description) {
     return null;
   }
@@ -698,17 +702,17 @@ function AgentChatToolDescribe({
 }
 
 function AgentChatActivityPart({
-  part,
+  toolCall,
   status,
   size = 'md',
   variant = 'bubble',
 }: {
-  part: AgentChatSdkPart;
+  toolCall: AgentChatToolCallData;
   status: ReturnType<typeof getToolStatus>;
   size?: AgentChatSize;
   variant?: AgentChatVariant;
 }) {
-  const hasDescription = Boolean(getToolDescription(part));
+  const hasDescription = Boolean(getToolDescription(toolCall));
 
   return (
     <AgentChatToolCard
@@ -730,47 +734,11 @@ function AgentChatActivityPart({
       {hasDescription && (
         <AgentChatToolContent>
           <AgentChatToolContentInner size={size} className="pt-0">
-            <AgentChatToolDescribe part={part} status={status} />
+            <AgentChatToolDescribe toolCall={toolCall} status={status} />
           </AgentChatToolContentInner>
         </AgentChatToolContent>
       )}
     </AgentChatToolCard>
-  );
-}
-
-function AgentChatActivityParts({
-  parts,
-  size,
-  variant,
-}: {
-  parts?: AgentChatSdkPart[];
-  size?: AgentChatSize;
-  variant?: AgentChatVariant;
-}) {
-  const activityParts = (parts || []).filter(
-    (part) => isToolPart(part) && !isGenerateDynamicChatComponentPart(part),
-  );
-
-  if (activityParts.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="flex w-fit max-w-full flex-col">
-      {activityParts.map((part, index) => {
-        const status = getToolStatus(part);
-
-        return (
-          <AgentChatActivityPart
-            key={part.toolCallId || `${part.type}-${index}`}
-            part={part}
-            status={status}
-            size={size}
-            variant={variant}
-          />
-        );
-      })}
-    </div>
   );
 }
 
@@ -848,23 +816,17 @@ function AgentChatStreamdown({
   );
 }
 
-function AgentChatSdkMessageParts({
-  parts,
-  fallbackContent,
-  isThinking,
+function AgentChatToolCallsContent({
+  toolCalls,
   size,
-  role,
   variant,
 }: {
-  parts?: AgentChatSdkPart[];
-  fallbackContent?: string;
-  isThinking?: boolean;
+  toolCalls: AgentChatToolCallData[];
   size?: AgentChatSize;
-  role: 'ai' | 'human';
   variant?: 'bubble' | 'minimal';
 }) {
   const contentGapClass =
-    variant === 'minimal' ? 'gap-1' : messagePartsGapClasses[size ?? 'md'];
+    variant === 'minimal' ? 'gap-1' : messageContentGapClasses[size ?? 'md'];
   const liveComponentScopeExtras = React.useMemo(
     () => ({
       AgentChatPrimitive,
@@ -882,129 +844,15 @@ function AgentChatSdkMessageParts({
     [],
   );
 
-  if (!parts?.length) {
-    return fallbackContent ? (
-      <AgentChatStreamdown
-        content={fallbackContent}
-        isStreaming={isThinking}
-        size={size}
-        role={role}
-        variant={variant}
-      />
-    ) : null;
-  }
+  const generatedToolCalls = toolCalls.filter(
+    isGenerateDynamicChatComponentToolCall,
+  );
+  const activityToolCalls = toolCalls.filter(
+    (toolCall) => !isGenerateDynamicChatComponentToolCall(toolCall),
+  );
 
-  const renderedParts: React.ReactNode[] = [];
-  let activityParts: AgentChatSdkPart[] = [];
-  let lastTextPartIndex = -1;
-  parts.forEach((part, index) => {
-    if (part.type === 'text') {
-      lastTextPartIndex = index;
-    }
-  });
-
-  const flushActivityParts = (key: string) => {
-    if (activityParts.length === 0) {
-      return;
-    }
-
-    renderedParts.push(
-      <AgentChatActivityParts
-        key={key}
-        parts={activityParts}
-        size={size}
-        variant={variant}
-      />,
-    );
-    activityParts = [];
-  };
-
-  const renderGenerateDynamicChatComponentPart = (
-    part: AgentChatSdkPart,
-    index: number,
-  ) => {
-    flushActivityParts(`activity-${index}`);
-    renderedParts.push(
-      <AgentChatLiveComponentPart
-        key={part.toolCallId || `${part.type}-${index}`}
-        part={part}
-        size={size}
-        variant={variant}
-        scopeExtras={liveComponentScopeExtras}
-      />,
-    );
-  };
-
-  parts.forEach((part, index) => {
-    switch (part.type) {
-      case GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_TYPE:
-        renderGenerateDynamicChatComponentPart(part, index);
-        return;
-
-      case 'text':
-        flushActivityParts(`activity-${index}`);
-        if (part.text) {
-          const isStreamingTextPart =
-            isThinking && role === 'ai' && index === lastTextPartIndex;
-          renderedParts.push(
-            <AgentChatStreamdown
-              key={part.id || `text-${index}`}
-              content={part.text}
-              isStreaming={isStreamingTextPart}
-              size={size}
-              role={role}
-              variant={variant}
-            />,
-          );
-        }
-        return;
-
-      case 'file':
-        flushActivityParts(`activity-${index}`);
-        if (isFilePart(part)) {
-          renderedParts.push(
-            <div
-              key={part.id || part.url || `file-${index}`}
-              data-slot="agent-chat-message-attachments"
-              className={agentChatMessageAttachmentsVariants({
-                size,
-                variant,
-                role,
-              })}
-            >
-              <AgentChatAttachmentBadge
-                attachment={filePartToAttachment(part)}
-                size={size}
-              />
-            </div>,
-          );
-        }
-        return;
-
-      default:
-        if (isGenerateDynamicChatComponentPart(part)) {
-          renderGenerateDynamicChatComponentPart(part, index);
-          return;
-        }
-
-        if (isToolPart(part)) {
-          activityParts.push(part);
-        }
-    }
-  });
-
-  flushActivityParts('activity-final');
-
-  if (renderedParts.length === 0 && fallbackContent) {
-    return (
-      <AgentChatStreamdown
-        content={fallbackContent}
-        isStreaming={isThinking}
-        size={size}
-        role={role}
-        variant={variant}
-      />
-    );
+  if (generatedToolCalls.length === 0 && activityToolCalls.length === 0) {
+    return null;
   }
 
   return (
@@ -1014,7 +862,24 @@ function AgentChatSdkMessageParts({
         contentGapClass,
       )}
     >
-      {renderedParts}
+      {activityToolCalls.map((toolCall, index) => (
+        <AgentChatActivityPart
+          key={toolCall.toolCallId || `${toolCall.type}-${index}`}
+          toolCall={toolCall}
+          status={getToolStatus(toolCall)}
+          size={size}
+          variant={variant}
+        />
+      ))}
+      {generatedToolCalls.map((toolCall, index) => (
+        <AgentChatLiveComponentPart
+          key={toolCall.toolCallId || `${toolCall.type}-${index}`}
+          part={toolCall}
+          size={size}
+          variant={variant}
+          scopeExtras={liveComponentScopeExtras}
+        />
+      ))}
     </div>
   );
 }
@@ -1029,10 +894,6 @@ interface AgentChatMessageProps {
 
 type LegacyAgentChatMessageProps = Omit<AgentChatMessageProps, 'message'> & {
   message: LegacyMessageItem;
-};
-
-type AiSdkAgentChatMessageProps = Omit<AgentChatMessageProps, 'message'> & {
-  message: V1AiSdkMessageItem;
 };
 
 function AgentChatAvatar({
@@ -1107,22 +968,6 @@ export function AgentChatMessage({
 }: AgentChatMessageProps &
   VariantProps<typeof messageVariants> &
   React.ComponentProps<'div'>) {
-  if (isV1AiSdkMessageItem(message)) {
-    return (
-      <AiSdkAgentChatMessage
-        message={message as unknown as V1AiSdkMessageItem}
-        index={index}
-        variant={variant}
-        size={size}
-        userPosition={userPosition}
-        showTimestamp={showTimestamp}
-        dateFormat={dateFormat}
-        className={className}
-        {...props}
-      />
-    );
-  }
-
   return (
     <LegacyAgentChatMessage
       message={message}
@@ -1167,12 +1012,13 @@ function LegacyAgentChatMessage({
           message.msg.content || ''
         }`
       : message.msg.content;
+  const toolCalls = getMessageToolCalls(message);
   const isStreamingMessage =
     isThinking && message.msg.role === 'ai' && index === messages.length - 1;
 
   return (
     <AgentChatPrimitive.AgentChatMessage
-      message={message as unknown as AgentChatPrimitive.MessageItem}
+      message={message}
       index={index}
       className={cn(
         messageVariants({ size, role: message.msg.role }),
@@ -1197,20 +1043,29 @@ function LegacyAgentChatMessage({
           role: message.msg.role,
         })}
       >
-        {messageContent && (
+        {(messageContent || toolCalls.length > 0) && (
           <div
             data-slot="agent-chat-message-content"
             className={cn(
               messageContentVariants({ size, role: message.msg.role, variant }),
             )}
           >
-            <AgentChatStreamdown
-              content={messageContent}
-              isStreaming={isStreamingMessage}
-              size={size || undefined}
-              role={message.msg.role}
-              variant={variant || undefined}
-            />
+            {messageContent && (
+              <AgentChatStreamdown
+                content={messageContent}
+                isStreaming={isStreamingMessage}
+                size={size || undefined}
+                role={message.msg.role}
+                variant={variant || undefined}
+              />
+            )}
+            {toolCalls.length > 0 && (
+              <AgentChatToolCallsContent
+                toolCalls={toolCalls}
+                size={size || undefined}
+                variant={variant || undefined}
+              />
+            )}
           </div>
         )}
         {message.msg.attachments && message.msg.attachments.length > 0 && (
@@ -1244,96 +1099,6 @@ function LegacyAgentChatMessage({
             {userPosition === 'bottom' && (
               <AgentChatAvatar
                 role={message.msg.role}
-                size={size}
-                userPosition={userPosition}
-              />
-            )}
-            <span className="text-xs text-muted-foreground">
-              {format(new Date(message.createdAt), dateFormat)}
-            </span>
-          </div>
-        )}
-      </div>
-    </AgentChatPrimitive.AgentChatMessage>
-  );
-}
-
-function AiSdkAgentChatMessage({
-  message,
-  index,
-  variant = 'bubble',
-  size = 'md',
-  userPosition = 'side',
-  showTimestamp = true,
-  dateFormat = 'HH:mm',
-  className,
-  ...props
-}: AiSdkAgentChatMessageProps &
-  VariantProps<typeof messageVariants> &
-  React.ComponentProps<'div'>) {
-  const { isThinking, messages } = useAgentChat();
-  // v1 messages store AI SDK roles ("user"/"assistant"). The visual
-  // primitives still use the legacy layout roles ("human"/"ai").
-  const displayRole = message.msg.role === 'user' ? 'human' : 'ai';
-  const messageParts = message.msg.parts as AgentChatSdkPart[];
-  const fallbackContent = messageParts
-    ?.map((part) => (part.type === 'text' ? part.text : ''))
-    .join('');
-  const isStreamingMessage =
-    isThinking && displayRole === 'ai' && index === messages.length - 1;
-
-  return (
-    <AgentChatPrimitive.AgentChatMessage
-      message={message as unknown as AgentChatPrimitive.MessageItem}
-      index={index}
-      className={cn(messageVariants({ size, role: displayRole }), className)}
-      {...props}
-    >
-      {variant === 'bubble' && userPosition === 'side' && (
-        <AgentChatAvatar
-          role={displayRole}
-          size={size}
-          userPosition={userPosition}
-        />
-      )}
-
-      <div
-        className={agentChatMessageContentWrapperVariants({
-          size,
-          variant,
-          role: displayRole,
-        })}
-      >
-        {messageParts?.length ? (
-          <div
-            data-slot="agent-chat-message-content"
-            className={cn(
-              messageContentVariants({ size, role: displayRole, variant }),
-            )}
-          >
-            <AgentChatSdkMessageParts
-              parts={messageParts}
-              fallbackContent={fallbackContent}
-              isThinking={isStreamingMessage}
-              size={size || undefined}
-              role={displayRole}
-              variant={variant || undefined}
-            />
-          </div>
-        ) : null}
-        {showTimestamp && (
-          <div
-            data-slot="agent-chat-message-timestamp"
-            className={agentChatMessageTimestampVariants({
-              variant,
-              userPosition,
-              size,
-              role: displayRole,
-            })}
-          >
-            {userPosition === 'bottom' && (
-              <AgentChatAvatar
-                role={displayRole}
                 size={size}
                 userPosition={userPosition}
               />
