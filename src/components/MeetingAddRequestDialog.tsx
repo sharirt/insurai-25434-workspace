@@ -425,7 +425,7 @@ export const MeetingAddRequestDialog = ({
                     <SelectValue placeholder="בחר סוג בקשה" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border" onMouseDown={(e) => e.preventDefault()}>
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
                         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -433,8 +433,6 @@ export const MeetingAddRequestDialog = ({
                         value={requestTypeSearch}
                         onChange={(e) => setRequestTypeSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
@@ -472,7 +470,7 @@ export const MeetingAddRequestDialog = ({
                     <SelectValue placeholder="בחר יצרן" />
                   </SelectTrigger>
                   <SelectContent>
-                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border">
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border" onMouseDown={(e) => e.preventDefault()}>
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
                         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -480,8 +478,6 @@ export const MeetingAddRequestDialog = ({
                         value={providerSearch}
                         onChange={(e) => setProviderSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
