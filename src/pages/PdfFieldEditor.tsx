@@ -68,6 +68,7 @@ export default function PdfFieldEditor() {
 
   const [fields, setFields] = useState<PdfField[]>([]);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
   const [hasLoadedFields, setHasLoadedFields] = useState(false);
 
   // Load fields when form is available
@@ -111,8 +112,8 @@ export default function PdfFieldEditor() {
     if (selectedFieldId === id) setSelectedFieldId(null);
   };
 
-  const handleAddField = () => {
-    const newField = createNewField();
+  const handleAddField = (page: number) => {
+    const newField = createNewField(page);
     setFields((prev) => [...prev, newField]);
     setSelectedFieldId(newField.id);
   };
@@ -231,6 +232,7 @@ export default function PdfFieldEditor() {
             onSelectField={setSelectedFieldId}
             onUpdateField={handleUpdateField}
             onDeleteField={handleDeleteField}
+            onPageChange={setCurrentPage}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -253,6 +255,8 @@ export default function PdfFieldEditor() {
           onSave={handleSave}
           isSaving={isAnnotating}
           isRefreshing={isDescribing}
+          currentPage={currentPage}
+          totalPages={form?.pages}
         />
       </div>
     </div>

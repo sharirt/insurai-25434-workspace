@@ -47,13 +47,13 @@ export const ALL_FIELD_TYPES: FieldType[] = [
 ];
 
 let fieldCounter = 0;
-export function createNewField(): PdfField {
+export function createNewField(page: number = 0): PdfField {
   fieldCounter++;
   return {
     id: `new_${Date.now()}_${fieldCounter}`,
     name: `שדה_חדש_${fieldCounter}`,
     type: "text",
-    page: 0,
+    page,
     x: 50,
     y: 50,
     width: 200,

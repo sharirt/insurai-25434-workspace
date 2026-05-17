@@ -5,10 +5,11 @@ import { PdfField } from "@/utils/PdfFieldTypes";
 import { ColorLegend } from "@/components/ColorLegend";
 import { FieldRow } from "@/components/FieldRow";
 import { FieldEditor } from "@/components/FieldEditor";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router";
 import { getPageUrl } from "@/lib/utils";
 import { FormsManagerPage } from "@/product-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FieldPanelProps {
   formTitle: string;
@@ -17,11 +18,13 @@ interface FieldPanelProps {
   onSelectField: (id: string) => void;
   onUpdateField: (id: string, updates: Partial<PdfField>) => void;
   onDeleteField: (id: string) => void;
-  onAddField: () => void;
+  onAddField: (page: number) => void;
   onRefresh: () => void;
   onSave: () => void;
   isSaving: boolean;
   isRefreshing: boolean;
+  currentPage?: number;
+  totalPages?: number;
 }
 
 export const FieldPanel = ({
@@ -36,8 +39,17 @@ export const FieldPanel = ({
   onSave,
   isSaving,
   isRefreshing,
+  currentPage,
+  totalPages,
 }: FieldPanelProps) => {
   const [expandedFieldId, setExpandedFieldId] = useState<string | null>(null);
+  const [targetPage, setTargetPage] = useState(1);
+
+  useEffect(() => {
+    if (currentPage !== undefined) {
+      setTargetPage(currentPage + 1);
+    }
+  }, [currentPage]);
   const visibleFields = fields.filter((f) => !f.isDeleted);
 
   return (
@@ -66,10 +78,21 @@ export const FieldPanel = ({
             )}
             רענן שדות
           </Button>
-          <Button variant="outline" size="sm" onClick={onAddField}>
+          <Button variant="outline" size="sm" onClick={() => onAddField(targetPage - 1)}>
             <Plus data-icon="inline-start" />
             הוסף שדה
           </Button>
+          <div className="flex items-center gap-1">
+            <span className="text-sm text-muted-foreground">עמוד:</span>
+            <Input
+              type="number"
+              min={1}
+              max={totalPages || undefined}
+              value={targetPage}
+              onChange={(e) => setTargetPage(Math.max(1, Math.min(totalPages || 999, Number(e.target.value) || 1)))}
+              className="w-[60px] h-8 text-center"
+            />
+          </div>
           <Button size="sm" onClick={onSave} disabled={isSaving}>
             {isSaving ? (
               <Loader2 className="animate-spin" data-icon="inline-start" />

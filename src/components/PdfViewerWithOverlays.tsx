@@ -11,6 +11,7 @@ interface PdfViewerWithOverlaysProps {
   onSelectField: (id: string) => void;
   onUpdateField?: (id: string, updates: Partial<PdfField>) => void;
   onDeleteField?: (id: string) => void;
+  onPageChange?: (page: number) => void;
 }
 
 export const PdfViewerWithOverlays = ({
@@ -20,6 +21,7 @@ export const PdfViewerWithOverlays = ({
   onSelectField,
   onUpdateField,
   onDeleteField,
+  onPageChange,
 }: PdfViewerWithOverlaysProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const nativeSize = usePdfNativeSize(pdfUrl);
@@ -28,7 +30,7 @@ export const PdfViewerWithOverlays = ({
     <div className="relative h-full w-full min-h-0 overflow-hidden">
       <PdfViewer
         file={pdfUrl}
-        onPageChange={(page: number) => setCurrentPage(page - 1)}
+        onPageChange={(page: number) => { setCurrentPage(page - 1); onPageChange?.(page - 1); }}
       />
       <FormPdfFieldOverlay
         key={pdfUrl}
