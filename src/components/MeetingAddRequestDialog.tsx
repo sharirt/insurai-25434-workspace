@@ -326,8 +326,14 @@ export const MeetingAddRequestDialog = ({
     []
   );
 
-  const handleSelectSearchRowMouseDown = (
-    e: React.MouseEvent<HTMLDivElement>
+  // const handleSelectSearchRowMouseDown = (
+  //   e: React.MouseEvent<HTMLDivElement>
+  // ) => {
+  //   if ((e.target as HTMLElement).closest("input")) return;
+  //   e.preventDefault();
+  // };
+  const handleSelectSearchRowPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>
   ) => {
     if ((e.target as HTMLElement).closest("input")) return;
     e.preventDefault();
@@ -434,7 +440,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectContent>
                     <div
                       className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowMouseDown}
+                      onMouseDown={handleSelectSearchRowPointerDown}
                     >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
@@ -482,7 +488,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectContent>
                     <div
                       className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowMouseDown}
+                      onMouseDown={handleSelectSearchRowPointerDown}
                     >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input

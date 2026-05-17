@@ -156,6 +156,14 @@ export default {
             backgroundPosition: '-200% 0',
           },
         },
+        sizePulse: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.12)' },
+        },
+        typingDot: {
+          '0%, 60%, 100%': { opacity: '0.25' },
+          '30%': { opacity: '1' },
+        },
         pulse: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
@@ -165,6 +173,8 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         shimmer: 'shimmer 2s linear infinite',
+        'size-pulse': 'sizePulse 1.4s ease-in-out infinite',
+        'typing-dot': 'typingDot 1.4s ease-in-out infinite',
         fadeIn: 'fadeIn 0.5s ease-out',
         slideIn: 'slideIn 0.5s ease-out',
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

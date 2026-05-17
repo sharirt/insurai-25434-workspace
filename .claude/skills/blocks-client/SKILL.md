@@ -462,6 +462,43 @@ function ChatPage() {
 
 **Built-in voice mode**: The chat footer includes a mic button that switches to real-time voice conversation with a live waveform. Voice transcripts appear as chat messages. No extra configuration needed — voice is automatically available when the chat agent has a voice configuration.
 
+### Chat page header — agent identity, not generic chatbot art
+
+The page that hosts the chat (the title bar, breadcrumb, hero, sidebar entry — anything outside `<AgentChatSimple>` itself) is yours to design. One rule:
+
+**Never use a generic `Sparkles`, `Bot`, `Wand`, or any placeholder AI icon as the chat-header avatar.** The agent has its own identity (e.g. "Leo", "Stella") — surface it.
+
+Either:
+
+1. **Omit the avatar entirely** — a clean title is fine.
+2. **Use the agent's own photo** (preferred when the agent has one):
+
+```tsx
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+function ChatHeader() {
+  const agentChat = useAgentChat(CustomerSupportChatAgent);
+  const agent = agentChat.agentChatData?.agent;
+  const initials = (agent?.title ?? 'A')
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
+
+  return (
+    <header className="flex items-center gap-3 px-4 py-3">
+      <Avatar className="h-9 w-9">
+        <AvatarImage src={agent?.photoUrl} alt={agent?.title} />
+        <AvatarFallback>{initials}</AvatarFallback>
+      </Avatar>
+      <div className="font-semibold">{agent?.title ?? 'Assistant'}</div>
+    </header>
+  );
+}
+```
+
+The fallback initials ensure the avatar always renders something specific to the agent — never a generic chatbot mark.
+
 ---
 
 ## Data Filtering Best Practices

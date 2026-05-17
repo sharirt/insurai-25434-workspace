@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { X } from "lucide-react";
 import { PdfField, FIELD_TYPE_COLORS } from "@/utils/PdfFieldTypes";
 import type { PdfNativeSize } from "@/hooks/usePdfNativeSize";
 
@@ -409,7 +409,7 @@ export const FormPdfFieldOverlay = ({
                       (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#EF4444";
                     }}
                   >
-                    <Trash2 style={{ width: "10px", height: "10px", color: "white" }} />
+                    <X style={{ width: "10px", height: "10px", color: "white" }} />
                   </button>
                 )}
               </div>

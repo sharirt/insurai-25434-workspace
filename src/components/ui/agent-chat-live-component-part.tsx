@@ -1,5 +1,6 @@
 import * as BlocksClientReactSdk from '@blocksdiy/blocks-client-sdk/reactSdk';
 import { code as streamdownCode } from '@streamdown/code';
+import { cva } from 'class-variance-authority';
 import { Check, Code2, Copy } from 'lucide-react';
 import * as React from 'react';
 import { LiveError, LivePreview, LiveProvider } from 'react-live';
@@ -16,7 +17,6 @@ import * as BaseMarkdownUI from '@/components/ui/base-markdown/base-markdown';
 import * as BaseMarkdownExtensionsUI from '@/components/ui/base-markdown/extensions';
 import * as BaseMarkdownTextUI from '@/components/ui/base-markdown/text';
 import * as BreadcrumbUI from '@/components/ui/breadcrumb';
-import { Button } from '@/components/ui/button';
 import * as ButtonUI from '@/components/ui/button';
 import * as CalendarUI from '@/components/ui/calendar';
 import * as CardUI from '@/components/ui/card';
@@ -73,9 +73,10 @@ import {
   AgentChatToolContentInner,
   AgentChatToolControls,
   AgentChatToolHeader,
-  AgentChatToolStatusIcon,
+  AgentChatToolLeadChevron,
+  AgentChatToolSecondaryAction,
   AgentChatToolTitle,
-  agentChatToolContentInnerVariants,
+  agentChatToolTitleStateVariants,
   type AgentChatToolCardSize,
   type AgentChatToolCardVariant,
   type AgentChatToolStatusIconValue,
@@ -93,6 +94,7 @@ type AgentChatLiveComponentPartData = {
   output?: {
     title?: string;
     code?: string;
+    componentProps?: Record<string, unknown>;
   };
 };
 
@@ -140,14 +142,116 @@ const getGenerateDynamicChatComponentPayload = (
     ? part.output
     : undefined;
 
+// The live preview is the rendered component itself — it shouldn't sit
+// inside the indented "description rail" used by activity tool descriptions.
+// Plain padding so the chart/UI fills its container naturally.
+const liveComponentPreviewVariants = cva('min-w-0 max-w-full overflow-x-auto', {
+  variants: {
+    size: {
+      sm: 'p-2',
+      md: 'p-3',
+      lg: 'p-4',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+const liveComponentSkeletonWrapperVariants = cva('', {
+  variants: {
+    size: {
+      sm: 'p-2',
+      md: 'p-3',
+      lg: 'p-4',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+// Body skeleton — taller per size so the loading state has visual weight
+// matching the eventual rendered preview (charts, dashboards, etc. are
+// rarely as short as a 96px strip). `w-full` is enforced by the wrapper.
+const liveComponentSkeletonShapeVariants = cva('w-full', {
+  variants: {
+    size: {
+      sm: 'h-32',
+      md: 'h-40',
+      lg: 'h-48',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+// Title-bar skeleton placeholder shown until the agent emits the actual
+// title. Sized to look like a short text run, aligned to the title's
+// line-height so it doesn't shift the row when the real text arrives.
+const liveComponentTitleSkeletonVariants = cva('rounded-sm', {
+  variants: {
+    size: {
+      sm: 'h-3.5 w-28',
+      md: 'h-4 w-40',
+      lg: 'h-5 w-48',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+const liveComponentEmptyStateVariants = cva('text-sm text-muted-foreground', {
+  variants: {
+    size: {
+      sm: 'p-2',
+      md: 'p-3',
+      lg: 'p-4',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+// `react-live` defaults LiveError to monospace; we explicitly force `font-sans`
+// here to match the calm typography of a normal description, only the color
+// differs (destructive/80).
+const liveComponentErrorVariants = cva(
+  'whitespace-pre-wrap font-sans text-sm leading-relaxed text-destructive/80',
+  {
+    variants: {
+      size: {
+        sm: 'px-2 pb-2',
+        md: 'px-3 pb-3',
+        lg: 'px-4 pb-4',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+    },
+  },
+);
+
+// "View generated code" dialog body. Compact prose with neutralised pre/code
+// surfaces because the syntax highlighter (`@streamdown/code`) supplies its
+// own block styling.
+const liveComponentDebugCodeVariants = cva(
+  'max-h-[65vh] overflow-auto prose max-w-none dark:prose-invert prose-pre:my-0 prose-pre:bg-transparent prose-pre:p-0 prose-code:bg-transparent prose-code:p-0',
+);
+
 function AgentChatLiveComponentCreating({
   size,
 }: {
   size?: AgentChatLiveComponentSize;
 }) {
   return (
-    <div className={agentChatToolContentInnerVariants({ size })}>
-      <SkeletonUI.Skeleton className="h-24 w-full" />
+    <div className={cn(liveComponentSkeletonWrapperVariants({ size }))}>
+      <SkeletonUI.Skeleton
+        className={cn(liveComponentSkeletonShapeVariants({ size }))}
+      />
     </div>
   );
 }
@@ -163,12 +267,21 @@ export function AgentChatLiveComponentPart({
   variant?: AgentChatLiveComponentVariant;
   scopeExtras?: Record<string, unknown>;
 }) {
+  const componentProps = part.output?.componentProps || {};
   const payload = getGenerateDynamicChatComponentPayload(part);
   const code = payload?.code ? normalizeLiveCode(payload.code) : '';
   const displayCode = code;
   const debugCode = displayCode;
-  const title = payload?.title || 'Generated component';
+  // Title comes from the agent (in whatever language it generated). When the
+  // agent doesn't supply one, we render an empty title rather than a fixed
+  // English fallback — the chevron + the rendered preview already
+  // communicate that this is a generated component.
+  const title = payload?.title ?? '';
   const [isCodeCopied, setIsCodeCopied] = React.useState(false);
+  // Live components are the one tool we *do* auto-open while streaming, so the
+  // user can watch the preview build. We never auto-open on failure though —
+  // an inline destructive box on collapse would be loud; the chevron stays
+  // available and the user can opt in.
   const [open, setOpen] = React.useState(true);
   const [hasOpened, setHasOpened] = React.useState(true);
   const copyResetTimeoutRef = React.useRef<number | undefined>(undefined);
@@ -206,6 +319,7 @@ export function AgentChatLiveComponentPart({
   const scope = React.useMemo(
     () =>
       sanitizeLiveScope({
+        props: componentProps,
         React,
         Recharts,
         BlocksClientReactSdk,
@@ -291,6 +405,9 @@ export function AgentChatLiveComponentPart({
     }
   }, [isCodeReady]);
 
+  // Spec: do NOT auto-expand on failure. The chevron stays clickable so the
+  // user can opt in to read the error.
+
   const handleOpenChange = React.useCallback((nextOpen: boolean) => {
     setOpen(nextOpen);
     if (nextOpen) {
@@ -302,67 +419,69 @@ export function AgentChatLiveComponentPart({
     <AgentChatToolCard
       size={size}
       variant={variant}
-      className="w-full min-w-0"
       open={open}
       onOpenChange={handleOpenChange}
     >
       <AgentChatToolHeader size={size} variant={variant}>
+        <AgentChatToolLeadChevron status={statusValue} size={size} />
         <AgentChatToolTitle
           size={size}
-          status={<AgentChatToolStatusIcon value={statusValue} size={size} />}
+          className={cn(
+            agentChatToolTitleStateVariants({ status: statusValue }),
+          )}
         >
-          {title}
+          {title ? (
+            title
+          ) : (
+            // Agent hasn't streamed the title yet — show a short skeleton
+            // text placeholder. Sized to match the title line-height so the
+            // row doesn't shift when the real text arrives.
+            <SkeletonUI.Skeleton
+              className={cn(liveComponentTitleSkeletonVariants({ size }))}
+              aria-hidden="true"
+            />
+          )}
         </AgentChatToolTitle>
         <AgentChatToolControls size={size}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-7 text-muted-foreground hover:text-foreground"
+          {/* No visible labels or tooltips — only screen-reader `aria-label`
+              via `label` prop. Consumers can wrap in their own localised
+              <Tooltip> if they want a visible hover hint. */}
+          <AgentChatToolSecondaryAction
+            size={size}
+            icon={isCodeCopied ? Check : Copy}
+            label={isCodeCopied ? 'Copied' : 'Copy code'}
             onClick={handleCopyCode}
             disabled={!debugCode}
-            aria-label="Copy generated code"
-            title="Copy generated code"
-          >
-            {isCodeCopied ? (
-              <Check className="size-3.5" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
-          </Button>
+          />
           <DialogUI.Dialog>
             <DialogUI.DialogTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-7 text-muted-foreground hover:text-foreground"
+              <AgentChatToolSecondaryAction
+                size={size}
+                icon={Code2}
+                label="View code"
                 disabled={!debugCode}
-                aria-label="View generated code"
-                title="View generated code"
-              >
-                <Code2 className="size-3.5" />
-              </Button>
+              />
             </DialogUI.DialogTrigger>
             <DialogUI.DialogContent className="max-w-4xl">
-              <DialogUI.DialogHeader>
-                <DialogUI.DialogTitle>Generated Code</DialogUI.DialogTitle>
-                <DialogUI.DialogDescription>
-                  Raw TSX rendered by the chat component.
-                </DialogUI.DialogDescription>
+              {/* DialogTitle is required by Radix for accessibility but
+                  we don't want it visible (English in any-language app);
+                  `sr-only` keeps it for screen readers only. We omit
+                  DialogDescription entirely — it would render visibly. */}
+              <DialogUI.DialogHeader className="sr-only">
+                <DialogUI.DialogTitle>Generated code</DialogUI.DialogTitle>
               </DialogUI.DialogHeader>
               {debugCode ? (
                 <Streamdown
                   mode="static"
-                  className="max-h-[65vh] overflow-auto prose max-w-none dark:prose-invert prose-pre:my-0 prose-pre:bg-transparent prose-pre:p-0 prose-code:bg-transparent prose-code:p-0"
+                  className={liveComponentDebugCodeVariants()}
                   plugins={{ code: streamdownCode }}
                 >
                   {formatDebugCodeBlock(debugCode)}
                 </Streamdown>
               ) : (
-                <code className="text-muted-foreground">
-                  Waiting for generated TSX...
-                </code>
+                // Visible "Waiting…" copy would be a fixed language; a
+                // Skeleton communicates the same waiting state without text.
+                <SkeletonUI.Skeleton className="h-32 w-full" />
               )}
             </DialogUI.DialogContent>
           </DialogUI.Dialog>
@@ -372,34 +491,15 @@ export function AgentChatLiveComponentPart({
         <AgentChatToolContentInner padded={false}>
           {isCodeReady ? (
             <LiveProvider code={displayCode} scope={scope} noInline>
-              <div
-                className={cn(
-                  agentChatToolContentInnerVariants({ size }),
-                  'min-w-0 max-w-full overflow-x-auto',
-                )}
-              >
+              <div className={cn(liveComponentPreviewVariants({ size }))}>
                 <LivePreview />
               </div>
-              <LiveError
-                className={cn(
-                  'mt-0 whitespace-pre-wrap rounded-md border border-destructive/40 bg-destructive/10 text-xs text-destructive',
-                  size === 'sm'
-                    ? 'm-2 p-2'
-                    : size === 'lg'
-                      ? 'm-4 p-4'
-                      : 'm-3 p-3',
-                )}
-              />
+              <LiveError className={cn(liveComponentErrorVariants({ size }))} />
             </LiveProvider>
           ) : showCreatingSkeleton ? (
             <AgentChatLiveComponentCreating size={size} />
           ) : (
-            <div
-              className={cn(
-                agentChatToolContentInnerVariants({ size }),
-                'text-sm text-muted-foreground',
-              )}
-            >
+            <div className={cn(liveComponentEmptyStateVariants({ size }))}>
               <div className="h-7" />
             </div>
           )}

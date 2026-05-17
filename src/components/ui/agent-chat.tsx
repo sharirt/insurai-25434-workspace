@@ -20,6 +20,11 @@ import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Streamdown } from 'streamdown';
 
+import {
+  AgentChatAskUserPart,
+  ASK_USER_TOOL_NAME,
+  ASK_USER_TOOL_TYPE,
+} from '@/components/ui/agent-chat-ask-user-part';
 import { AgentChatLiveComponentPart } from '@/components/ui/agent-chat-live-component-part';
 import {
   AgentChatToolCard,
@@ -28,9 +33,11 @@ import {
   AgentChatToolContent,
   AgentChatToolContentInner,
   AgentChatToolHeader,
-  AgentChatToolStatusIcon,
+  AgentChatToolLeadChevron,
   type AgentChatToolStatusIconValue,
   AgentChatToolTitle,
+  agentChatToolHeaderVariants,
+  agentChatToolTitleStateVariants,
 } from '@/components/ui/agent-chat-tool-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -87,60 +94,66 @@ const agentChatMessagesVariants = cva('flex flex-col', {
   },
 });
 
-const agentChatMessageTimestampVariants = cva('flex items-center', {
-  variants: {
-    variant: {
-      bubble: '',
-      minimal: '',
+// Hover-only timestamp. Quiet color (60% muted-foreground), opacity-0 by
+// default and revealed by `group-hover` on the message row (the row carries
+// the `group` class via `messageVariants`).
+const agentChatMessageTimestampVariants = cva(
+  'flex items-center text-xs text-muted-foreground/60 opacity-0 transition-opacity group-hover:opacity-100',
+  {
+    variants: {
+      variant: {
+        bubble: '',
+        minimal: '',
+      },
+      role: {
+        human: '',
+        ai: '',
+      },
+      userPosition: {
+        side: '',
+        bottom: '',
+      },
+      size: {
+        sm: '',
+        md: '',
+        lg: '',
+      },
     },
-    role: {
-      human: '',
-      ai: '',
-    },
-    userPosition: {
-      side: '',
-      bottom: '',
-    },
-    size: {
-      sm: '',
-      md: '',
-      lg: '',
-    },
-  },
-  compoundVariants: [
-    {
-      userPosition: 'bottom',
-      size: 'sm',
-      className: 'gap-2',
-    },
-    {
-      userPosition: 'bottom',
+    compoundVariants: [
+      {
+        userPosition: 'bottom',
+        size: 'sm',
+        className: 'gap-2',
+      },
+      {
+        userPosition: 'bottom',
+        size: 'md',
+        className: 'gap-2',
+      },
+      {
+        userPosition: 'bottom',
+        size: 'lg',
+        className: 'gap-3',
+      },
+      {
+        variant: 'bubble',
+        role: 'ai',
+        className: 'flex-row',
+      },
+      {
+        variant: 'bubble',
+        role: 'human',
+        className: 'flex-row-reverse',
+      },
+    ],
+    defaultVariants: {
+      variant: 'bubble',
+      userPosition: 'side',
       size: 'md',
-      className: 'gap-2',
-    },
-    {
-      userPosition: 'bottom',
-      size: 'lg',
-      className: 'gap-3',
-    },
-    {
-      variant: 'bubble',
       role: 'ai',
-      className: 'flex-row',
     },
-    {
-      variant: 'bubble',
-      role: 'human',
-      className: 'flex-row-reverse',
-    },
-  ],
-  defaultVariants: {
-    variant: 'bubble',
-    userPosition: 'side',
-    size: 'md',
-    role: 'ai',
   },
-});
+);
 
 const messageVariants = cva('group relative flex transition-colors', {
   variants: {
@@ -192,7 +205,13 @@ const messageVariants = cva('group relative flex transition-colors', {
   },
 });
 
-const messageContentVariants = cva('relative min-w-0 overflow-hidden', {
+// Layout intent:
+// - AI in bubble variant: NO bubble at all. Text sits flush on the canvas next
+//   to the avatar — no background, border, shadow, or padding. The width cap
+//   gives long answers comfortable line length.
+// - Human in bubble variant: tight, more rounded pill (rounded-2xl). The
+//   per-size compounds use the smaller padding values from the spec.
+const messageContentVariants = cva('relative min-w-0 overflow-visible', {
   variants: {
     variant: {
       bubble: 'rounded-lg max-w-full md:max-w-[70%]',
@@ -209,34 +228,38 @@ const messageContentVariants = cva('relative min-w-0 overflow-hidden', {
     },
   },
   compoundVariants: [
+    // Tightened human-bubble paddings (was px-3/4/5 py-2/2.5/3)
     {
+      variant: 'bubble',
       role: 'human',
-      variant: 'bubble',
-      className: 'bg-primary text-primary-foreground',
-    },
-    {
-      role: 'ai',
-      variant: 'bubble',
-      className: 'bg-muted text-foreground',
-    },
-    {
-      variant: 'bubble',
       size: 'sm',
+      className: 'px-2.5 py-1.5',
+    },
+    {
+      variant: 'bubble',
+      role: 'human',
+      size: 'md',
       className: 'px-3 py-2',
     },
     {
       variant: 'bubble',
-      size: 'md',
+      role: 'human',
+      size: 'lg',
       className: 'px-4 py-2.5',
     },
     {
+      role: 'human',
       variant: 'bubble',
-      size: 'lg',
-      className: 'px-5 py-3',
+      className:
+        'overflow-hidden rounded-2xl bg-primary text-primary-foreground',
     },
+    // AI in bubble: strip the bubble entirely. `!important` overrides any
+    // size-based padding compounds upstream and guarantees flush layout.
     {
+      role: 'ai',
       variant: 'bubble',
-      size: 'md',
+      className:
+        'bg-transparent text-foreground !px-0 !py-0 !rounded-none max-w-full md:!max-w-[88%]',
     },
     {
       variant: 'minimal',
@@ -304,30 +327,27 @@ const agentChatAvatarVariants = cva('shrink-0', {
     },
     userPosition: {
       side: '',
-      bottom: 'h-7 w-7',
+      bottom: 'size-7',
+    },
+    // Pulse the avatar to signal "agent is working". `transform`-only — no
+    // opacity dimming. `origin-center` keeps the pulse in place; the
+    // `will-change-transform` hint nudges the GPU compositor to keep things
+    // smooth even on cheaper devices.
+    isPulsing: {
+      true: 'origin-center will-change-transform animate-size-pulse',
+      false: '',
     },
   },
   compoundVariants: [
-    {
-      userPosition: 'side',
-      size: 'sm',
-      className: 'h-7 w-7',
-    },
-    {
-      userPosition: 'side',
-      size: 'md',
-      className: 'h-9 w-9',
-    },
-    {
-      userPosition: 'side',
-      size: 'lg',
-      className: 'h-11 w-11',
-    },
+    { userPosition: 'side', size: 'sm', className: 'size-7' },
+    { userPosition: 'side', size: 'md', className: 'size-9' },
+    { userPosition: 'side', size: 'lg', className: 'size-11' },
   ],
   defaultVariants: {
     role: 'ai',
     size: 'md',
     userPosition: 'side',
+    isPulsing: false,
   },
 });
 
@@ -377,18 +397,28 @@ const agentChatMessageContentWrapperVariants = cva('flex flex-col flex-1', {
     },
     {
       variant: 'bubble',
+      role: 'human',
       size: 'sm',
       className: 'gap-2',
     },
     {
       variant: 'bubble',
+      role: 'human',
       size: 'md',
       className: 'gap-2',
     },
     {
       variant: 'bubble',
+      role: 'human',
       size: 'lg',
       className: 'gap-3',
+    },
+    // AI uses a tight gap-0.5 between (a future) header and the content. With
+    // the bubble stripped, this also keeps consecutive AI parts hugging.
+    {
+      variant: 'bubble',
+      role: 'ai',
+      className: 'gap-0.5',
     },
     {
       role: 'human',
@@ -521,6 +551,7 @@ interface AgentChatToolCallData {
     title?: string;
     description?: string;
     code?: string;
+    chatComponent?: boolean;
   } & Record<string, unknown>;
   text?: string;
   url?: string;
@@ -536,12 +567,6 @@ type LegacyMessageItem = MessageItem & {
 
 type AgentChatSize = AgentChatToolCardSize;
 type AgentChatVariant = AgentChatToolCardVariant;
-
-const messageContentGapClasses: Record<AgentChatSize, string> = {
-  sm: 'gap-1.5',
-  md: 'gap-2',
-  lg: 'gap-2.5',
-};
 
 interface AgentChatAttachmentBadgeProps extends VariantProps<
   typeof agentChatAttachmentBadgeVariants
@@ -588,7 +613,11 @@ const isGenerateDynamicChatComponentToolCall = (
   toolCall: AgentChatToolCallData,
 ) =>
   toolCall.type === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_TYPE ||
-  toolCall.toolName === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME;
+  toolCall.toolName === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME ||
+  toolCall.output?.chatComponent === true;
+const isAskUserToolCall = (toolCall: AgentChatToolCallData) =>
+  toolCall.type === ASK_USER_TOOL_TYPE ||
+  toolCall.toolName === ASK_USER_TOOL_NAME;
 
 const getRawToolName = (toolCall: AgentChatToolCallData) =>
   toolCall.toolName ||
@@ -598,8 +627,9 @@ const formatToolName = (toolCall: AgentChatToolCallData) => {
   const rawName = getRawToolName(toolCall);
 
   return rawName
-    .replace(/[_-]+/g, ' ')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -610,49 +640,123 @@ interface AgentChatToolStatus {
   value: AgentChatToolStatusIconValue;
 }
 
-const getToolStatus = (
+// 3 states only: progress, done, failed. The lead chevron + the title together
+// encode state — the chevron is hidden during progress, the title shimmers.
+const getStatusValue = (
   toolCall: AgentChatToolCallData,
-): AgentChatToolStatus => {
-  const toolName = formatToolName(toolCall);
-
+): AgentChatToolStatusIconValue => {
   switch (toolCall.state) {
-    case 'input-streaming':
-      return {
-        label: toolName,
-        value: 'loading',
-      };
-    case 'input-available':
-      return {
-        label: toolName,
-        value: 'loading',
-      };
-    case 'approval-requested':
-      return {
-        label: toolName,
-        value: 'loading',
-      };
     case 'output-available':
-      return {
-        label: toolName,
-        value: 'completed',
-      };
+      return 'completed';
     case 'output-error':
-      return {
-        label: toolName,
-        value: 'failed',
-      };
+      return 'failed';
     default:
-      return {
-        label: toolName,
-        value: 'loading',
-      };
+      return 'loading';
   }
 };
 
-const getToolDescription = (toolCall: AgentChatToolCallData) =>
-  toolCall.description ||
-  toolCall.output?.description ||
-  toolCall.input?.description;
+// We deliberately do NOT add status-aware verbs ("Preparing X", "Using X",
+// "X failed") — those would be fixed English in a boilerplate consumed by
+// any-language apps. Visual state is encoded by the title styling (shimmer
+// for loading, destructive for failed) and, when expandable, the chevron.
+const getSingleToolLabel = (toolCall: AgentChatToolCallData) =>
+  formatToolName(toolCall);
+
+const getToolStatus = (
+  toolCall: AgentChatToolCallData,
+): AgentChatToolStatus => {
+  const value = getStatusValue(toolCall);
+  return { label: getSingleToolLabel(toolCall), value };
+};
+
+// Placeholder for the (yet-to-be-shipped) reasoning channel. When the SDK
+// starts surfacing model reasoning on tool calls, this is the single place
+// to wire it up. We check the common locations defensively so the UI lights
+// up as soon as the field appears, without another diff.
+//
+// IMPORTANT: today this returns `undefined` for every real tool call, which
+// means activity tool rows render flat (no chevron, no expand panel) by
+// design — there's nothing to disclose yet.
+const getToolReasoning = (
+  toolCall: AgentChatToolCallData,
+): string | undefined => {
+  const candidates: unknown[] = [
+    (toolCall as { reasoning?: unknown }).reasoning,
+    (toolCall.output as { reasoning?: unknown } | undefined)?.reasoning,
+    (toolCall.input as { reasoning?: unknown } | undefined)?.reasoning,
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate;
+    }
+  }
+  return undefined;
+};
+
+interface AgentChatToolGroup {
+  key: string;
+  calls: AgentChatToolCallData[];
+  representative: AgentChatToolCallData;
+}
+
+// Collapse consecutive same-tool runs (e.g. 3 × createTodo) into one row.
+// The representative is the latest part — its input/output drive the
+// expanded panel — and the displayed label is recomputed from the group.
+const groupConsecutiveToolCalls = (
+  toolCalls: AgentChatToolCallData[],
+): AgentChatToolGroup[] => {
+  const groups: AgentChatToolGroup[] = [];
+  for (let index = 0; index < toolCalls.length; index += 1) {
+    const call = toolCalls[index];
+    const name = getRawToolName(call);
+    const last = groups[groups.length - 1];
+    if (last && getRawToolName(last.representative) === name) {
+      last.calls.push(call);
+      last.representative = call;
+      continue;
+    }
+    groups.push({
+      key: call.toolCallId || `${call.type}-${index}`,
+      calls: [call],
+      representative: call,
+    });
+  }
+  return groups;
+};
+
+const getGroupStatus = (group: AgentChatToolGroup): AgentChatToolStatus => {
+  const total = group.calls.length;
+  if (total === 1) {
+    return getToolStatus(group.representative);
+  }
+
+  const completedCount = group.calls.filter(
+    (call) => call.state === 'output-available',
+  ).length;
+  const failedCount = group.calls.filter(
+    (call) => call.state === 'output-error',
+  ).length;
+  const doneCount = completedCount + failedCount;
+  // Use the humanised tool name for the group label. Suffix is purely
+  // numeric — "2/3" while running, "×3" when done — so it reads in any
+  // language.
+  const baseLabel = getSingleToolLabel(group.representative);
+
+  if (doneCount < total) {
+    return {
+      label: `${baseLabel} ${doneCount + 1}/${total}`,
+      value: 'loading',
+    };
+  }
+
+  // All done. Surface failure if any sub-call failed — open question in spec
+  // whether to break this down separately. For now: latest wins on visual
+  // state, label uses the language-neutral "×N" multiplication symbol.
+  return {
+    label: `${baseLabel} \u00D7${total}`,
+    value: failedCount > 0 ? 'failed' : 'completed',
+  };
+};
 
 const getMessageToolCalls = (
   message: LegacyMessageItem,
@@ -682,66 +786,107 @@ const getMessageToolCalls = (
     });
 };
 
-function AgentChatToolDescribe({
-  toolCall,
-  status,
-}: {
-  toolCall: AgentChatToolCallData;
-  status: ReturnType<typeof getToolStatus>;
-}) {
-  const description = getToolDescription(toolCall);
-  if (!description) {
-    return null;
-  }
+// Body of an expanded tool panel — currently only used for `reasoning` text
+// when the SDK populates it. Same prose rhythm as the `LiveError` text in
+// the live-component part; no `mt-*` here because the rail's vertical
+// padding owns the rhythm.
+const agentChatToolDisclosureBodyVariants = cva(
+  'whitespace-pre-wrap font-sans text-sm leading-relaxed text-muted-foreground',
+);
 
+function AgentChatToolReasoningBody({ text }: { text: string }) {
   return (
-    <div className="mt-2 text-sm leading-relaxed text-muted-foreground">
-      {description}
-    </div>
+    <div className={cn(agentChatToolDisclosureBodyVariants())}>{text}</div>
+  );
+}
+
+// Three animated dots that follow the title sentence during progress.
+// Explicit color (not transparent through the parent's gradient) so they stay
+// visible against any background.
+const agentChatToolTypingDotsVariants = cva(
+  'ml-px inline-flex items-baseline text-muted-foreground/60',
+);
+
+const agentChatToolTypingDotVariants = cva('animate-typing-dot');
+
+const TYPING_DOT_DELAYS_MS = [0, 200, 400] as const;
+
+function AgentChatToolTypingDots() {
+  return (
+    <span className={cn(agentChatToolTypingDotsVariants())} aria-hidden="true">
+      {TYPING_DOT_DELAYS_MS.map((delay) => (
+        <span
+          key={delay}
+          className={cn(agentChatToolTypingDotVariants())}
+          style={{ animationDelay: `${delay}ms` }}
+        >
+          .
+        </span>
+      ))}
+    </span>
   );
 }
 
 function AgentChatActivityPart({
-  toolCall,
-  status,
+  group,
   size = 'md',
   variant = 'bubble',
 }: {
-  toolCall: AgentChatToolCallData;
-  status: ReturnType<typeof getToolStatus>;
+  group: AgentChatToolGroup;
   size?: AgentChatSize;
   variant?: AgentChatVariant;
 }) {
-  const hasDescription = Boolean(getToolDescription(toolCall));
+  const status = getGroupStatus(group);
+  const reasoning = getToolReasoning(group.representative);
+  // The chevron only earns its place when there's something to disclose.
+  // Today that's reasoning (when the SDK starts emitting it). Tomorrow it
+  // could grow to include input/output dumps, traces, etc. — drive it from
+  // this single boolean so the row layout stays consistent.
+  const isExpandable = Boolean(reasoning);
 
-  return (
-    <AgentChatToolCard
+  // Title is shared between the expandable and flat layouts.
+  const titleNode = (
+    <AgentChatToolTitle
       size={size}
-      variant={variant}
-      className={cn(
-        'w-full min-w-0',
-        status.value === 'failed' && 'border-destructive text-destructive',
-      )}
+      className={cn(agentChatToolTitleStateVariants({ status: status.value }))}
     >
+      {status.label}
+      {status.value === 'loading' && <AgentChatToolTypingDots />}
+    </AgentChatToolTitle>
+  );
+
+  // Flat layout: no card chrome, no chevron, no expand panel. The row is
+  // non-interactive — visual state is carried by the title styling
+  // (shimmer for loading, destructive for failed).
+  if (!isExpandable) {
+    return (
+      <div className={cn(agentChatToolHeaderVariants({ size, variant }))}>
+        {titleNode}
+      </div>
+    );
+  }
+
+  // Expandable layout: full card with the lead chevron + animated
+  // disclosure panel containing the reasoning body.
+  return (
+    <AgentChatToolCard size={size} variant={variant}>
       <AgentChatToolHeader size={size} variant={variant}>
-        <AgentChatToolTitle
-          size={size}
-          status={<AgentChatToolStatusIcon value={status.value} size={size} />}
-        >
-          {status.label}
-        </AgentChatToolTitle>
+        <AgentChatToolLeadChevron status={status.value} size={size} />
+        {titleNode}
       </AgentChatToolHeader>
-      {hasDescription && (
-        <AgentChatToolContent>
-          <AgentChatToolContentInner size={size} className="pt-0">
-            <AgentChatToolDescribe toolCall={toolCall} status={status} />
-          </AgentChatToolContentInner>
-        </AgentChatToolContent>
-      )}
+      <AgentChatToolContent>
+        <AgentChatToolContentInner size={size}>
+          {reasoning && <AgentChatToolReasoningBody text={reasoning} />}
+        </AgentChatToolContentInner>
+      </AgentChatToolContent>
     </AgentChatToolCard>
   );
 }
 
+// Tighter line-height (1.6), softer body color (90%), less heavy headings
+// (semibold, not bold), tighter list rhythm. The intent is calm long-form
+// reading — the AI message body sits flush on the canvas, no bubble, so the
+// typography itself has to feel restrained.
 const streamdownClassName = ({
   size,
   role,
@@ -752,10 +897,13 @@ const streamdownClassName = ({
   variant?: 'bubble' | 'minimal';
 }) =>
   cn(
-    'prose min-w-0 max-w-full overflow-hidden text-foreground dark:prose-invert',
-    'prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground',
-    'prose-p:my-1 prose-p:leading-relaxed prose-headings:mb-2 prose-headings:mt-3',
-    'prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-li:pl-0',
+    'prose min-w-0 max-w-full overflow-hidden text-foreground/90 dark:prose-invert',
+    'prose-headings:text-foreground prose-p:text-foreground/90 prose-strong:text-foreground',
+    'prose-headings:font-semibold prose-strong:font-semibold',
+    'prose-p:my-1 prose-p:leading-[1.6] prose-headings:mb-2 prose-headings:mt-3',
+    'prose-ul:my-2 prose-ol:my-2 prose-ul:pl-5 prose-ol:pl-5',
+    'prose-li:my-0 prose-li:pl-0',
+    'prose-li:marker:text-muted-foreground/50',
     'prose-blockquote:my-2 prose-pre:my-2 prose-hr:my-2',
     'prose-table:my-1.5 prose-table:text-foreground prose-th:border-border prose-td:border-border',
     'prose-th:px-3 prose-th:py-2 prose-td:px-3 prose-td:py-2',
@@ -816,6 +964,30 @@ function AgentChatStreamdown({
   );
 }
 
+// Flex column that hosts the rendered tool-call rows inside an AI message.
+// The size-keyed gap is the *only* vertical rhythm between consecutive tool
+// rows — tool cards do NOT add their own `my-*`.
+const agentChatToolCallsContentVariants = cva(
+  'flex w-full min-w-0 max-w-full flex-col items-start overflow-visible',
+  {
+    variants: {
+      size: {
+        sm: 'gap-1',
+        md: 'gap-1.5',
+        lg: 'gap-2',
+      },
+      variant: {
+        bubble: '',
+        minimal: 'gap-1',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      variant: 'bubble',
+    },
+  },
+);
+
 function AgentChatToolCallsContent({
   toolCalls,
   size,
@@ -825,8 +997,6 @@ function AgentChatToolCallsContent({
   size?: AgentChatSize;
   variant?: 'bubble' | 'minimal';
 }) {
-  const contentGapClass =
-    variant === 'minimal' ? 'gap-1' : messageContentGapClasses[size ?? 'md'];
   const liveComponentScopeExtras = React.useMemo(
     () => ({
       AgentChatPrimitive,
@@ -847,26 +1017,39 @@ function AgentChatToolCallsContent({
   const generatedToolCalls = toolCalls.filter(
     isGenerateDynamicChatComponentToolCall,
   );
+  const askUserToolCalls = toolCalls.filter(isAskUserToolCall);
   const activityToolCalls = toolCalls.filter(
-    (toolCall) => !isGenerateDynamicChatComponentToolCall(toolCall),
+    (toolCall) =>
+      !isGenerateDynamicChatComponentToolCall(toolCall) &&
+      !isAskUserToolCall(toolCall),
   );
 
-  if (generatedToolCalls.length === 0 && activityToolCalls.length === 0) {
+  // O(n) and cheap; useMemo would never hit cache anyway because
+  // `activityToolCalls` is a fresh array reference each render.
+  const activityGroups = groupConsecutiveToolCalls(activityToolCalls);
+
+  if (
+    generatedToolCalls.length === 0 &&
+    askUserToolCalls.length === 0 &&
+    activityGroups.length === 0
+  ) {
     return null;
   }
 
   return (
-    <div
-      className={cn(
-        'flex min-w-0 max-w-full flex-col items-start overflow-hidden',
-        contentGapClass,
-      )}
-    >
-      {activityToolCalls.map((toolCall, index) => (
+    <div className={cn(agentChatToolCallsContentVariants({ size, variant }))}>
+      {activityGroups.map((group) => (
         <AgentChatActivityPart
+          key={group.key}
+          group={group}
+          size={size}
+          variant={variant}
+        />
+      ))}
+      {askUserToolCalls.map((toolCall, index) => (
+        <AgentChatAskUserPart
           key={toolCall.toolCallId || `${toolCall.type}-${index}`}
-          toolCall={toolCall}
-          status={getToolStatus(toolCall)}
+          part={toolCall}
           size={size}
           variant={variant}
         />
@@ -900,6 +1083,7 @@ function AgentChatAvatar({
   role = 'ai',
   size = 'md',
   userPosition = 'side',
+  isPulsing = false,
   className,
 }: VariantProps<typeof agentChatAvatarVariants> & {
   className?: string;
@@ -932,6 +1116,7 @@ function AgentChatAvatar({
           role,
           size,
           userPosition,
+          isPulsing,
           className,
         }),
       )}
@@ -942,12 +1127,19 @@ function AgentChatAvatar({
             ? user.profileImageUrl
             : agentChatData?.agent?.photoUrl
         }
+        alt={
+          role === 'human'
+            ? user.firstName || user.lastName || 'You'
+            : agentChatData?.agent?.title || 'Assistant'
+        }
       />
       <AvatarFallback
-        className={agentChatAvatarFallbackVariants({
-          size,
-          userPosition,
-        })}
+        className={cn(
+          agentChatAvatarFallbackVariants({
+            size,
+            userPosition,
+          }),
+        )}
       >
         {displayName}
       </AvatarFallback>
@@ -1016,6 +1208,19 @@ function LegacyAgentChatMessage({
   const isStreamingMessage =
     isThinking && message.msg.role === 'ai' && index === messages.length - 1;
 
+  // Pulse the visible avatar of the latest AI group's representative. The
+  // representative is the FIRST message in the group (only it renders a
+  // visible avatar; subsequent ones use `invisible`). A message belongs to
+  // the latest AI group iff it is AI, isFirstInGroup, isThinking, and every
+  // message from this index forward is also AI (no human breaks the run).
+  const isLatestAiGroupRepresentative =
+    isThinking &&
+    message.msg.role === 'ai' &&
+    isFirstInGroup &&
+    messages.slice(index).every((m) => m.msg.role === 'ai');
+
+  const hasContent = Boolean(messageContent) || toolCalls.length > 0;
+
   return (
     <AgentChatPrimitive.AgentChatMessage
       message={message}
@@ -1032,6 +1237,7 @@ function LegacyAgentChatMessage({
           role={message.msg.role}
           size={size}
           userPosition={userPosition}
+          isPulsing={isLatestAiGroupRepresentative}
           className={!isFirstInGroup ? 'invisible' : undefined}
         />
       )}
@@ -1043,7 +1249,7 @@ function LegacyAgentChatMessage({
           role: message.msg.role,
         })}
       >
-        {(messageContent || toolCalls.length > 0) && (
+        {hasContent && (
           <div
             data-slot="agent-chat-message-content"
             className={cn(
@@ -1089,12 +1295,14 @@ function LegacyAgentChatMessage({
         {showTimestamp && isLastInGroup && (
           <div
             data-slot="agent-chat-message-timestamp"
-            className={agentChatMessageTimestampVariants({
-              variant,
-              userPosition,
-              size,
-              role: message.msg.role,
-            })}
+            className={cn(
+              agentChatMessageTimestampVariants({
+                variant,
+                userPosition,
+                size,
+                role: message.msg.role,
+              }),
+            )}
           >
             {userPosition === 'bottom' && (
               <AgentChatAvatar
@@ -1103,9 +1311,7 @@ function LegacyAgentChatMessage({
                 userPosition={userPosition}
               />
             )}
-            <span className="text-xs text-muted-foreground">
-              {format(new Date(message.createdAt), dateFormat)}
-            </span>
+            <span>{format(new Date(message.createdAt), dateFormat)}</span>
           </div>
         )}
       </div>
@@ -1113,23 +1319,21 @@ function LegacyAgentChatMessage({
   );
 }
 
-export function AgentChatThinking({
-  size = 'md',
-  className,
-  ...props
-}: VariantProps<typeof agentChatThinkingVariants> &
-  React.ComponentProps<'div'>) {
-  const { agentChatData } = useAgentChat();
+interface AgentChatThinkingProps {
+  variant?: AgentChatVariant;
+  userPosition?: 'side' | 'bottom';
+}
 
-  return (
-    <AgentChatPrimitive.AgentChatThinking
-      className={cn(agentChatThinkingVariants({ size }), className)}
-      {...props}
-    >
-      <Loader2 className="animate-spin" />
-      <span>{agentChatData?.agent?.title || 'AI'} is thinking...</span>
-    </AgentChatPrimitive.AgentChatThinking>
-  );
+// Returns `null` by design: the brief gap between user-sends-message and
+// AI-starts-streaming is intentional dead air. Once the AI's first token
+// arrives, its message renders and its avatar pulses (see `isPulsing` on
+// `AgentChatAvatar`). Stacking a placeholder would compete with that.
+export function AgentChatThinking(
+  _props: VariantProps<typeof agentChatThinkingVariants> &
+    AgentChatThinkingProps &
+    React.ComponentProps<'div'>,
+) {
+  return null;
 }
 
 export function AgentChatFetching({
@@ -1292,7 +1496,11 @@ export function AgentChatMessages({
           );
         })}
 
-        <AgentChatThinking size={size} />
+        <AgentChatThinking
+          size={size}
+          variant={variant || undefined}
+          userPosition={userPosition}
+        />
         <AgentChatFetching size={size} />
       </div>
     </AgentChatPrimitive.AgentChatMessages>
