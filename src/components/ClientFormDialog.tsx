@@ -61,6 +61,8 @@ interface ClientFormState {
   englishStreet: string;
   bornInUSA: boolean;
   smoker: boolean;
+  beneficiariesDivide: string;
+  beneficiariesDivideFree: string;
   taxCountry: string;
   bankName: string;
   branchNumber: string;
@@ -108,6 +110,8 @@ const INITIAL_FORM_STATE: ClientFormState = {
   englishStreet: "",
   bornInUSA: false,
   smoker: false,
+  beneficiariesDivide: "",
+  beneficiariesDivideFree: "",
   taxCountry: "",
   bankName: "",
   branchNumber: "",
@@ -184,6 +188,8 @@ export const ClientFormDialog = ({
         englishStreet: client.englishStreet || "",
         bornInUSA: client.bornInUSA || false,
         smoker: client.smoker || false,
+        beneficiariesDivide: client.beneficiariesDivide || "",
+        beneficiariesDivideFree: client.beneficiariesDivideFree || "",
         taxCountry: client.taxCountry || "",
         bankName: client.bankName || "",
         branchNumber: client.branchNumber || "",
@@ -284,6 +290,8 @@ export const ClientFormDialog = ({
       if (formState.englishStreet.trim()) data.englishStreet = formState.englishStreet.trim();
       data.bornInUSA = formState.bornInUSA;
       data.smoker = formState.smoker;
+      if (formState.beneficiariesDivide) data.beneficiariesDivide = formState.beneficiariesDivide;
+      if (formState.beneficiariesDivideFree.trim()) data.beneficiariesDivideFree = formState.beneficiariesDivideFree.trim();
       if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
       if (formState.bankName.trim()) data.bankName = formState.bankName.trim();
       if (formState.branchNumber.trim()) data.branchNumber = formState.branchNumber.trim();
@@ -936,6 +944,41 @@ export const ClientFormDialog = ({
                     </div>
                   </div>
                 </div>
+
+                {/* חלוקה בין מוטבים */}
+                <div className="space-y-2">
+                  <Label>חלוקה בין מוטבים</Label>
+                  <Select
+                    value={formState.beneficiariesDivide}
+                    onValueChange={(value) => handleChange("beneficiariesDivide", value)}
+                    dir="rtl"
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="בחר חלוקה" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="חלקים שווים">חלקים שווים</SelectItem>
+                      <SelectItem value="יחסי לחלקם">יחסי לחלקם</SelectItem>
+                      <SelectItem value="יורשים חוקיים">יורשים חוקיים</SelectItem>
+                      <SelectItem value="אחר">אחר</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formState.beneficiariesDivide === "אחר" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="beneficiariesDivideFree">חלוקה בין מוטבים - אחר</Label>
+                    <Input
+                      id="beneficiariesDivideFree"
+                      value={formState.beneficiariesDivideFree}
+                      onChange={(e) => handleChange("beneficiariesDivideFree", e.target.value)}
+                      placeholder="הזן חלוקה"
+                      disabled={isLoading}
+                      dir="rtl"
+                    />
+                  </div>
+                )}
 
                 {/* Row 10: Notes (textarea, full width) */}
                 <div className="space-y-2">

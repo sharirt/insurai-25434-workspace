@@ -96,6 +96,12 @@ export type ClientsEntityEmploymentEnum =
   | "גמלאי"
   | "שכיר בעל שליטה";
 
+export type ClientsEntityBeneficiariesDivideEnum =
+  | "חלקים שווים"
+  | "יחסי לחלקם"
+  | "יורשים חוקיים"
+  | "אחר";
+
 export type ClientsEntityGenderEnum = "זכר" | "נקבה";
 
 export type ClientsEntityRelationshipEnum =
@@ -159,6 +165,8 @@ export interface IClientsEntity {
   smoker?: boolean;
   /** Client's employment type - whether they are self-employed or an employee  */
   employment?: ClientsEntityEmploymentEnum;
+  /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
+  beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** שם רחוב בלבד - Computed street name extracted from the address field, removing any numeric characters and trimming whitespace  */
   streetName?: string;
   /** URL link to a file containing pictures of the client's ID documentation. Accepts any file type (jpg, pdf, doc, etc.). Uploaded by the agent when editing the client's profile.  */
@@ -205,6 +213,8 @@ export interface IClientsEntity {
   parent1Id?: string;
   /** Whether the client was born in the USA (יליד ארה״ב)  */
   bornInUSA?: boolean;
+  /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
+  beneficiariesDivideFree?: string;
   /** Whether the client is an American citizen or holds US citizenship/residency status  */
   american?: boolean;
   /** First name of the first parent or guardian of the client  */

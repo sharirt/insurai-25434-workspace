@@ -72,6 +72,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "bankName", label: "קוד בנק" },
       { value: "branchNumber", label: "מספר סניף" },
       { value: "accountNumber", label: "מספר חשבון" },
+      { value: "beneficiariesDivideFree", label: "חלוקה בין מוטבים - אחר" },
     ],
   },
   {

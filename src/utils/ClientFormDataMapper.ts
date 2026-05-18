@@ -44,6 +44,8 @@ export function mapClientToFormData(
     bankName: client.bankName ?? "",
     branchNumber: client.branchNumber ?? "",
     accountNumber: client.accountNumber ?? "",
+    beneficiariesDivide: client.beneficiariesDivide,
+    beneficiariesDivideFree: client.beneficiariesDivideFree ?? "",
   };
 }
 
@@ -89,5 +91,7 @@ export function createEmptyClientFormData(): Partial<IClientsEntity> {
     bankName: "",
     branchNumber: "",
     accountNumber: "",
+    beneficiariesDivide: undefined,
+    beneficiariesDivideFree: "",
   };
 }

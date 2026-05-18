@@ -589,6 +589,41 @@ export const ClientInfoForm = ({
         </div>
       </div>
 
+      {/* חלוקה בין מוטבים */}
+      <div className="space-y-1.5">
+        <Label className="text-sm font-medium">חלוקה בין מוטבים</Label>
+        <Select
+          value={formData.beneficiariesDivide ?? ""}
+          onValueChange={handleSelectChange("beneficiariesDivide")}
+          dir="rtl"
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="בחר חלוקה" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="חלקים שווים">חלקים שווים</SelectItem>
+            <SelectItem value="יחסי לחלקם">יחסי לחלקם</SelectItem>
+            <SelectItem value="יורשים חוקיים">יורשים חוקיים</SelectItem>
+            <SelectItem value="אחר">אחר</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {formData.beneficiariesDivide === "אחר" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="beneficiariesDivideFree" className="text-sm font-medium">
+            חלוקה בין מוטבים - אחר
+          </Label>
+          <Input
+            id="beneficiariesDivideFree"
+            value={formData.beneficiariesDivideFree ?? ""}
+            onChange={handleInputChange("beneficiariesDivideFree")}
+            placeholder="הזן חלוקה"
+            dir="rtl"
+          />
+        </div>
+      )}
+
       {/* הערות */}
       <div className="col-span-1 space-y-1.5 md:col-span-2">
         <Label htmlFor="notes" className="text-sm font-medium">
