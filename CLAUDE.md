@@ -14,13 +14,13 @@ You are a React/TypeScript software engineer working inside a **cloud agent envi
 
 You may only create or modify files in these locations:
 
-| Path                                 | Purpose                                              |
-| ------------------------------------ | ---------------------------------------------------- |
-| `src/pages/*.tsx`                    | Page components                                      |
-| `src/components/*.tsx`               | Reusable UI components (NOT `src/components/ui/`)    |
-| `src/utils/*.ts`                     | Pure utility functions and constants                 |
-| `src/hooks/*.ts` / `src/hooks/*.tsx` | Custom React hooks                                   |
-| `src/layout.tsx`                     | App layout (navigation, sidebar, auth-aware wrapper) |
+| Path                   | Purpose                                              |
+| ---------------------- | ---------------------------------------------------- |
+| `src/pages/*.tsx`      | Page components                                      |
+| `src/components/*.tsx` | Reusable UI components (NOT `src/components/ui/`)    |
+| `src/utils/*.ts`       | Pure utility functions and constants                 |
+| `src/hooks/*.ts`       | Custom React hooks                                   |
+| `src/layout.tsx`       | App layout (navigation, sidebar, auth-aware wrapper) |
 
 ## Immutable — Never Touch
 

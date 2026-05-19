@@ -13,7 +13,7 @@
     "lint:fix-test-mode:json": "eslint . --fix -f json --quiet --config eslint.config.test-mode.js",
     "lint:fix:json": "eslint . --fix -f json --quiet",
     "lint:cache": "eslint --config  ./eslint.config.js ./src/pages/Main.tsx",
-    "build": "NODE_ENV=production vite build --configLoader runner",
+    "build": "pnpm lint:fix && NODE_ENV=production vite build --configLoader runner",
     "build:standalone": "VITE_BUILD_STANDALONE=1 vite build --configLoader runner",
     "preview": "pnpm run build:standalone && vite preview --configLoader runner",
     "test": "vitest run --configLoader runner",

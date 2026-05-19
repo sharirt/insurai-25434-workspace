@@ -28,6 +28,7 @@ export default tseslint.config(
       'node_modules',
       '*.d.ts',
       '*.d.tsx',
+      'deno-actions/**/*.{ts,tsx}',
     ],
     languageOptions: {
       ecmaVersion: 2022,

@@ -17,6 +17,7 @@ const externalDeps = [
   '@blocksdiy/blocks-client-sdk/clientSdk',
   '@blocksdiy/blocks-client-sdk/reactSdk',
   '@blocksdiy/react-common/agent-chat',
+  '@blocksdiy/react-common/new-agent-chat',
 ];
 
 export default defineConfig(({ mode, command }) => {
@@ -143,6 +144,8 @@ export default defineConfig(({ mode, command }) => {
                   '@blocksdiy/blocks-client-sdk/reactSdk',
                 '@blocksdiy/react-common/agent-chat':
                   '@blocksdiy/react-common/agent-chat',
+                '@blocksdiy/react-common/new-agent-chat':
+                  '@blocksdiy/react-common/new-agent-chat',
               },
             },
           },

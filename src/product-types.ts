@@ -2,10 +2,10 @@
  * Stores agency-level information such as agency name, used as a data source in field mapping for insurance form templates.
  */
 export interface IAgencyEntity {
-  /** The agency's company registration number (ח.פ סוכנות) - free text field for the agency's official business ID  */
-  agencyCode?: string;
   /** The name of the insurance agency  */
   agencyName?: string;
+  /** The agency's company registration number (ח.פ סוכנות) - free text field for the agency's official business ID  */
+  agencyCode?: string;
 }
 
 export const AgencyEntity = {
@@ -17,12 +17,12 @@ export const AgencyEntity = {
  * Lookup table for agency codes, mapping each code to a provider and optional description. Used to associate insurance agencies with their codes per provider for form processing and reporting.
  */
 export interface IAgencyCodesEntity {
-  /** Array of request type IDs this agency code applies to. Supports multiple request types per code.  */
-  requestTypeIds?: string[];
   /** The agent code identifier for this agency code record.  */
   agentCode?: string;
   /** Array of provider IDs this agency code applies to. Supports multiple providers per code.  */
   providerIds?: string[];
+  /** Array of request type IDs this agency code applies to. Supports multiple request types per code.  */
+  requestTypeIds?: string[];
 }
 
 export const AgencyCodesEntity = {
@@ -34,20 +34,20 @@ export const AgencyCodesEntity = {
  * Stores insurance agent information including agent names and identification numbers for insurance form processing
  */
 export interface IAgentsEntity {
-  /** Computed full name of the agent combining first name and last name (שם מלא של הסוכן)  */
-  fullName?: string;
-  /** The national ID (תעודת זהות) of the insurance agent  */
-  nationalId?: string;
-  /** The agent's phone number for SMS notifications (E.164 format, e.g. +972501234567)  */
-  phone?: string;
-  /** The first name (שם פרטי) of the insurance agent  */
-  firstName?: string;
-  /** The agent's email address for communication and notifications  */
-  email?: string;
-  /** The last name (שם משפחה) of the insurance agent  */
-  lastName?: string;
   /** The unique identification number assigned to the insurance agent  */
   agentNumber?: string;
+  /** The agent's email address for communication and notifications  */
+  email?: string;
+  /** The national ID (תעודת זהות) of the insurance agent  */
+  nationalId?: string;
+  /** The first name (שם פרטי) of the insurance agent  */
+  firstName?: string;
+  /** The last name (שם משפחה) of the insurance agent  */
+  lastName?: string;
+  /** The agent's phone number for SMS notifications (E.164 format, e.g. +972501234567)  */
+  phone?: string;
+  /** Computed full name of the agent combining first name and last name (שם מלא של הסוכן)  */
+  fullName?: string;
 }
 
 export const AgentsEntity = {
@@ -59,22 +59,22 @@ export const AgentsEntity = {
  * Stores beneficiary records linked to a specific client. Each beneficiary has personal details including name, national ID, relationship to the client, and their allocation percentage of the insurance/fund benefits.
  */
 export interface IBeneficiariesEntity {
-  /** שם מלא - Calculated full name combining first name and last name.  */
-  fullName?: string;
-  /** תעודת זהות - The beneficiary's national identification number.  */
-  nationalId?: string;
-  /** Reference to the client this beneficiary belongs to. Links to the Clients table by client ID.  */
-  clientId?: string;
-  /** הקצאה באחוזים - The percentage of benefits allocated to this beneficiary. Should be a floating point number between 0 and 100.  */
-  allocationPercentage?: number;
-  /** קרבה - The relationship of the beneficiary to the client (e.g., spouse, child, parent).  */
-  relationship?: string;
   /** תאריך לידה - The beneficiary's date of birth.. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
   birthDate?: string;
+  /** תעודת זהות - The beneficiary's national identification number.  */
+  nationalId?: string;
+  /** קרבה - The relationship of the beneficiary to the client (e.g., spouse, child, parent).  */
+  relationship?: string;
+  /** Reference to the client this beneficiary belongs to. Links to the Clients table by client ID.  */
+  clientId?: string;
   /** שם פרטי - The beneficiary's first name.  */
   firstName?: string;
   /** שם משפחה - The beneficiary's last name.  */
   lastName?: string;
+  /** שם מלא - Calculated full name combining first name and last name.  */
+  fullName?: string;
+  /** הקצאה באחוזים - The percentage of benefits allocated to this beneficiary. Should be a floating point number between 0 and 100.  */
+  allocationPercentage?: number;
 }
 
 export const BeneficiariesEntity = {
@@ -82,7 +82,16 @@ export const BeneficiariesEntity = {
   instanceType: {} as IBeneficiariesEntity,
 } as const;
 
+export type ClientsEntityGenderEnum = "זכר" | "נקבה";
+
 export type ClientsEntityClientStatusEnum = "פעיל" | "טרום יעוץ";
+
+export type ClientsEntityRelationshipEnum =
+  | "רווק"
+  | "נשוי"
+  | "גרוש"
+  | "אלמן"
+  | "ידוע בציבור";
 
 export type ClientsEntityEmploymentEnum =
   | "שכיר"
@@ -102,135 +111,126 @@ export type ClientsEntityBeneficiariesDivideEnum =
   | "יורשים חוקיים"
   | "אחר";
 
-export type ClientsEntityGenderEnum = "זכר" | "נקבה";
-
-export type ClientsEntityRelationshipEnum =
-  | "רווק"
-  | "נשוי"
-  | "גרוש"
-  | "אלמן"
-  | "ידוע בציבור";
-
 /**
  * Stores client personal details including national identification number, contact information for insurance form processing
  */
 export interface IClientsEntity {
-  /** Client's date of birth. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
-  dateOfBirth?: string;
+  /** Client's first name  */
+  first_name?: string;
+  /** Client's last name  */
+  last_name?: string;
+  /** Client's national identification number, 9 characters  */
+  national_id?: string;
+  /** Client's email address for communication  */
+  email?: string;
+  /** Client's phone number for contact  */
+  phone_number?: string;
+  /** Client's gender  */
+  gender?: ClientsEntityGenderEnum;
   /** Client's street address  */
   address?: string;
-  /** Computed age of the client in years, calculated from the dateOfBirth field  */
-  age?: number;
-  /** First name of the second parent or guardian of the client  */
-  parent2FirstName?: string;
-  /** The issue date of the client's national ID card (תאריך הנפקה). ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
-  idIssueDate?: string;
+  /** Client's date of birth. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  dateOfBirth?: string;
+  /** City where the client resides  */
+  cityOfResidence?: string;
+  /** Client's postal/zip code  */
+  zipCode?: string;
+  /** General notes about the client  */
+  notes?: string;
   /** Client's current status in the system  */
   clientStatus?: ClientsEntityClientStatusEnum;
+  /** Whether the client is an American citizen or holds US citizenship/residency status  */
+  american?: boolean;
+  /** Client's marital/relationship status  */
+  relationship?: ClientsEntityRelationshipEnum;
+  /** Client's occupation or job title  */
+  occupation?: string;
+  /** Client's employer name  */
+  employer?: string;
+  /** Client's employer company registration ID number  */
+  companyId?: string;
+  /** The issue date of the client's national ID card (תאריך הנפקה). ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  idIssueDate?: string;
+  /** Client's apartment number (מספר דירה) within their building  */
+  apartmentNumber?: string;
+  /** Computed full address combining city of residence, street address, and apartment number  */
+  fullAddress?: string;
+  /** Computed full name combining the client's first name and last name  */
+  fullName?: string;
+  /** Full name of the first parent or guardian of the client  */
+  parent1Name?: string;
+  /** National ID number of the first parent or guardian of the client  */
+  parent1Id?: string;
+  /** Full name of the second parent or guardian of the client  */
+  parent2Name?: string;
+  /** National ID number of the second parent or guardian of the client  */
+  parent2Id?: string;
+  /** Computed age of the client in years, calculated from the dateOfBirth field  */
+  age?: number;
+  /** שם רחוב בלבד - Computed street name extracted from the address field, removing any numeric characters and trimming whitespace  */
+  streetName?: string;
+  /** מספר בית בלבד - Computed street number extracted from the address field, keeping only numeric characters  */
+  streetNumber?: string;
+  /** Client's home/building number (מספר בית) - the number of the building or house at the client's address  */
+  homeNumber?: string;
+  /** First name of the first parent or guardian of the client  */
+  parent1FirstName?: string;
+  /** Last name of the first parent or guardian of the client  */
+  parent1LastName?: string;
+  /** First name of the second parent or guardian of the client  */
+  parent2FirstName?: string;
+  /** Last name of the second parent or guardian of the client  */
+  parent2LastName?: string;
   /** Date of birth of the client's first parent, stored in YYYY-MM-DD format. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
   parent1DateOfBirth?: string;
   /** Date of birth of the client's second parent, stored in YYYY-MM-DD format. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
   parent2DateOfBirth?: string;
-  /** Client's country in English (מדינה אנגלית)  */
-  englishCountry?: string;
-  /** Client's phone number for contact  */
-  phone_number?: string;
-  /** Client's home/building number (מספר בית) - the number of the building or house at the client's address  */
-  homeNumber?: string;
-  /** Client's city of residence in English (עיר אנגלית)  */
-  englishCity?: string;
-  /** Client's apartment number (מספר דירה) within their building  */
-  apartmentNumber?: string;
-  /** The client's country of birth in English (free text). Used for forms and documents that require English-language birth country information.  */
-  birthCountryEnglish?: string;
-  /** Client's national identification number, 9 characters  */
-  national_id?: string;
-  /** Computed English street address with number — combines englishStreet and streetNumber fields (רחוב באנגלית עם מספר)  */
-  englishStreetWithNumber?: string;
-  /** Client's last name in English (שם משפחה אנגלית)  */
-  englishLastName?: string;
-  /** National ID number of the second parent or guardian of the client  */
-  parent2Id?: string;
-  /** Client's occupation or job title  */
-  occupation?: string;
-  /** City where the client resides  */
-  cityOfResidence?: string;
-  /** The client's bank account number (מספר חשבון). Stored as string to preserve leading zeros and special formats.  */
-  accountNumber?: string;
-  /** Last name of the first parent or guardian of the client  */
-  parent1LastName?: string;
-  /** The client's bank code (קוד בנק). Numeric or alphanumeric code identifying the client's bank.  */
-  bankName?: string;
-  /** Whether the client is a smoker (מעשן). Used for insurance risk assessment purposes.  */
-  smoker?: boolean;
-  /** Client's employment type - whether they are self-employed or an employee  */
-  employment?: ClientsEntityEmploymentEnum;
-  /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
-  beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
-  /** שם רחוב בלבד - Computed street name extracted from the address field, removing any numeric characters and trimming whitespace  */
-  streetName?: string;
-  /** URL link to a file containing pictures of the client's ID documentation. Accepts any file type (jpg, pdf, doc, etc.). Uploaded by the agent when editing the client's profile.  */
-  idDocumentationUrl?: string;
-  /** Client's email address for communication  */
-  email?: string;
-  /** Client's street address in English (רחוב באנגלית)  */
-  englishStreet?: string;
-  /** Full name of the second parent or guardian of the client  */
-  parent2Name?: string;
-  /** מספר בית בלבד - Computed street number extracted from the address field, keeping only numeric characters  */
-  streetNumber?: string;
-  /** Client's US Tax Identification Number (מספר TIN) - required for American tax residents  */
-  tinNumber?: string;
-  /** Client's first name  */
-  first_name?: string;
-  /** Client's gender  */
-  gender?: ClientsEntityGenderEnum;
-  /** Last name of the second parent or guardian of the client  */
-  parent2LastName?: string;
-  /** Client's country of birth (ארץ לידה)  */
-  birthCountry?: string;
-  /** Computed full address combining city of residence, street address, and apartment number  */
-  fullAddress?: string;
-  /** Client's first name in English (שם פרטי אנגלית)  */
-  englishFirstName?: string;
-  /** General notes about the client  */
-  notes?: string;
-  /** Client's last name  */
-  last_name?: string;
-  /** The bank branch number where the client's account is located (מספר סניף). Stored as string to preserve leading zeros.  */
-  branchNumber?: string;
-  /** Client's postal/zip code  */
-  zipCode?: string;
   /** List of email addresses of office users assigned to this client. Each entry is an email string referencing a user with the 'office' role.  */
   assignedOfficeEmails?: string[];
-  /** Client's city of birth (עיר לידה)  */
-  birthCity?: string;
-  /** The client's city of birth in English (free text). Used for forms and documents that require English-language birth city information.  */
-  birthCityEnglish?: string;
+  /** Client's city of residence in English (עיר אנגלית)  */
+  englishCity?: string;
   /** Whether the client is a US resident for tax purposes (תושב ארצות הברית לצורכי מס)  */
   americanForTax?: boolean;
-  /** National ID number of the first parent or guardian of the client  */
-  parent1Id?: string;
+  /** Client's country in English (מדינה אנגלית)  */
+  englishCountry?: string;
+  /** Client's last name in English (שם משפחה אנגלית)  */
+  englishLastName?: string;
+  /** Client's first name in English (שם פרטי אנגלית)  */
+  englishFirstName?: string;
+  /** Client's US Tax Identification Number (מספר TIN) - required for American tax residents  */
+  tinNumber?: string;
+  /** Client's country of birth (ארץ לידה)  */
+  birthCountry?: string;
+  /** Client's city of birth (עיר לידה)  */
+  birthCity?: string;
+  /** Client's street address in English (רחוב באנגלית)  */
+  englishStreet?: string;
   /** Whether the client was born in the USA (יליד ארה״ב)  */
   bornInUSA?: boolean;
-  /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
-  beneficiariesDivideFree?: string;
-  /** Whether the client is an American citizen or holds US citizenship/residency status  */
-  american?: boolean;
-  /** First name of the first parent or guardian of the client  */
-  parent1FirstName?: string;
-  /** Client's employer name  */
-  employer?: string;
-  /** Client's marital/relationship status  */
-  relationship?: ClientsEntityRelationshipEnum;
-  /** Full name of the first parent or guardian of the client  */
-  parent1Name?: string;
+  /** Client's employment type - whether they are self-employed or an employee  */
+  employment?: ClientsEntityEmploymentEnum;
+  /** URL link to a file containing pictures of the client's ID documentation. Accepts any file type (jpg, pdf, doc, etc.). Uploaded by the agent when editing the client's profile.  */
+  idDocumentationUrl?: string;
+  /** Whether the client is a smoker (מעשן). Used for insurance risk assessment purposes.  */
+  smoker?: boolean;
+  /** The client's country of birth in English (free text). Used for forms and documents that require English-language birth country information.  */
+  birthCountryEnglish?: string;
+  /** The client's city of birth in English (free text). Used for forms and documents that require English-language birth city information.  */
+  birthCityEnglish?: string;
   /** The client's country of tax residency (מדינת מס). Free text field used to indicate if the client is a tax resident of a foreign country.  */
   taxCountry?: string;
-  /** Client's employer company registration ID number  */
-  companyId?: string;
-  /** Computed full name combining the client's first name and last name  */
-  fullName?: string;
+  /** The client's bank code (קוד בנק). Numeric or alphanumeric code identifying the client's bank.  */
+  bankName?: string;
+  /** The bank branch number where the client's account is located (מספר סניף). Stored as string to preserve leading zeros.  */
+  branchNumber?: string;
+  /** The client's bank account number (מספר חשבון). Stored as string to preserve leading zeros and special formats.  */
+  accountNumber?: string;
+  /** Computed English street address with number — combines englishStreet and streetNumber fields (רחוב באנגלית עם מספר)  */
+  englishStreetWithNumber?: string;
+  /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
+  beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
+  /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
+  beneficiariesDivideFree?: string;
 }
 
 export const ClientsEntity = {
@@ -238,19 +238,24 @@ export const ClientsEntity = {
   instanceType: {} as IClientsEntity,
 } as const;
 
-export type FormsEntityFormStatusEnum =
-  | "לפני מיפוי"
-  | "חסרות אפשרויות מיפוי"
-  | "לפני בדיקה"
-  | "צריך לערוך קופסאות"
-  | "מוכן (ללא מקרי קצה)"
-  | "טיוטא ישנה"
-  | "מוכן (100%)";
-
 /**
  * JSON object with key-value pairs where key is the document field name and value is the mapping rule
  */
 export interface IFormsEntityFieldMappingObject {}
+
+/**
+ * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
+ */
+export interface IFormsEntityFileDataObject {
+  /** The original file name  */
+  name: string;
+  /** File size in bytes  */
+  size?: number;
+  /** MIME type of the file  */
+  type?: string;
+  /** The URL where the file is stored  */
+  url: string;
+}
 
 /**
  * undefined
@@ -282,50 +287,45 @@ export interface IFormsEntitySignatureFieldsObject {
   fields: IFormsEntityFormsEntityFieldsItemObject[];
 }
 
-/**
- * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
- */
-export interface IFormsEntityFileDataObject {
-  /** The original file name  */
-  name: string;
-  /** File size in bytes  */
-  size?: number;
-  /** MIME type of the file  */
-  type?: string;
-  /** The URL where the file is stored  */
-  url: string;
-}
+export type FormsEntityFormStatusEnum =
+  | "לפני מיפוי"
+  | "חסרות אפשרויות מיפוי"
+  | "לפני בדיקה"
+  | "צריך לערוך קופסאות"
+  | "מוכן (ללא מקרי קצה)"
+  | "טיוטא ישנה"
+  | "מוכן (100%)";
 
 /**
  * Stores insurance form templates including PDF files with dynamic fields, field mappings, associated providers and request types for automated form processing
  */
 export interface IFormsEntity {
-  /** Current status of the form template indicating its readiness or lifecycle stage  */
-  formStatus?: FormsEntityFormStatusEnum;
-  /** List of Provider IDs from the Providers table  */
-  providers?: string[];
-  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
-  fieldMapping?: IFormsEntityFieldMappingObject;
   /** Form title in English  */
   formTitle?: string;
-  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
-  imageAttachment?: string;
-  /** Number of pages in the form  */
-  pages?: number;
-  /** Unique form identifier number  */
-  formNumber?: string;
-  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
-  notes?: string;
-  /** Optional purpose description for the form, can be null  */
-  purpose?: string;
-  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
-  signatureFields?: IFormsEntitySignatureFieldsObject;
-  /** List of request type IDs from the RequestSchemes table  */
-  requests?: string[];
-  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
-  fileData?: IFormsEntityFileDataObject;
   /** Form title in Hebrew  */
   formTitleHebrew?: string;
+  /** Unique form identifier number  */
+  formNumber?: string;
+  /** List of Provider IDs from the Providers table  */
+  providers?: string[];
+  /** List of request type IDs from the RequestSchemes table  */
+  requests?: string[];
+  /** Optional purpose description for the form, can be null  */
+  purpose?: string;
+  /** Number of pages in the form  */
+  pages?: number;
+  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
+  fieldMapping?: IFormsEntityFieldMappingObject;
+  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
+  fileData?: IFormsEntityFileDataObject;
+  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
+  signatureFields?: IFormsEntitySignatureFieldsObject;
+  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
+  notes?: string;
+  /** Current status of the form template indicating its readiness or lifecycle stage  */
+  formStatus?: FormsEntityFormStatusEnum;
+  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
+  imageAttachment?: string;
 }
 
 export const FormsEntity = {
@@ -341,46 +341,46 @@ export type FundsEntityPlanStatusEnum = "שכיר" | "עצמאי" | "פרט";
  * Stores comprehensive insurance fund information including policy details, financial balances, contribution tracking, and agent/provider relationships for insurance portfolio management
  */
 export interface IFundsEntity {
-  /** Total contributions made by the employee  */
-  employeeContributions?: number;
-  /** The amount of the most recent deposit  */
-  lastDepositAmount?: number;
+  /** The type of insurance product (e.g., pension, life insurance, provident fund)  */
+  productType?: string;
+  /** The name of the insurance plan or fund  */
+  planName?: string;
+  /** The unique policy identification number  */
+  policyNumber?: string;
   /** The date when the policy was initiated. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
   joinDate?: string;
   /** Current status of the fund policy  */
   status?: FundsEntityStatusEnum;
-  /** Severance pay amount allocated in the fund  */
-  severance?: number;
-  /** Name of the employer associated with this fund  */
-  employer?: string;
-  /** Reference to the client who owns this fund from the Clients table  */
-  clientId?: string;
   /** The total accumulated balance in the fund  */
   totalBalance?: number;
-  /** Agent number (מספר סוכן) as imported from Excel - stored as string to support formats like '2-5000'  */
-  agentNumber?: string;
-  /** The unique policy identification number  */
-  policyNumber?: string;
-  /** The type of insurance product (e.g., pension, life insurance, provident fund)  */
-  productType?: string;
   /** Management fee percentage charged on deposits  */
   managementFeeDeposits?: number;
   /** Management fee percentage charged on accumulated balance  */
   managementFeeAccumulation?: number;
-  /** The name of the insurance plan or fund  */
-  planName?: string;
-  /** The salary amount reported for contribution calculations  */
-  reportedSalary?: number;
   /** Employment status related to the plan  */
   planStatus?: FundsEntityPlanStatusEnum;
-  /** The date until which the fund data is considered valid and current. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
-  dataValidityDate?: string;
+  /** Name of the employer associated with this fund  */
+  employer?: string;
+  /** The salary amount reported for contribution calculations  */
+  reportedSalary?: number;
+  /** Total contributions made by the employee  */
+  employeeContributions?: number;
   /** Total contributions made by the employer  */
   employerContributions?: number;
-  /** Name of the insurance provider/manufacturer (שם יצרן) as imported from Excel  */
-  providerName?: string;
+  /** Severance pay amount allocated in the fund  */
+  severance?: number;
   /** The date of the most recent deposit to the fund. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
   lastDepositDate?: string;
+  /** The amount of the most recent deposit  */
+  lastDepositAmount?: number;
+  /** The date until which the fund data is considered valid and current. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  dataValidityDate?: string;
+  /** Reference to the client who owns this fund from the Clients table  */
+  clientId?: string;
+  /** Name of the insurance provider/manufacturer (שם יצרן) as imported from Excel  */
+  providerName?: string;
+  /** Agent number (מספר סוכן) as imported from Excel - stored as string to support formats like '2-5000'  */
+  agentNumber?: string;
 }
 
 export const FundsEntity = {
@@ -392,40 +392,40 @@ export const FundsEntity = {
  * Stores investment track records that can be associated with insurance funds, including track name, type, risk level, and other relevant investment track details.
  */
 export interface IInvestmentTracksEntity {
-  /** שם יצרן - The name of the insurance provider/manufacturer (e.g., הראל, מיטב, כלל)  */
-  providerName?: string;
-  /** תשואה ממוצעת 3 שנים - Average annual return over the last 3 years  */
-  return3Years?: number;
-  /** סוג מוצר - The type of insurance product (e.g., חיים משולב חסכון, קרן פנסיה, קרן השתלמות)  */
-  productType?: string;
-  /** תשואה תחילת שנה - Year-to-date return rate since the beginning of the year  */
-  ytdReturn?: number;
-  /** מספר פוליסה - The policy number associated with this investment track  */
-  policyNumber?: string;
   /** מספר מ.ה - The internal track ID number used by the provider  */
   trackIdNumber?: string;
-  /** סכום צבירה במסלול - The accumulation amount specifically within this investment track  */
-  trackAccumulationAmount?: number;
-  /** סך צבירה בפוליסה - Total accumulation amount across the entire policy  */
-  totalPolicyAccumulation?: number;
-  /** תשואה מצטברת 12 חודשים - Cumulative return over the last 12 months  */
-  return12Months?: number;
-  /** The name of the investment track  */
-  trackName?: string;
   /** תשואה חודשית - Monthly return rate of the investment track (as a decimal, e.g., 0.0138 = 1.38%)  */
   monthlyReturn?: number;
-  /** חשיפה לחו״ל - The percentage exposure to foreign markets (as a decimal)  */
-  foreignExposure?: number;
-  /** תאריך נכונות - The date until which the data in this record is valid. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
-  dataValidityDate?: string;
-  /** חשיפה למניות - The percentage exposure to equities/stocks (as a decimal, e.g., 0.528 = 52.8%)  */
-  equityExposure?: number;
+  /** תשואה תחילת שנה - Year-to-date return rate since the beginning of the year  */
+  ytdReturn?: number;
+  /** תשואה מצטברת 12 חודשים - Cumulative return over the last 12 months  */
+  return12Months?: number;
+  /** תשואה ממוצעת 3 שנים - Average annual return over the last 3 years  */
+  return3Years?: number;
   /** תשואה ממוצעת 5 שנים - Average annual return over the last 5 years  */
   return5Years?: number;
+  /** תאריך נכונות - The date until which the data in this record is valid. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  dataValidityDate?: string;
+  /** The name of the investment track  */
+  trackName?: string;
+  /** סוג מוצר - The type of insurance product (e.g., חיים משולב חסכון, קרן פנסיה, קרן השתלמות)  */
+  productType?: string;
+  /** שם יצרן - The name of the insurance provider/manufacturer (e.g., הראל, מיטב, כלל)  */
+  providerName?: string;
+  /** סך צבירה בפוליסה - Total accumulation amount across the entire policy  */
+  totalPolicyAccumulation?: number;
+  /** סכום צבירה במסלול - The accumulation amount specifically within this investment track  */
+  trackAccumulationAmount?: number;
   /** שם מעסיק משלם - The name of the employer making contributions to this track  */
   payingEmployerName?: string;
   /** חשיפה למט״ח - The percentage exposure to foreign currency (as a decimal)  */
   foreignCurrencyExposure?: number;
+  /** חשיפה למניות - The percentage exposure to equities/stocks (as a decimal, e.g., 0.528 = 52.8%)  */
+  equityExposure?: number;
+  /** חשיפה לחו״ל - The percentage exposure to foreign markets (as a decimal)  */
+  foreignExposure?: number;
+  /** מספר פוליסה - The policy number associated with this investment track  */
+  policyNumber?: string;
 }
 
 export const InvestmentTracksEntity = {
@@ -448,18 +448,18 @@ export type MeetingsEntityStatusEnum =
  * Stores meeting records including agent, client, date, associated requests, and status for coordinating insurance consultations and request reviews
  */
 export interface IMeetingsEntity {
-  /** Array of request IDs associated with this meeting  */
-  requests?: string[];
-  /** The client attending the meeting  */
-  clientId?: string;
-  /** Optional notes or comments about the meeting, such as discussion points, outcomes, or follow-up items  */
-  notes?: string;
-  /** The insurance agent conducting the meeting  */
-  agentId?: string;
-  /** Current status of the meeting  */
-  status?: MeetingsEntityStatusEnum;
   /** The scheduled date and time of the meeting. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   date?: string;
+  /** Array of request IDs associated with this meeting  */
+  requests?: string[];
+  /** The insurance agent conducting the meeting  */
+  agentId?: string;
+  /** The client attending the meeting  */
+  clientId?: string;
+  /** Current status of the meeting  */
+  status?: MeetingsEntityStatusEnum;
+  /** Optional notes or comments about the meeting, such as discussion points, outcomes, or follow-up items  */
+  notes?: string;
 }
 
 export const MeetingsEntity = {
@@ -471,14 +471,14 @@ export const MeetingsEntity = {
  * Lookup table that stores the email address to use when sending documents to a provider for a specific request type. Each row represents a unique combination of provider and request type with the corresponding recipient email.
  */
 export interface IProviderEmailsEntity {
-  /** Optional notes or description about this email mapping (e.g. department name, contact person)  */
-  notes?: string;
-  /** Reference to the request type (RequestSchemes table ID) this email mapping applies to  */
-  requestTypeId?: string;
   /** The recipient email address to use when sending documents to the provider for this specific request type  */
   email?: string;
+  /** Optional notes or description about this email mapping (e.g. department name, contact person)  */
+  notes?: string;
   /** Reference to the provider (Providers table ID) this email mapping applies to  */
   providerId?: string;
+  /** Reference to the request type (RequestSchemes table ID) this email mapping applies to  */
+  requestTypeId?: string;
 }
 
 export const ProviderEmailsEntity = {
@@ -492,22 +492,18 @@ export const ProviderEmailsEntity = {
 export interface IProvidersEntity {
   /** The name of the healthcare provider or medical facility  */
   provider_name?: string;
-  /** Computed column combining the institutional name and provider ID code, displayed as 'שם מוסדי וח.פ' in Hebrew. Used for display in forms and selectors.  */
-  institutionalNameAndCode?: string;
-  /** The official provider identification code or ID number used to identify the provider in external systems and insurance forms  */
-  providerIdCode?: string;
   /** The institutional/official name of the provider, used for formal documents and insurance form processing  */
   institutionalName?: string;
+  /** The official provider identification code or ID number used to identify the provider in external systems and insurance forms  */
+  providerIdCode?: string;
+  /** Computed column combining the institutional name and provider ID code, displayed as 'שם מוסדי וח.פ' in Hebrew. Used for display in forms and selectors.  */
+  institutionalNameAndCode?: string;
 }
 
 export const ProvidersEntity = {
   tableBlockId: "69db99a77d23f0bc9a294de0",
   instanceType: {} as IProvidersEntity,
 } as const;
-
-export type RequestsEntityAccountTypeEnum = "פרטי" | "עסקי";
-
-export type RequestsEntityKerenNameEnum = "" | "כללי" | "אומגה";
 
 export type RequestsEntityStatusEnum =
   | "מעבד"
@@ -519,8 +515,6 @@ export type RequestsEntityStatusEnum =
   | "נשלח ליצרן"
   | "הושלם"
   | "נדחה";
-
-export type RequestsEntityChargeDayEnum = "1" | "5" | "10" | "15" | "20" | "25";
 
 /**
  * undefined
@@ -534,11 +528,20 @@ export interface IRequestsEntityRequestsEntityFormsItemObject {
   processedAt?: string;
 }
 
+/**
+ * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
+ */
+export interface IRequestsEntityTracksObject {}
+
+export type RequestsEntityChoiceDurationEnum = "" | "6" | "12" | "24";
+
 export type RequestsEntityTransferTypeEnum =
   | ""
   | "צבירה והפקדות"
   | "צבירה בלבד"
   | "הפקדות בלבד";
+
+export type RequestsEntityKerenNameEnum = "" | "כללי" | "אומגה";
 
 export type RequestsEntityStandingEnum =
   | "שכיר"
@@ -547,63 +550,60 @@ export type RequestsEntityStandingEnum =
   | "עצמאי באמצעות מעסיק"
   | "חבר קיבוץ";
 
-/**
- * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
- */
-export interface IRequestsEntityTracksObject {}
+export type RequestsEntityAccountTypeEnum = "פרטי" | "עסקי";
+
+export type RequestsEntityChargeDayEnum = "1" | "5" | "10" | "15" | "20" | "25";
 
 export type RequestsEntityIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
 
-export type RequestsEntityChoiceDurationEnum = "" | "6" | "12" | "24";
-
 /**
  * Stores insurance request records including request type, associated agent, client, provider, processing status, scheme changes, and links to processed forms for tracking request lifecycle
  */
 export interface IRequestsEntity {
-  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
-  accountType?: RequestsEntityAccountTypeEnum;
-  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
-  isTotalTransfer?: boolean;
-  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
-  managementFeeAccumulation?: number;
-  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
-  managementFee?: number;
-  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
-  kerenName?: RequestsEntityKerenNameEnum;
   /** Current processing status of the request  */
   status?: RequestsEntityStatusEnum;
-  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
-  chargeDay?: RequestsEntityChargeDayEnum;
-  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
-  transferAmount?: string;
-  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
-  independentTransferAmount?: string;
-  /** Array of processed form documents with their URL links  */
-  forms?: IRequestsEntityRequestsEntityFormsItemObject[];
-  /** Reference to the client submitting this request from Clients table  */
-  clientId?: string;
-  /** Reference to the healthcare provider associated with this request from Providers table  */
-  providerId?: string;
-  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
-  transferType?: RequestsEntityTransferTypeEnum;
+  /** Reference to the request scheme type from RequestSchemes table  */
+  requestTypeId?: string;
   /** Reference to the insurance agent handling this request from Agents table  */
   agentId?: string;
+  /** Reference to the client submitting this request from Clients table  */
+  clientId?: string;
+  /** Array of processed form documents with their URL links  */
+  forms?: IRequestsEntityRequestsEntityFormsItemObject[];
+  /** Reference to the healthcare provider associated with this request from Providers table  */
+  providerId?: string;
+  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
+  tracks?: IRequestsEntityTracksObject;
+  /** Reference to a specific insurance fund from the Funds table associated with this request  */
+  fundId?: string;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
+  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
+  choiceDuration?: RequestsEntityChoiceDurationEnum;
+  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
+  transferType?: RequestsEntityTransferTypeEnum;
+  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
+  kerenName?: RequestsEntityKerenNameEnum;
+  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
+  transferAmount?: string;
+  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
+  isTotalTransfer?: boolean;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: RequestsEntityStandingEnum;
-  /** Reference to the request scheme type from RequestSchemes table  */
-  requestTypeId?: string;
-  /** Reference to a specific insurance fund from the Funds table associated with this request  */
-  fundId?: string;
-  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
-  tracks?: IRequestsEntityTracksObject;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: RequestsEntityAccountTypeEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: RequestsEntityChargeDayEnum;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: RequestsEntityIndependentTransferTypeEnum;
-  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
-  choiceDuration?: RequestsEntityChoiceDurationEnum;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
 }
 
 export const RequestsEntity = {
@@ -620,10 +620,10 @@ export interface IRequestSchemesEntityTracksObject {}
  * Stores different types of insurance request schemes and their associated changes in JSON format for tracking scheme modifications
  */
 export interface IRequestSchemesEntity {
-  /** Flexible JSON structure to store various types of tracks (מסלולים) for the request scheme  */
-  tracks?: IRequestSchemesEntityTracksObject;
   /** The name of the request scheme type  */
   requestTypeName?: string;
+  /** Flexible JSON structure to store various types of tracks (מסלולים) for the request scheme  */
+  tracks?: IRequestSchemesEntityTracksObject;
 }
 
 export const RequestSchemesEntity = {
@@ -663,42 +663,42 @@ export interface ISignatureRequestsEntityFormMappingObject {
  * Tracks each signature request sent to a client for a specific form within a request. Stores the Dropbox Sign signature_request_id, current status, the signed PDF URL once completed, and references to the originating request and form. Also stores the signature field position (x, y, page, width, height) used when sending.
  */
 export interface ISignatureRequestsEntity {
-  /** The URL of the filled PDF that was sent for signature  */
-  formPdfUrl?: string;
-  /** The Docuseal submitter ID for the agent signer (integer).  */
-  agentSubmitterId?: number;
-  /** The embed source URL for the agent to sign the document via Docuseal.  */
-  agentEmbedSrc?: string;
-  /** The Docuseal merged template ID used for this signature request (integer).  */
-  docusealMergedTemplateId?: number;
-  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  sentAt?: string;
   /** Reference to the Requests table record this signature request belongs to  */
   requestId?: string;
-  /** Title of the form that was sent for signature, stored for display purposes  */
-  formTitle?: string;
-  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  clientSignedAt?: string;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
+  /** Reference to the Forms table record (form template) that was sent for signature  */
+  formId?: string;
   /** Current status of the signature request: pending (awaiting signature), signed (completed), declined (signer declined), cancelled  */
   status?: SignatureRequestsEntityStatusEnum;
-  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  completedAt?: string;
+  /** The URL of the filled PDF that was sent for signature  */
+  formPdfUrl?: string;
+  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  sentAt?: string;
+  /** Title of the form that was sent for signature, stored for display purposes  */
+  formTitle?: string;
   /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
   meetingId?: string;
+  /** The Docuseal submission ID for this signature request (integer).  */
+  docusealSubmissionId?: number;
+  /** The Docuseal merged template ID used for this signature request (integer).  */
+  docusealMergedTemplateId?: number;
+  /** The Docuseal submitter ID for the agent signer (integer).  */
+  agentSubmitterId?: number;
+  /** The Docuseal submitter ID for the client signer (integer).  */
+  clientSubmitterId?: number;
+  /** The embed source URL for the agent to sign the document via Docuseal.  */
+  agentEmbedSrc?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
+  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  clientSignedAt?: string;
+  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  completedAt?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISignatureRequestsEntityFormMappingObject;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** The Docuseal submission ID for this signature request (integer).  */
-  docusealSubmissionId?: number;
-  /** The Docuseal submitter ID for the client signer (integer).  */
-  clientSubmitterId?: number;
-  /** Reference to the Forms table record (form template) that was sent for signature  */
-  formId?: string;
 }
 
 export const SignatureRequestsEntity = {
@@ -710,24 +710,24 @@ export const SignatureRequestsEntity = {
  * Stores completed signed document records, linking each signed document to its originating signature request, insurance request, meeting, and client. Tracks the document name, URL, DocuSeal submission ID, and timestamps for when the document was signed and created.
  */
 export interface ISignedDocumentsEntity {
-  /** The timestamp when the document was fully signed by all required parties. Nullable — null if not yet signed.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  signedAt?: string;
+  /** Foreign key reference to the Signature Requests table — the signature request that produced this signed document  */
+  signatureRequestId?: string;
+  /** The name or title of the signed document  */
+  documentName?: string;
   /** Foreign key reference to the Meetings table — the meeting during which this document was signed, if applicable  */
   meetingId?: string;
-  /** Foreign key reference to the Forms table — the specific form template that was signed in this document. Used to link each signed document back to its original form template.  */
-  formId?: string;
   /** Foreign key reference to the Clients table — the client who signed this document  */
   clientId?: string;
   /** The URL where the signed document PDF can be accessed or downloaded  */
   documentUrl?: string;
-  /** The name or title of the signed document  */
-  documentName?: string;
-  /** Foreign key reference to the Requests table — the insurance request associated with this signed document  */
-  requestId?: string;
-  /** Foreign key reference to the Signature Requests table — the signature request that produced this signed document  */
-  signatureRequestId?: string;
   /** The DocuSeal submission ID associated with this signed document, used to reference the submission in DocuSeal's system  */
   docusealSubmissionId?: number;
+  /** The timestamp when the document was fully signed by all required parties. Nullable — null if not yet signed.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  signedAt?: string;
+  /** Foreign key reference to the Forms table — the specific form template that was signed in this document. Used to link each signed document back to its original form template.  */
+  formId?: string;
+  /** Foreign key reference to the Requests table — the insurance request associated with this signed document  */
+  requestId?: string;
 }
 
 export const SignedDocumentsEntity = {
@@ -992,19 +992,24 @@ export interface IAnnotateFormPdfFieldsActionInput {
   fieldGeometryUpdates?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject[];
 }
 
-export type AnnotateFormPdfFieldsActionOutputFormStatusEnum =
-  | "לפני מיפוי"
-  | "חסרות אפשרויות מיפוי"
-  | "לפני בדיקה"
-  | "צריך לערוך קופסאות"
-  | "מוכן (ללא מקרי קצה)"
-  | "טיוטא ישנה"
-  | "מוכן (100%)";
-
 /**
  * JSON object with key-value pairs where key is the document field name and value is the mapping rule
  */
 export interface IAnnotateFormPdfFieldsActionOutputFieldMappingObject {}
+
+/**
+ * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
+ */
+export interface IAnnotateFormPdfFieldsActionOutputFileDataObject {
+  /** The original file name  */
+  name: string;
+  /** File size in bytes  */
+  size?: number;
+  /** MIME type of the file  */
+  type?: string;
+  /** The URL where the file is stored  */
+  url: string;
+}
 
 /**
  * undefined
@@ -1036,19 +1041,14 @@ export interface IAnnotateFormPdfFieldsActionOutputSignatureFieldsObject {
   fields: IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOutputFieldsItemObject[];
 }
 
-/**
- * Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF
- */
-export interface IAnnotateFormPdfFieldsActionOutputFileDataObject {
-  /** The original file name  */
-  name: string;
-  /** File size in bytes  */
-  size?: number;
-  /** MIME type of the file  */
-  type?: string;
-  /** The URL where the file is stored  */
-  url: string;
-}
+export type AnnotateFormPdfFieldsActionOutputFormStatusEnum =
+  | "לפני מיפוי"
+  | "חסרות אפשרויות מיפוי"
+  | "לפני בדיקה"
+  | "צריך לערוך קופסאות"
+  | "מוכן (ללא מקרי קצה)"
+  | "טיוטא ישנה"
+  | "מוכן (100%)";
 
 /**
  * The item updated in the table, keys are the column names, values are the column values
@@ -1068,32 +1068,32 @@ export interface IAnnotateFormPdfFieldsActionOutputAnnotateFormPdfFieldsActionOu
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** Current status of the form template indicating its readiness or lifecycle stage  */
-  formStatus?: AnnotateFormPdfFieldsActionOutputFormStatusEnum;
-  /** List of Provider IDs from the Providers table  */
-  providers?: string[];
-  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
-  fieldMapping?: IAnnotateFormPdfFieldsActionOutputFieldMappingObject;
   /** Form title in English  */
   formTitle?: string;
-  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
-  imageAttachment?: string;
-  /** Number of pages in the form  */
-  pages?: number;
-  /** Unique form identifier number  */
-  formNumber?: string;
-  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
-  notes?: string;
-  /** Optional purpose description for the form, can be null  */
-  purpose?: string;
-  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
-  signatureFields?: IAnnotateFormPdfFieldsActionOutputSignatureFieldsObject;
-  /** List of request type IDs from the RequestSchemes table  */
-  requests?: string[];
-  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
-  fileData?: IAnnotateFormPdfFieldsActionOutputFileDataObject;
   /** Form title in Hebrew  */
   formTitleHebrew?: string;
+  /** Unique form identifier number  */
+  formNumber?: string;
+  /** List of Provider IDs from the Providers table  */
+  providers?: string[];
+  /** List of request type IDs from the RequestSchemes table  */
+  requests?: string[];
+  /** Optional purpose description for the form, can be null  */
+  purpose?: string;
+  /** Number of pages in the form  */
+  pages?: number;
+  /** JSON object with key-value pairs where key is the document field name and value is the mapping rule  */
+  fieldMapping?: IAnnotateFormPdfFieldsActionOutputFieldMappingObject;
+  /** Stores the uploaded file information including file name, size, type, and URL for the insurance form PDF  */
+  fileData?: IAnnotateFormPdfFieldsActionOutputFileDataObject;
+  /** Array of signature field definitions placed on the PDF via drag & drop. Each field has: type (signature|date|text|checkbox|initials), x (pixels from left), y (pixels from top), page (1-indexed), width, height. Saved once per form template and reused for every signature request.  */
+  signatureFields?: IAnnotateFormPdfFieldsActionOutputSignatureFieldsObject;
+  /** Free-text notes or comments about the form template, for internal use by agents and admins  */
+  notes?: string;
+  /** Current status of the form template indicating its readiness or lifecycle stage  */
+  formStatus?: AnnotateFormPdfFieldsActionOutputFormStatusEnum;
+  /** URL of an image attached to the form template, used for visual reference or supplementary documentation alongside the PDF  */
+  imageAttachment?: string;
 }
 
 /**
@@ -1123,13 +1123,6 @@ export interface IAutoProcessNewRequestActionInput {
   requestId: string;
 }
 
-export type AutoProcessNewRequestActionOutputAccountTypeEnum = "פרטי" | "עסקי";
-
-export type AutoProcessNewRequestActionOutputKerenNameEnum =
-  | ""
-  | "כללי"
-  | "אומגה";
-
 export type AutoProcessNewRequestActionOutputStatusEnum =
   | "מעבד"
   | "מוכן לשליחה ללקוח"
@@ -1140,14 +1133,6 @@ export type AutoProcessNewRequestActionOutputStatusEnum =
   | "נשלח ליצרן"
   | "הושלם"
   | "נדחה";
-
-export type AutoProcessNewRequestActionOutputChargeDayEnum =
-  | "1"
-  | "5"
-  | "10"
-  | "15"
-  | "20"
-  | "25";
 
 /**
  * undefined
@@ -1161,11 +1146,27 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   processedAt?: string;
 }
 
+/**
+ * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
+ */
+export interface IAutoProcessNewRequestActionOutputTracksObject {}
+
+export type AutoProcessNewRequestActionOutputChoiceDurationEnum =
+  | ""
+  | "6"
+  | "12"
+  | "24";
+
 export type AutoProcessNewRequestActionOutputTransferTypeEnum =
   | ""
   | "צבירה והפקדות"
   | "צבירה בלבד"
   | "הפקדות בלבד";
+
+export type AutoProcessNewRequestActionOutputKerenNameEnum =
+  | ""
+  | "כללי"
+  | "אומגה";
 
 export type AutoProcessNewRequestActionOutputStandingEnum =
   | "שכיר"
@@ -1174,20 +1175,19 @@ export type AutoProcessNewRequestActionOutputStandingEnum =
   | "עצמאי באמצעות מעסיק"
   | "חבר קיבוץ";
 
-/**
- * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
- */
-export interface IAutoProcessNewRequestActionOutputTracksObject {}
+export type AutoProcessNewRequestActionOutputAccountTypeEnum = "פרטי" | "עסקי";
+
+export type AutoProcessNewRequestActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
 
 export type AutoProcessNewRequestActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type AutoProcessNewRequestActionOutputChoiceDurationEnum =
-  | ""
-  | "6"
-  | "12"
-  | "24";
 
 /**
  * The item updated in the table, keys are the column names, values are the column values
@@ -1207,48 +1207,48 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
-  accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
-  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
-  isTotalTransfer?: boolean;
-  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
-  managementFeeAccumulation?: number;
-  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
-  managementFee?: number;
-  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
-  kerenName?: AutoProcessNewRequestActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: AutoProcessNewRequestActionOutputStatusEnum;
-  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
-  chargeDay?: AutoProcessNewRequestActionOutputChargeDayEnum;
-  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
-  transferAmount?: string;
-  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
-  independentTransferAmount?: string;
-  /** Array of processed form documents with their URL links  */
-  forms?: IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputFormsItemObject[];
-  /** Reference to the client submitting this request from Clients table  */
-  clientId?: string;
-  /** Reference to the healthcare provider associated with this request from Providers table  */
-  providerId?: string;
-  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
-  transferType?: AutoProcessNewRequestActionOutputTransferTypeEnum;
+  /** Reference to the request scheme type from RequestSchemes table  */
+  requestTypeId?: string;
   /** Reference to the insurance agent handling this request from Agents table  */
   agentId?: string;
+  /** Reference to the client submitting this request from Clients table  */
+  clientId?: string;
+  /** Array of processed form documents with their URL links  */
+  forms?: IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOutputFormsItemObject[];
+  /** Reference to the healthcare provider associated with this request from Providers table  */
+  providerId?: string;
+  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
+  tracks?: IAutoProcessNewRequestActionOutputTracksObject;
+  /** Reference to a specific insurance fund from the Funds table associated with this request  */
+  fundId?: string;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
+  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
+  choiceDuration?: AutoProcessNewRequestActionOutputChoiceDurationEnum;
+  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
+  transferType?: AutoProcessNewRequestActionOutputTransferTypeEnum;
+  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
+  kerenName?: AutoProcessNewRequestActionOutputKerenNameEnum;
+  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
+  transferAmount?: string;
+  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
+  isTotalTransfer?: boolean;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: AutoProcessNewRequestActionOutputStandingEnum;
-  /** Reference to the request scheme type from RequestSchemes table  */
-  requestTypeId?: string;
-  /** Reference to a specific insurance fund from the Funds table associated with this request  */
-  fundId?: string;
-  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
-  tracks?: IAutoProcessNewRequestActionOutputTracksObject;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: AutoProcessNewRequestActionOutputAccountTypeEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: AutoProcessNewRequestActionOutputChargeDayEnum;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: AutoProcessNewRequestActionOutputIndependentTransferTypeEnum;
-  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
-  choiceDuration?: AutoProcessNewRequestActionOutputChoiceDurationEnum;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
 }
 
 /**
@@ -1770,18 +1770,18 @@ export interface IParseMeetingSummaryAndCreateActionOutputParseMeetingSummaryAnd
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** Array of request IDs associated with this meeting  */
-  requests?: string[];
-  /** The client attending the meeting  */
-  clientId?: string;
-  /** Optional notes or comments about the meeting, such as discussion points, outcomes, or follow-up items  */
-  notes?: string;
-  /** The insurance agent conducting the meeting  */
-  agentId?: string;
-  /** Current status of the meeting  */
-  status?: ParseMeetingSummaryAndCreateActionOutputStatusEnum;
   /** The scheduled date and time of the meeting. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   date?: string;
+  /** Array of request IDs associated with this meeting  */
+  requests?: string[];
+  /** The insurance agent conducting the meeting  */
+  agentId?: string;
+  /** The client attending the meeting  */
+  clientId?: string;
+  /** Current status of the meeting  */
+  status?: ParseMeetingSummaryAndCreateActionOutputStatusEnum;
+  /** Optional notes or comments about the meeting, such as discussion points, outcomes, or follow-up items  */
+  notes?: string;
 }
 
 /**
@@ -1811,13 +1811,6 @@ export interface IProcessRequestFormsActionInput {
   requestId: string;
 }
 
-export type ProcessRequestFormsActionOutputAccountTypeEnum = "פרטי" | "עסקי";
-
-export type ProcessRequestFormsActionOutputKerenNameEnum =
-  | ""
-  | "כללי"
-  | "אומגה";
-
 export type ProcessRequestFormsActionOutputStatusEnum =
   | "מעבד"
   | "מוכן לשליחה ללקוח"
@@ -1828,14 +1821,6 @@ export type ProcessRequestFormsActionOutputStatusEnum =
   | "נשלח ליצרן"
   | "הושלם"
   | "נדחה";
-
-export type ProcessRequestFormsActionOutputChargeDayEnum =
-  | "1"
-  | "5"
-  | "10"
-  | "15"
-  | "20"
-  | "25";
 
 /**
  * undefined
@@ -1849,11 +1834,27 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   processedAt?: string;
 }
 
+/**
+ * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
+ */
+export interface IProcessRequestFormsActionOutputTracksObject {}
+
+export type ProcessRequestFormsActionOutputChoiceDurationEnum =
+  | ""
+  | "6"
+  | "12"
+  | "24";
+
 export type ProcessRequestFormsActionOutputTransferTypeEnum =
   | ""
   | "צבירה והפקדות"
   | "צבירה בלבד"
   | "הפקדות בלבד";
+
+export type ProcessRequestFormsActionOutputKerenNameEnum =
+  | ""
+  | "כללי"
+  | "אומגה";
 
 export type ProcessRequestFormsActionOutputStandingEnum =
   | "שכיר"
@@ -1862,20 +1863,19 @@ export type ProcessRequestFormsActionOutputStandingEnum =
   | "עצמאי באמצעות מעסיק"
   | "חבר קיבוץ";
 
-/**
- * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
- */
-export interface IProcessRequestFormsActionOutputTracksObject {}
+export type ProcessRequestFormsActionOutputAccountTypeEnum = "פרטי" | "עסקי";
+
+export type ProcessRequestFormsActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
 
 export type ProcessRequestFormsActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type ProcessRequestFormsActionOutputChoiceDurationEnum =
-  | ""
-  | "6"
-  | "12"
-  | "24";
 
 /**
  * The item updated in the table, keys are the column names, values are the column values
@@ -1895,48 +1895,48 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
-  accountType?: ProcessRequestFormsActionOutputAccountTypeEnum;
-  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
-  isTotalTransfer?: boolean;
-  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
-  managementFeeAccumulation?: number;
-  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
-  managementFee?: number;
-  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
-  kerenName?: ProcessRequestFormsActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: ProcessRequestFormsActionOutputStatusEnum;
-  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
-  chargeDay?: ProcessRequestFormsActionOutputChargeDayEnum;
-  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
-  transferAmount?: string;
-  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
-  independentTransferAmount?: string;
-  /** Array of processed form documents with their URL links  */
-  forms?: IProcessRequestFormsActionOutputProcessRequestFormsActionOutputFormsItemObject[];
-  /** Reference to the client submitting this request from Clients table  */
-  clientId?: string;
-  /** Reference to the healthcare provider associated with this request from Providers table  */
-  providerId?: string;
-  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
-  transferType?: ProcessRequestFormsActionOutputTransferTypeEnum;
+  /** Reference to the request scheme type from RequestSchemes table  */
+  requestTypeId?: string;
   /** Reference to the insurance agent handling this request from Agents table  */
   agentId?: string;
+  /** Reference to the client submitting this request from Clients table  */
+  clientId?: string;
+  /** Array of processed form documents with their URL links  */
+  forms?: IProcessRequestFormsActionOutputProcessRequestFormsActionOutputFormsItemObject[];
+  /** Reference to the healthcare provider associated with this request from Providers table  */
+  providerId?: string;
+  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
+  tracks?: IProcessRequestFormsActionOutputTracksObject;
+  /** Reference to a specific insurance fund from the Funds table associated with this request  */
+  fundId?: string;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
+  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
+  choiceDuration?: ProcessRequestFormsActionOutputChoiceDurationEnum;
+  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
+  transferType?: ProcessRequestFormsActionOutputTransferTypeEnum;
+  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
+  kerenName?: ProcessRequestFormsActionOutputKerenNameEnum;
+  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
+  transferAmount?: string;
+  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
+  isTotalTransfer?: boolean;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: ProcessRequestFormsActionOutputStandingEnum;
-  /** Reference to the request scheme type from RequestSchemes table  */
-  requestTypeId?: string;
-  /** Reference to a specific insurance fund from the Funds table associated with this request  */
-  fundId?: string;
-  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
-  tracks?: IProcessRequestFormsActionOutputTracksObject;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: ProcessRequestFormsActionOutputAccountTypeEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: ProcessRequestFormsActionOutputChargeDayEnum;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: ProcessRequestFormsActionOutputIndependentTransferTypeEnum;
-  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
-  choiceDuration?: ProcessRequestFormsActionOutputChoiceDurationEnum;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
 }
 
 /**
@@ -1992,42 +1992,42 @@ export interface ISendAllFormsForSignatureDocuSealActionOutputSendAllFormsForSig
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** The URL of the filled PDF that was sent for signature  */
-  formPdfUrl?: string;
-  /** The Docuseal submitter ID for the agent signer (integer).  */
-  agentSubmitterId?: number;
-  /** The embed source URL for the agent to sign the document via Docuseal.  */
-  agentEmbedSrc?: string;
-  /** The Docuseal merged template ID used for this signature request (integer).  */
-  docusealMergedTemplateId?: number;
-  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  sentAt?: string;
   /** Reference to the Requests table record this signature request belongs to  */
   requestId?: string;
-  /** Title of the form that was sent for signature, stored for display purposes  */
-  formTitle?: string;
-  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  clientSignedAt?: string;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
+  /** Reference to the Forms table record (form template) that was sent for signature  */
+  formId?: string;
   /** Current status of the signature request: pending (awaiting signature), signed (completed), declined (signer declined), cancelled  */
   status?: SendAllFormsForSignatureDocuSealActionOutputStatusEnum;
-  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  completedAt?: string;
+  /** The URL of the filled PDF that was sent for signature  */
+  formPdfUrl?: string;
+  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  sentAt?: string;
+  /** Title of the form that was sent for signature, stored for display purposes  */
+  formTitle?: string;
   /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
   meetingId?: string;
+  /** The Docuseal submission ID for this signature request (integer).  */
+  docusealSubmissionId?: number;
+  /** The Docuseal merged template ID used for this signature request (integer).  */
+  docusealMergedTemplateId?: number;
+  /** The Docuseal submitter ID for the agent signer (integer).  */
+  agentSubmitterId?: number;
+  /** The Docuseal submitter ID for the client signer (integer).  */
+  clientSubmitterId?: number;
+  /** The embed source URL for the agent to sign the document via Docuseal.  */
+  agentEmbedSrc?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
+  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  clientSignedAt?: string;
+  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  completedAt?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISendAllFormsForSignatureDocuSealActionOutputFormMappingObject;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** The Docuseal submission ID for this signature request (integer).  */
-  docusealSubmissionId?: number;
-  /** The Docuseal submitter ID for the client signer (integer).  */
-  clientSubmitterId?: number;
-  /** Reference to the Forms table record (form template) that was sent for signature  */
-  formId?: string;
 }
 
 /**
@@ -2085,15 +2085,6 @@ export interface ISendCustomProviderEmailActionInput {
   recipientEmail: string;
 }
 
-export type SendCustomProviderEmailActionOutputAccountTypeEnum =
-  | "פרטי"
-  | "עסקי";
-
-export type SendCustomProviderEmailActionOutputKerenNameEnum =
-  | ""
-  | "כללי"
-  | "אומגה";
-
 export type SendCustomProviderEmailActionOutputStatusEnum =
   | "מעבד"
   | "מוכן לשליחה ללקוח"
@@ -2104,14 +2095,6 @@ export type SendCustomProviderEmailActionOutputStatusEnum =
   | "נשלח ליצרן"
   | "הושלם"
   | "נדחה";
-
-export type SendCustomProviderEmailActionOutputChargeDayEnum =
-  | "1"
-  | "5"
-  | "10"
-  | "15"
-  | "20"
-  | "25";
 
 /**
  * undefined
@@ -2125,11 +2108,27 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   processedAt?: string;
 }
 
+/**
+ * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
+ */
+export interface ISendCustomProviderEmailActionOutputTracksObject {}
+
+export type SendCustomProviderEmailActionOutputChoiceDurationEnum =
+  | ""
+  | "6"
+  | "12"
+  | "24";
+
 export type SendCustomProviderEmailActionOutputTransferTypeEnum =
   | ""
   | "צבירה והפקדות"
   | "צבירה בלבד"
   | "הפקדות בלבד";
+
+export type SendCustomProviderEmailActionOutputKerenNameEnum =
+  | ""
+  | "כללי"
+  | "אומגה";
 
 export type SendCustomProviderEmailActionOutputStandingEnum =
   | "שכיר"
@@ -2138,20 +2137,21 @@ export type SendCustomProviderEmailActionOutputStandingEnum =
   | "עצמאי באמצעות מעסיק"
   | "חבר קיבוץ";
 
-/**
- * Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request
- */
-export interface ISendCustomProviderEmailActionOutputTracksObject {}
+export type SendCustomProviderEmailActionOutputAccountTypeEnum =
+  | "פרטי"
+  | "עסקי";
+
+export type SendCustomProviderEmailActionOutputChargeDayEnum =
+  | "1"
+  | "5"
+  | "10"
+  | "15"
+  | "20"
+  | "25";
 
 export type SendCustomProviderEmailActionOutputIndependentTransferTypeEnum =
   | "הוראת קבע"
   | "הפקדה חד פעמית";
-
-export type SendCustomProviderEmailActionOutputChoiceDurationEnum =
-  | ""
-  | "6"
-  | "12"
-  | "24";
 
 /**
  * The item updated in the table, keys are the column names, values are the column values
@@ -2171,48 +2171,48 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
-  accountType?: SendCustomProviderEmailActionOutputAccountTypeEnum;
-  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
-  isTotalTransfer?: boolean;
-  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
-  managementFeeAccumulation?: number;
-  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
-  managementFee?: number;
-  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
-  kerenName?: SendCustomProviderEmailActionOutputKerenNameEnum;
   /** Current processing status of the request  */
   status?: SendCustomProviderEmailActionOutputStatusEnum;
-  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
-  chargeDay?: SendCustomProviderEmailActionOutputChargeDayEnum;
-  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
-  transferAmount?: string;
-  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
-  independentTransferAmount?: string;
-  /** Array of processed form documents with their URL links  */
-  forms?: ISendCustomProviderEmailActionOutputSendCustomProviderEmailActionOutputFormsItemObject[];
-  /** Reference to the client submitting this request from Clients table  */
-  clientId?: string;
-  /** Reference to the healthcare provider associated with this request from Providers table  */
-  providerId?: string;
-  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
-  transferType?: SendCustomProviderEmailActionOutputTransferTypeEnum;
+  /** Reference to the request scheme type from RequestSchemes table  */
+  requestTypeId?: string;
   /** Reference to the insurance agent handling this request from Agents table  */
   agentId?: string;
+  /** Reference to the client submitting this request from Clients table  */
+  clientId?: string;
+  /** Array of processed form documents with their URL links  */
+  forms?: ISendCustomProviderEmailActionOutputSendCustomProviderEmailActionOutputFormsItemObject[];
+  /** Reference to the healthcare provider associated with this request from Providers table  */
+  providerId?: string;
+  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
+  tracks?: ISendCustomProviderEmailActionOutputTracksObject;
+  /** Reference to a specific insurance fund from the Funds table associated with this request  */
+  fundId?: string;
+  /** Management fee deposit (דמי ניהול מהפקדה) associated with this insurance request, representing the fee percentage charged on deposits for managing the fund  */
+  managementFee?: number;
+  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
+  choiceDuration?: SendCustomProviderEmailActionOutputChoiceDurationEnum;
+  /** סוג העברה - the type of transfer for this insurance request: accumulation and deposits, accumulation only, or deposits only  */
+  transferType?: SendCustomProviderEmailActionOutputTransferTypeEnum;
+  /** The name of the keren (fund) associated with this request. Optional enum field with values: כללי (Klali) or אומגה (Omega). Empty string means no keren selected.  */
+  kerenName?: SendCustomProviderEmailActionOutputKerenNameEnum;
+  /** The transfer amount (יתרת העברה) for the insurance request, stored as a string to support formatted values  */
+  transferAmount?: string;
+  /** Indicates whether the transfer amount is the full/total amount. True means transfer all funds, false or null means partial or unspecified transfer amount.  */
+  isTotalTransfer?: boolean;
   /** True when the request was created directly from the client profile page (standalone request), false or null when created as part of a meeting wizard flow.  */
   isStandalone?: boolean;
   /** מעמד - the standing/status classification of the request, e.g. שכיר, עצמאי, or other relevant standing values  */
   standing?: SendCustomProviderEmailActionOutputStandingEnum;
-  /** Reference to the request scheme type from RequestSchemes table  */
-  requestTypeId?: string;
-  /** Reference to a specific insurance fund from the Funds table associated with this request  */
-  fundId?: string;
-  /** Dynamic tracks/מסלולים object structure from the request scheme, stores the track field values for this request  */
-  tracks?: ISendCustomProviderEmailActionOutputTracksObject;
+  /** Management fee accumulation (דמי ניהול מצבירה) associated with this insurance request, representing the fee percentage charged on accumulated funds  */
+  managementFeeAccumulation?: number;
+  /** סוג חשבון - the account type for this insurance request. פרטי means personal account, עסקי means business account.  */
+  accountType?: SendCustomProviderEmailActionOutputAccountTypeEnum;
+  /** מועד חיוב - the charge day of the month for this insurance request. Enum values represent the day of the month on which the charge is made.  */
+  chargeDay?: SendCustomProviderEmailActionOutputChargeDayEnum;
   /** Type of independent transfer for the insurance request. Either 'הוראת קבע' (standing order) or 'הפקדה חד פעמית' (one-time deposit).  */
   independentTransferType?: SendCustomProviderEmailActionOutputIndependentTransferTypeEnum;
-  /** תקופת בחירה בחודשים - the duration of the choice period in months for this insurance request  */
-  choiceDuration?: SendCustomProviderEmailActionOutputChoiceDurationEnum;
+  /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
+  independentTransferAmount?: string;
 }
 
 /**
@@ -2268,42 +2268,42 @@ export interface ISendMeetingFormsForSignatureActionOutputSendMeetingFormsForSig
   updatedByAgentId?: string;
   /** Item tenant id  */
   tenantId?: string;
-  /** The URL of the filled PDF that was sent for signature  */
-  formPdfUrl?: string;
-  /** The Docuseal submitter ID for the agent signer (integer).  */
-  agentSubmitterId?: number;
-  /** The embed source URL for the agent to sign the document via Docuseal.  */
-  agentEmbedSrc?: string;
-  /** The Docuseal merged template ID used for this signature request (integer).  */
-  docusealMergedTemplateId?: number;
-  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  sentAt?: string;
   /** Reference to the Requests table record this signature request belongs to  */
   requestId?: string;
-  /** Title of the form that was sent for signature, stored for display purposes  */
-  formTitle?: string;
-  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  clientSignedAt?: string;
+  /** Reference to the Clients table record — the signer  */
+  clientId?: string;
+  /** Reference to the Forms table record (form template) that was sent for signature  */
+  formId?: string;
   /** Current status of the signature request: pending (awaiting signature), signed (completed), declined (signer declined), cancelled  */
   status?: SendMeetingFormsForSignatureActionOutputStatusEnum;
-  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
-  completedAt?: string;
+  /** The URL of the filled PDF that was sent for signature  */
+  formPdfUrl?: string;
+  /** Timestamp when the signature request was sent to the client. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  sentAt?: string;
+  /** Title of the form that was sent for signature, stored for display purposes  */
+  formTitle?: string;
   /** Reference to the Meetings table record this signature request is associated with. Nullable.  */
   meetingId?: string;
+  /** The Docuseal submission ID for this signature request (integer).  */
+  docusealSubmissionId?: number;
+  /** The Docuseal merged template ID used for this signature request (integer).  */
+  docusealMergedTemplateId?: number;
+  /** The Docuseal submitter ID for the agent signer (integer).  */
+  agentSubmitterId?: number;
+  /** The Docuseal submitter ID for the client signer (integer).  */
+  clientSubmitterId?: number;
+  /** The embed source URL for the agent to sign the document via Docuseal.  */
+  agentEmbedSrc?: string;
   /** The embed source URL for the client to sign the document via Docuseal.  */
   clientEmbedSrc?: string;
   /** Timestamp when the agent signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   agentSignedAt?: string;
+  /** Timestamp when the client signed the document. Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  clientSignedAt?: string;
+  /** Timestamp when the signature request was fully completed (all parties signed). Nullable.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  completedAt?: string;
   /** Array of form-to-request mappings for meeting-level submissions. Each entry contains formId, requestId, and formIndex (0-based position in the merged DocuSeal submission). Used by the webhook to save each signed document back to its correct request.  */
   formMapping?: ISendMeetingFormsForSignatureActionOutputFormMappingObject;
-  /** Reference to the Clients table record — the signer  */
-  clientId?: string;
-  /** The Docuseal submission ID for this signature request (integer).  */
-  docusealSubmissionId?: number;
-  /** The Docuseal submitter ID for the client signer (integer).  */
-  clientSubmitterId?: number;
-  /** Reference to the Forms table record (form template) that was sent for signature  */
-  formId?: string;
 }
 
 /**
