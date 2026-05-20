@@ -125,6 +125,24 @@ export type ClientsEntityBankNameEnum =
   | "בנק הדואר"
   | "Pepper";
 
+export type ClientsEntityBankCodeEnum =
+  | "12"
+  | "10"
+  | "20"
+  | "11"
+  | "31"
+  | "18"
+  | "4"
+  | "54"
+  | "17"
+  | "46"
+  | "52"
+  | "22"
+  | "23"
+  | "25"
+  | "14"
+  | "9";
+
 export type ClientsEntityBeneficiariesDivideEnum =
   | "חלקים שווים"
   | "יחסי לחלקם"
@@ -247,6 +265,8 @@ export interface IClientsEntity {
   accountNumber?: string;
   /** Computed English street address with number — combines englishStreet and streetNumber fields (רחוב באנגלית עם מספר)  */
   englishStreetWithNumber?: string;
+  /** The bank code (קוד בנק) corresponding to the client's bank. Each code maps to a specific Israeli or international bank.  */
+  bankCode?: ClientsEntityBankCodeEnum;
   /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
   beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */

@@ -18,3 +18,30 @@ export const BANK_OPTIONS = [
   "בנק הדואר",
   "Pepper",
 ] as const;
+
+export const BANK_CODE_MAP: Record<string, string> = {
+  "בנק הפועלים": "12",
+  "בנק לאומי": "10",
+  "בנק מזרחי טפחות": "20",
+  "בנק דיסקונט": "11",
+  "הבנק הבינלאומי": "31",
+  "וואן זירו הבנק הדיגיטלי": "18",
+  "בנק יהב לעובדי המדינה": "4",
+  "בנק ירושלים": "54",
+  "בנק מרכנתיל דיסקונט": "17",
+  "בנק מסד": "46",
+  "בנק פועלי אגודת ישראל (פאג״י)": "52",
+  "Citibank": "22",
+  "HSBC": "23",
+  "BNP Paribas": "25",
+  "אוצר החייל": "14",
+  "Pepper": "9",
+};
+
+export const BANK_CODE_TO_NAME: Record<string, string> = Object.fromEntries(
+  Object.entries(BANK_CODE_MAP).map(([name, code]) => [code, name])
+);
+
+export const BANK_CODE_OPTIONS = [
+  "12", "10", "20", "11", "31", "18", "4", "54", "17", "46", "52", "22", "23", "25", "14", "9",
+] as const;

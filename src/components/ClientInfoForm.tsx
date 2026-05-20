@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { IClientsEntity } from "@/product-types";
-import { BANK_OPTIONS } from "@/utils/BankOptions";
+import { BANK_OPTIONS, BANK_CODE_MAP, BANK_CODE_TO_NAME, BANK_CODE_OPTIONS } from "@/utils/BankOptions";
 
 interface ClientInfoFormProps {
   formData: Partial<IClientsEntity>;
@@ -577,7 +577,12 @@ export const ClientInfoForm = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="bankName" className="text-sm font-medium">שם בנק</Label>
-            <Select value={formData.bankName ?? ""} onValueChange={(value) => onFieldChange("bankName", value === "__clear__" ? "" : value)}>
+            <Select value={formData.bankName ?? ""} onValueChange={(value) => {
+                const newName = value === "__clear__" ? "" : value;
+                onFieldChange("bankName", newName);
+                const mapped = newName ? BANK_CODE_MAP[newName] : "";
+                if (mapped !== undefined) onFieldChange("bankCode", mapped);
+              }}>
               <SelectTrigger id="bankName" dir="rtl" className="text-right">
                 <SelectValue placeholder="בחר בנק" />
               </SelectTrigger>
@@ -585,6 +590,25 @@ export const ClientInfoForm = ({
                 <SelectItem value="__clear__">ללא בחירה</SelectItem>
                 {BANK_OPTIONS.map((bank) => (
                   <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="bankCode" className="text-sm font-medium">קוד בנק</Label>
+            <Select value={formData.bankCode ?? ""} onValueChange={(value) => {
+                const newCode = value === "__clear__" ? "" : value;
+                onFieldChange("bankCode", newCode);
+                const mapped = newCode ? BANK_CODE_TO_NAME[newCode] : "";
+                if (mapped !== undefined) onFieldChange("bankName", mapped);
+              }}>
+              <SelectTrigger id="bankCode" dir="rtl" className="text-right">
+                <SelectValue placeholder="בחר קוד בנק" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__clear__">ללא בחירה</SelectItem>
+                {BANK_CODE_OPTIONS.map((code) => (
+                  <SelectItem key={code} value={code}>{code} - {BANK_CODE_TO_NAME[code]}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

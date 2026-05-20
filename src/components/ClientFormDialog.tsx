@@ -18,7 +18,7 @@ import { useEntityCreate, useEntityUpdate, useEntityGetAll, useFileUpload } from
 import { ClientsEntity, UsersEntity } from "@/product-types";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { BANK_OPTIONS } from "@/utils/BankOptions";
+import { BANK_OPTIONS, BANK_CODE_MAP, BANK_CODE_TO_NAME, BANK_CODE_OPTIONS } from "@/utils/BankOptions";
 import { Upload, FileCheck, X, Loader2, ExternalLink } from "lucide-react";
 
 interface ClientFormState {
@@ -66,6 +66,7 @@ interface ClientFormState {
   beneficiariesDivideFree: string;
   taxCountry: string;
   bankName: string;
+  bankCode: string;
   branchNumber: string;
   accountNumber: string;
 }
@@ -115,6 +116,7 @@ const INITIAL_FORM_STATE: ClientFormState = {
   beneficiariesDivideFree: "",
   taxCountry: "",
   bankName: "",
+  bankCode: "",
   branchNumber: "",
   accountNumber: "",
 };
@@ -193,6 +195,7 @@ export const ClientFormDialog = ({
         beneficiariesDivideFree: client.beneficiariesDivideFree || "",
         taxCountry: client.taxCountry || "",
         bankName: client.bankName || "",
+        bankCode: client.bankCode || "",
         branchNumber: client.branchNumber || "",
         accountNumber: client.accountNumber || "",
       });
@@ -295,6 +298,7 @@ export const ClientFormDialog = ({
       if (formState.beneficiariesDivideFree.trim()) data.beneficiariesDivideFree = formState.beneficiariesDivideFree.trim();
       if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
       if (formState.bankName.trim()) data.bankName = formState.bankName.trim();
+      if (formState.bankCode.trim()) data.bankCode = formState.bankCode.trim();
       if (formState.branchNumber.trim()) data.branchNumber = formState.branchNumber.trim();
       if (formState.accountNumber.trim()) data.accountNumber = formState.accountNumber.trim();
       if (formState.relationship) data.relationship = formState.relationship;
@@ -914,7 +918,12 @@ export const ClientFormDialog = ({
                       <Label htmlFor="bankName">שם בנק</Label>
                       <Select
                         value={formState.bankName || ""}
-                        onValueChange={(value) => handleChange("bankName", value === "__clear__" ? "" : value)}
+                        onValueChange={(value) => {
+                          const newName = value === "__clear__" ? "" : value;
+                          handleChange("bankName", newName);
+                          const mapped = newName ? BANK_CODE_MAP[newName] : "";
+                          if (mapped !== undefined) handleChange("bankCode", mapped);
+                        }}
                         disabled={isLoading}
                       >
                         <SelectTrigger id="bankName" dir="rtl" className="text-right">
@@ -924,6 +933,29 @@ export const ClientFormDialog = ({
                           <SelectItem value="__clear__">ללא בחירה</SelectItem>
                           {BANK_OPTIONS.map((bank) => (
                             <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bankCode">קוד בנק</Label>
+                      <Select
+                        value={formState.bankCode || ""}
+                        onValueChange={(value) => {
+                          const newCode = value === "__clear__" ? "" : value;
+                          handleChange("bankCode", newCode);
+                          const mapped = newCode ? BANK_CODE_TO_NAME[newCode] : "";
+                          if (mapped !== undefined) handleChange("bankName", mapped);
+                        }}
+                        disabled={isLoading}
+                      >
+                        <SelectTrigger id="bankCode" dir="rtl" className="text-right">
+                          <SelectValue placeholder="בחר קוד בנק" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__clear__">ללא בחירה</SelectItem>
+                          {BANK_CODE_OPTIONS.map((code) => (
+                            <SelectItem key={code} value={code}>{code} - {BANK_CODE_TO_NAME[code]}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
