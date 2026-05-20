@@ -69,7 +69,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "englishStreetWithNumber", label: "רחוב באנגלית עם מספר" },
       { value: "bornInUSA", label: "יליד ארה״ב" },
       { value: "taxCountry", label: "מדינת מס" },
-      { value: "bankName", label: "קוד בנק" },
+      { value: "bankName", label: "שם בנק" },
       { value: "branchNumber", label: "מספר סניף" },
       { value: "accountNumber", label: "מספר חשבון" },
       { value: "beneficiariesDivideFree", label: "חלוקה בין מוטבים - אחר" },

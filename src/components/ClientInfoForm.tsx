@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { IClientsEntity } from "@/product-types";
+import { BANK_OPTIONS } from "@/utils/BankOptions";
 
 interface ClientInfoFormProps {
   formData: Partial<IClientsEntity>;
@@ -575,8 +576,18 @@ export const ClientInfoForm = ({
         <Label className="text-sm font-semibold">פרטי בנק</Label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="bankName" className="text-sm font-medium">קוד בנק</Label>
-            <Input id="bankName" value={formData.bankName ?? ""} onChange={handleInputChange("bankName")} placeholder="קוד בנק" dir="rtl" />
+            <Label htmlFor="bankName" className="text-sm font-medium">שם בנק</Label>
+            <Select value={formData.bankName ?? ""} onValueChange={(value) => onFieldChange("bankName", value === "__clear__" ? "" : value)}>
+              <SelectTrigger id="bankName" dir="rtl" className="text-right">
+                <SelectValue placeholder="בחר בנק" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__clear__">ללא בחירה</SelectItem>
+                {BANK_OPTIONS.map((bank) => (
+                  <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="branchNumber" className="text-sm font-medium">מספר סניף</Label>

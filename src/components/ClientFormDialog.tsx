@@ -18,6 +18,7 @@ import { useEntityCreate, useEntityUpdate, useEntityGetAll, useFileUpload } from
 import { ClientsEntity, UsersEntity } from "@/product-types";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import { BANK_OPTIONS } from "@/utils/BankOptions";
 import { Upload, FileCheck, X, Loader2, ExternalLink } from "lucide-react";
 
 interface ClientFormState {
@@ -910,15 +911,22 @@ export const ClientFormDialog = ({
                   <Label className="text-sm font-semibold">פרטי בנק</Label>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="bankName">קוד בנק</Label>
-                      <Input
-                        id="bankName"
-                        value={formState.bankName}
-                        onChange={(e) => handleChange("bankName", e.target.value)}
-                        placeholder="קוד בנק"
+                      <Label htmlFor="bankName">שם בנק</Label>
+                      <Select
+                        value={formState.bankName || ""}
+                        onValueChange={(value) => handleChange("bankName", value === "__clear__" ? "" : value)}
                         disabled={isLoading}
-                        dir="rtl"
-                      />
+                      >
+                        <SelectTrigger id="bankName" dir="rtl" className="text-right">
+                          <SelectValue placeholder="בחר בנק" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__clear__">ללא בחירה</SelectItem>
+                          {BANK_OPTIONS.map((bank) => (
+                            <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="branchNumber">מספר סניף</Label>

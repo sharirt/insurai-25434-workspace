@@ -105,6 +105,26 @@ export type ClientsEntityEmploymentEnum =
   | "גמלאי"
   | "שכיר בעל שליטה";
 
+export type ClientsEntityBankNameEnum =
+  | "בנק הפועלים"
+  | "בנק לאומי"
+  | "בנק מזרחי טפחות"
+  | "בנק דיסקונט"
+  | "הבנק הבינלאומי"
+  | "וואן זירו הבנק הדיגיטלי"
+  | "בנק יהב לעובדי המדינה"
+  | "בנק ירושלים"
+  | "בנק מרכנתיל דיסקונט"
+  | "בנק מסד"
+  | "בנק פועלי אגודת ישראל (פאג״י)"
+  | "Citibank"
+  | "HSBC"
+  | "BNP Paribas"
+  | "אוצר החייל"
+  | "One Zero"
+  | "בנק הדואר"
+  | "Pepper";
+
 export type ClientsEntityBeneficiariesDivideEnum =
   | "חלקים שווים"
   | "יחסי לחלקם"
@@ -219,8 +239,8 @@ export interface IClientsEntity {
   birthCityEnglish?: string;
   /** The client's country of tax residency (מדינת מס). Free text field used to indicate if the client is a tax resident of a foreign country.  */
   taxCountry?: string;
-  /** The client's bank code (קוד בנק). Numeric or alphanumeric code identifying the client's bank.  */
-  bankName?: string;
+  /** The name of the client's bank (שם בנק). Selected from a predefined list of Israeli and international banks.  */
+  bankName?: ClientsEntityBankNameEnum;
   /** The bank branch number where the client's account is located (מספר סניף). Stored as string to preserve leading zeros.  */
   branchNumber?: string;
   /** The client's bank account number (מספר חשבון). Stored as string to preserve leading zeros and special formats.  */

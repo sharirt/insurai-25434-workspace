@@ -81,12 +81,8 @@ export default function FormDetails() {
       }
     });
     observer.observe(container);
-    const initialWidth = container.offsetWidth;
-    if (initialWidth > 0) {
-      setPdfWidth(Math.floor(initialWidth - 32));
-    }
     return () => observer.disconnect();
-  }, [sigDragDrop.pdfContainerRef]);
+  }, [sigDragDrop.pdfContainerRef, isLoading]);
 
   // Sorted providers list for dropdown
   const sortedProviders = useMemo(() => {
