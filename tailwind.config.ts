@@ -156,7 +156,7 @@ export default {
             backgroundPosition: '-200% 0',
           },
         },
-        sizePulse: {
+        'agent-avatar-pulse': {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.12)' },
         },
@@ -173,7 +173,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         shimmer: 'shimmer 2s linear infinite',
-        'size-pulse': 'sizePulse 1.4s ease-in-out infinite',
+        'agent-avatar-pulse': 'agent-avatar-pulse 1.4s ease-in-out infinite',
         'typing-dot': 'typingDot 1.4s ease-in-out infinite',
         fadeIn: 'fadeIn 0.5s ease-out',
         slideIn: 'slideIn 0.5s ease-out',

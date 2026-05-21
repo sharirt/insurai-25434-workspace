@@ -67,6 +67,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "birthCityEnglish", label: "עיר לידה אנגלית" },
       { value: "englishStreet", label: "רחוב באנגלית" },
       { value: "englishStreetWithNumber", label: "רחוב באנגלית עם מספר" },
+      { value: "englishFullAddress", label: "כתובת מלאה באנגלית" },
       { value: "bornInUSA", label: "יליד ארה״ב" },
       { value: "taxCountry", label: "מדינת מס" },
       { value: "bankName", label: "שם בנק" },

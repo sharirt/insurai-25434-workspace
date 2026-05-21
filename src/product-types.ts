@@ -267,6 +267,8 @@ export interface IClientsEntity {
   englishStreetWithNumber?: string;
   /** The bank code (קוד בנק) corresponding to the client's bank. Each code maps to a specific Israeli or international bank.  */
   bankCode?: ClientsEntityBankCodeEnum;
+  /** Computed full address in English — combines englishCity, englishStreet, streetNumber, and zipCode (כתובת מלאה באנגלית)  */
+  englishFullAddress?: string;
   /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
   beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
