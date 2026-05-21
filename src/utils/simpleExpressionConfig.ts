@@ -41,6 +41,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "בגיר", expression: "clients.age >= 18" },
   { label: "קטין", expression: "clients.age < 18" },
   { label: "בעל מוטבים", expression: "beneficiaries && beneficiaries.length > 0" },
+  { label: "אינו בעל מוטבים", expression: "beneficiaries && beneficiaries.length == 0" },
   { label: "חלוקה בין מוטבים לחלקים שווים", expression: "clients.beneficiariesDivide === 'חלקים שווים'" },
   { label: "חלוקה בין מוטבים יחסי לחלקם", expression: "clients.beneficiariesDivide === 'יחסי לחלקם'" },
   { label: "חלוקה בין מוטבים ליורשים חוקיים", expression: "clients.beneficiariesDivide === 'יורשים חוקיים'" },
