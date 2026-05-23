@@ -14,7 +14,7 @@ export const FieldRow = ({ field, isSelected, isExpanded, onClick }: FieldRowPro
   return (
     <div
       className={cn(
-        "flex items-center gap-2 px-3 py-2 cursor-pointer border-b transition-colors",
+        "flex items-center gap-2 px-3 py-2 cursor-pointer border-b transition-colors overflow-hidden min-w-0",
         isSelected ? "bg-accent" : "hover:bg-muted/50"
       )}
       onClick={onClick}
@@ -24,7 +24,7 @@ export const FieldRow = ({ field, isSelected, isExpanded, onClick }: FieldRowPro
         className="size-2.5 rounded-full shrink-0"
         style={{ backgroundColor: FIELD_TYPE_COLORS[field.type] }}
       />
-      <span className="text-sm font-medium flex-1 truncate">{field.name}</span>
+      <span className="text-sm font-medium flex-1 truncate min-w-0">{field.name}</span>
       {field.isNew && (
         <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
           חדש

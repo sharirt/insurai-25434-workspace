@@ -60,7 +60,7 @@ export const FieldPanel = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-card border-r" dir="rtl">
+    <div className="flex flex-col h-full bg-card border-r overflow-hidden" dir="rtl">
       {/* Header */}
       <div className="p-4 border-b flex flex-col gap-3">
         <div className="flex items-center gap-2">
@@ -124,7 +124,7 @@ export const FieldPanel = ({
       <ColorLegend />
 
       {/* Field List */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 overflow-hidden">
         {isRefreshing && (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="animate-spin text-muted-foreground" />
