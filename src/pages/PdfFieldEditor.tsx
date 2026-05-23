@@ -15,7 +15,6 @@ import { PdfViewerWithOverlays } from "@/components/PdfViewerWithOverlays";
 import { FieldPanel } from "@/components/FieldPanel";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { resolvePdfFileUrl } from "@/utils/PdfFileUrl";
 import type {
   IDescribeFormPdfFieldsActionOutputDescribeFormPdfFieldsActionOutputFieldsItemObject,
 } from "@/product-types";
@@ -108,9 +107,13 @@ export default function PdfFieldEditor() {
   };
 
   const handleDeleteField = (id: string) => {
-    setFields((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, isDeleted: true } : f))
-    );
+    setFields((prev) => {
+      const field = prev.find((f) => f.id === id);
+      if (field?.isNew) {
+        return prev.filter((f) => f.id !== id);
+      }
+      return prev.map((f) => (f.id === id ? { ...f, isDeleted: true } : f));
+    });
     if (selectedFieldId === id) setSelectedFieldId(null);
   };
 
@@ -126,10 +129,9 @@ export default function PdfFieldEditor() {
     const isRenamed = (f: PdfField) =>
       !f.isNew && !f.isDeleted && !!f.originalName && f.name !== f.originalName;
 
-    const removeFieldNames = [
-      ...fields.filter((f) => f.isDeleted && !f.isNew).map((f) => f.originalName || f.name),
-      ...fields.filter(isRenamed).map((f) => f.originalName!),
-    ];
+    const removeFieldNames = fields
+      .filter((f) => f.isDeleted && !f.isNew)
+      .map((f) => f.originalName || f.name);
 
     const fieldGeometryUpdates = fields
       .filter((f) => f.isModified && !f.isNew && !f.isDeleted && !isRenamed(f))
@@ -142,25 +144,13 @@ export default function PdfFieldEditor() {
       }));
 
     const renamedFields = fields.filter(isRenamed).map((f) => ({
-      name: f.name,
-      type: f.type,
-      page: f.page,
-      x: f.x,
-      y: f.y,
-      width: f.width,
-      height: f.height,
-      fontSize: f.fontSize,
-      fontFamily: f.fontFamily,
-      textDirection: f.textDirection,
-      multiline: f.multiline,
-      required: f.required,
-      readOnly: f.readOnly,
-      options: f.options?.length ? f.options : undefined,
-      defaultValue: f.defaultValue || undefined,
+      originalName: f.originalName!,
+      newName: f.name,
     }));
 
-    const newFields = [
-      ...fields.filter((f) => f.isNew && !f.isDeleted).map((f) => ({
+    const newFields = fields
+      .filter((f) => f.isNew && !f.isDeleted)
+      .map((f) => ({
         name: f.name,
         type: f.type,
         page: f.page,
@@ -176,9 +166,7 @@ export default function PdfFieldEditor() {
         readOnly: f.readOnly,
         options: f.options?.length ? f.options : undefined,
         defaultValue: f.defaultValue || undefined,
-      })),
-      ...renamedFields,
-    ];
+      }));
 
     try {
       await annotateFields({
@@ -188,6 +176,7 @@ export default function PdfFieldEditor() {
         fields: newFields as any,
         removeFieldNames: removeFieldNames.length ? removeFieldNames : undefined,
         fieldGeometryUpdates: fieldGeometryUpdates.length ? fieldGeometryUpdates : undefined,
+        renamedFields: renamedFields.length ? renamedFields : undefined,
       });
       // Sync fieldMapping
       const currentFieldMapping = (form.fieldMapping as Record<string, string>) || {};
@@ -244,7 +233,7 @@ export default function PdfFieldEditor() {
     );
   }
 
-  const pdfUrl = form.fileData?.url ? resolvePdfFileUrl(form.fileData.url) : undefined;
+  const pdfUrl = form.fileData?.url;
   const formTitle = form.formTitleHebrew || form.formTitle || "טופס ללא שם";
 
   return (

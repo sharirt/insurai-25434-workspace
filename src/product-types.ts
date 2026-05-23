@@ -1017,6 +1017,14 @@ export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInp
 }
 
 /**
+ * undefined
+ */
+export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRenamedFieldsItemObject {
+  originalName: string;
+  newName: string;
+}
+
+/**
  * AnnotateFormPdfFields input payload
  */
 export interface IAnnotateFormPdfFieldsActionInput {
@@ -1032,6 +1040,8 @@ export interface IAnnotateFormPdfFieldsActionInput {
   removeFieldNames?: string[];
   /** Geometry updates for existing fields (move/resize without removing)  */
   fieldGeometryUpdates?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject[];
+  /** Fields to rename: each entry has originalName and newName  */
+  renamedFields?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRenamedFieldsItemObject[];
 }
 
 /**
@@ -1148,7 +1158,7 @@ export interface IAnnotateFormPdfFieldsActionOutput {
 
 /**
  * AnnotateFormPdfFieldsAction
- * Annotates the PDF form fields for a given form using AnnotatePdfFormFields (remove, geometry update, add new fields), then updates the form record's fileData URL in the Forms table with the newly annotated PDF. Saves changes directly into the file metadata.
+ * Annotates the PDF form fields for a given form. Uses EditPdfFormFields to handle deletions, renames, and geometry updates on existing fields, then uses AnnotatePdfFormFields to add new fields. Finally updates the form record's fileData URL in the Forms table with the newly annotated PDF.
  */
 export const AnnotateFormPdfFieldsAction = {
   actionBlockId: "69f6438f5200c9748117efab",
