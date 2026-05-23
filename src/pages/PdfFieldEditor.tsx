@@ -15,6 +15,7 @@ import { PdfViewerWithOverlays } from "@/components/PdfViewerWithOverlays";
 import { FieldPanel } from "@/components/FieldPanel";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { resolvePdfFileUrl } from "@/utils/PdfFileUrl";
 import type {
   IDescribeFormPdfFieldsActionOutputDescribeFormPdfFieldsActionOutputFieldsItemObject,
 } from "@/product-types";
@@ -243,7 +244,7 @@ export default function PdfFieldEditor() {
     );
   }
 
-  const pdfUrl = form.fileData?.url;
+  const pdfUrl = form.fileData?.url ? resolvePdfFileUrl(form.fileData.url) : undefined;
   const formTitle = form.formTitleHebrew || form.formTitle || "טופס ללא שם";
 
   return (
