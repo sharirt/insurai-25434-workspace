@@ -34,6 +34,11 @@ export const FieldEditor = ({ field, onUpdate, onDelete }: FieldEditorProps) => 
             onChange={(e) => update({ name: e.target.value })}
             className="h-8 text-sm"
           />
+          {field.originalName && field.name !== field.originalName && (
+            <span className="text-xs text-muted-foreground">
+              שם מקורי: {field.originalName}
+            </span>
+          )}
         </div>
         <div className="flex flex-col gap-1">
           <Label className="text-xs">סוג</Label>

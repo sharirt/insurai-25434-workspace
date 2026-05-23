@@ -43,6 +43,7 @@ function mapApiFieldToLocal(
     isNew: false,
     isModified: false,
     isDeleted: false,
+    originalName: apiField.name || `field_${index}`,
   };
 }
 
@@ -121,12 +122,16 @@ export default function PdfFieldEditor() {
   const handleSave = async () => {
     if (!form?.fileData?.url) return;
 
-    const removeFieldNames = fields
-      .filter((f) => f.isDeleted && !f.isNew)
-      .map((f) => f.name);
+    const isRenamed = (f: PdfField) =>
+      !f.isNew && !f.isDeleted && !!f.originalName && f.name !== f.originalName;
+
+    const removeFieldNames = [
+      ...fields.filter((f) => f.isDeleted && !f.isNew).map((f) => f.originalName || f.name),
+      ...fields.filter(isRenamed).map((f) => f.originalName!),
+    ];
 
     const fieldGeometryUpdates = fields
-      .filter((f) => f.isModified && !f.isNew && !f.isDeleted)
+      .filter((f) => f.isModified && !f.isNew && !f.isDeleted && !isRenamed(f))
       .map((f) => ({
         name: f.name,
         x: f.x,
@@ -135,9 +140,26 @@ export default function PdfFieldEditor() {
         height: f.height,
       }));
 
-    const newFields = fields
-      .filter((f) => f.isNew && !f.isDeleted)
-      .map((f) => ({
+    const renamedFields = fields.filter(isRenamed).map((f) => ({
+      name: f.name,
+      type: f.type,
+      page: f.page,
+      x: f.x,
+      y: f.y,
+      width: f.width,
+      height: f.height,
+      fontSize: f.fontSize,
+      fontFamily: f.fontFamily,
+      textDirection: f.textDirection,
+      multiline: f.multiline,
+      required: f.required,
+      readOnly: f.readOnly,
+      options: f.options?.length ? f.options : undefined,
+      defaultValue: f.defaultValue || undefined,
+    }));
+
+    const newFields = [
+      ...fields.filter((f) => f.isNew && !f.isDeleted).map((f) => ({
         name: f.name,
         type: f.type,
         page: f.page,
@@ -153,7 +175,9 @@ export default function PdfFieldEditor() {
         readOnly: f.readOnly,
         options: f.options?.length ? f.options : undefined,
         defaultValue: f.defaultValue || undefined,
-      }));
+      })),
+      ...renamedFields,
+    ];
 
     try {
       await annotateFields({
@@ -165,14 +189,16 @@ export default function PdfFieldEditor() {
         fieldGeometryUpdates: fieldGeometryUpdates.length ? fieldGeometryUpdates : undefined,
       });
       // Sync fieldMapping
-      const survivingFieldNames = fields
-        .filter((f) => !f.isDeleted)
-        .map((f) => f.name);
-
       const currentFieldMapping = (form.fieldMapping as Record<string, string>) || {};
       const mergedFieldMapping: Record<string, string> = {};
-      for (const name of survivingFieldNames) {
-        mergedFieldMapping[name] = currentFieldMapping[name] ?? "";
+      for (const f of fields.filter((f) => !f.isDeleted)) {
+        if (isRenamed(f)) {
+          mergedFieldMapping[f.name] = currentFieldMapping[f.originalName!] ?? "";
+        } else if (f.isNew) {
+          mergedFieldMapping[f.name] = "";
+        } else {
+          mergedFieldMapping[f.name] = currentFieldMapping[f.name] ?? "";
+        }
       }
 
       try {

@@ -20,6 +20,7 @@ export interface PdfField {
   isNew: boolean;
   isModified: boolean;
   isDeleted: boolean;
+  originalName?: string;
 }
 
 export const FIELD_TYPE_COLORS: Record<FieldType, string> = {

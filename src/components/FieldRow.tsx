@@ -25,6 +25,16 @@ export const FieldRow = ({ field, isSelected, isExpanded, onClick }: FieldRowPro
         style={{ backgroundColor: FIELD_TYPE_COLORS[field.type] }}
       />
       <span className="text-sm font-medium flex-1 truncate">{field.name}</span>
+      {field.isNew && (
+        <Badge variant="secondary" className="text-xs shrink-0 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          חדש
+        </Badge>
+      )}
+      {!field.isNew && !!field.originalName && field.name !== field.originalName && (
+        <Badge variant="secondary" className="text-xs shrink-0 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+          שונה שם
+        </Badge>
+      )}
       <Badge variant="outline" className="text-xs shrink-0">
         {FIELD_TYPE_LABELS_HE[field.type]}
       </Badge>
