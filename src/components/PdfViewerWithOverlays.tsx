@@ -3,7 +3,6 @@ import { PdfViewer } from "@/components/ui/pdf-viewer";
 import { usePdfNativeSize } from "@/hooks/usePdfNativeSize";
 import { PdfField } from "@/utils/PdfFieldTypes";
 import { FormPdfFieldOverlay } from "@/components/FormPdfFieldOverlay";
-import { resolvePdfFileUrl } from "@/utils/PdfFileUrl";
 
 interface PdfViewerWithOverlaysProps {
   pdfUrl: string;
@@ -25,13 +24,12 @@ export const PdfViewerWithOverlays = ({
   onPageChange,
 }: PdfViewerWithOverlaysProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const resolvedUrl = resolvePdfFileUrl(pdfUrl);
-  const nativeSize = usePdfNativeSize(resolvedUrl);
+  const nativeSize = usePdfNativeSize(pdfUrl);
 
   return (
     <div className="relative h-full w-full min-h-0 overflow-hidden">
       <PdfViewer
-        file={resolvedUrl}
+        file={pdfUrl}
         onPageChange={(page: number) => { setCurrentPage(page - 1); onPageChange?.(page - 1); }}
       />
       <FormPdfFieldOverlay

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowRight, RefreshCw, Plus, Save, Loader2 } from "lucide-react";
+import { ArrowRight, RefreshCw, Plus, Save, Loader2, Search } from "lucide-react";
 import { PdfField } from "@/utils/PdfFieldTypes";
 import { ColorLegend } from "@/components/ColorLegend";
 import { FieldRow } from "@/components/FieldRow";
@@ -44,13 +44,20 @@ export const FieldPanel = ({
 }: FieldPanelProps) => {
   const [expandedFieldId, setExpandedFieldId] = useState<string | null>(null);
   const [targetPage, setTargetPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (currentPage !== undefined) {
       setTargetPage(currentPage + 1);
     }
   }, [currentPage]);
-  const visibleFields = fields.filter((f) => !f.isDeleted);
+  const visibleFields = fields.filter((f) => {
+    if (f.isDeleted) return false;
+    if (searchQuery.trim()) {
+      return f.name?.toLowerCase().includes(searchQuery.trim().toLowerCase());
+    }
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full bg-card border-r" dir="rtl">
@@ -102,6 +109,15 @@ export const FieldPanel = ({
             שמור שינויים
           </Button>
         </div>
+        <div className="relative">
+          <Search className="absolute right-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
+            placeholder="חפש שדה..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-8 pr-8 w-full"
+          />
+        </div>
       </div>
 
       {/* Color Legend */}
@@ -116,7 +132,7 @@ export const FieldPanel = ({
         )}
         {!isRefreshing && visibleFields.length === 0 && (
           <div className="p-8 text-center text-muted-foreground text-sm">
-            לא נמצאו שדות בטופס
+            {searchQuery.trim() ? "לא נמצאו שדות התואמים לחיפוש" : "לא נמצאו שדות בטופס"}
           </div>
         )}
         {!isRefreshing &&
