@@ -87,7 +87,15 @@ export default function PdfFieldEditor() {
         pdfUrl: form.fileData.url,
       });
       const apiFields = result?.fields ?? [];
-      setFields(apiFields.map((f, i) => mapApiFieldToLocal(f, i)));
+      const mapped = apiFields.map((f, i) => mapApiFieldToLocal(f, i));
+      const nameCount: Record<string, number> = {};
+      for (const field of mapped) {
+        const name = field.name;
+        const idx = nameCount[name] ?? 0;
+        field.occurrence = idx;
+        nameCount[name] = idx + 1;
+      }
+      setFields(mapped);
       setHasLoadedFields(true);
     } catch {
       toast.error("שגיאה בטעינת שדות הטופס");
@@ -131,12 +139,16 @@ export default function PdfFieldEditor() {
 
     const removeFieldNames = fields
       .filter((f) => f.isDeleted && !f.isNew)
-      .map((f) => f.originalName || f.name);
+      .map((f) => ({
+        name: f.originalName || f.name,
+        ...(f.occurrence !== undefined ? { occurrence: f.occurrence } : {}),
+      }));
 
     const fieldGeometryUpdates = fields
       .filter((f) => f.isModified && !f.isNew && !f.isDeleted && !isRenamed(f))
       .map((f) => ({
         name: f.name,
+        ...(f.occurrence !== undefined ? { occurrence: f.occurrence } : {}),
         x: f.x,
         y: f.y,
         width: f.width,
@@ -146,6 +158,7 @@ export default function PdfFieldEditor() {
     const renamedFields = fields.filter(isRenamed).map((f) => ({
       originalName: f.originalName!,
       newName: f.name,
+      ...(f.occurrence !== undefined ? { occurrence: f.occurrence } : {}),
     }));
 
     const newFields = fields
@@ -239,7 +252,7 @@ export default function PdfFieldEditor() {
   return (
     <div className="h-screen flex flex-col lg:flex-row overflow-hidden">
       {/* Left: PDF Viewer (60%) */}
-      <div className="flex-[3] min-h-0 overflow-hidden flex">
+      <div className="flex-[3] min-w-0 min-h-0 overflow-hidden flex">
         {pdfUrl ? (
           <PdfViewerWithOverlays
             pdfUrl={pdfUrl}
@@ -258,7 +271,7 @@ export default function PdfFieldEditor() {
       </div>
 
       {/* Right: Field Panel (40%) */}
-      <div className="flex-[2] min-h-0 overflow-hidden border-t lg:border-t-0">
+      <div className="flex-[2] min-w-0 min-h-0 overflow-hidden border-t lg:border-t-0">
         <FieldPanel
           formTitle={formTitle}
           fields={fields}

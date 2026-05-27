@@ -21,6 +21,7 @@ export interface PdfField {
   isModified: boolean;
   isDeleted: boolean;
   originalName?: string;
+  occurrence?: number;
 }
 
 export const FIELD_TYPE_COLORS: Record<FieldType, string> = {

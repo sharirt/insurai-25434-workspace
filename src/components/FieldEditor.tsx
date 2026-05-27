@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Trash2 } from "lucide-react";
 import { PdfField, FieldType, ALL_FIELD_TYPES, FIELD_TYPE_LABELS_HE } from "@/utils/PdfFieldTypes";
+import { cn } from "@/lib/utils";
 
 interface FieldEditorProps {
   field: PdfField;
@@ -60,7 +61,7 @@ export const FieldEditor = ({ field, onUpdate, onDelete }: FieldEditorProps) => 
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-2">
+      <div className={cn("grid gap-2", field.isNew ? "grid-cols-5" : "grid-cols-6")}>
         <div className="flex flex-col gap-1">
           <Label className="text-xs">עמוד</Label>
           <Input
@@ -106,6 +107,19 @@ export const FieldEditor = ({ field, onUpdate, onDelete }: FieldEditorProps) => 
             className="h-8 text-sm"
           />
         </div>
+        {!field.isNew && (
+          <div className="flex flex-col gap-1">
+            <Label className="text-xs">מופע</Label>
+            <Input
+              type="number"
+              min={0}
+              value={field.occurrence ?? 0}
+              onChange={(e) => update({ occurrence: parseInt(e.target.value) || 0 })}
+              className="h-8 text-sm"
+            />
+            <span className="text-[10px] text-muted-foreground">לשדות עם שם כפול</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-2">

@@ -1008,8 +1008,20 @@ export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInp
 /**
  * undefined
  */
+export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRemoveFieldNamesItemObject {
+  /** Field name to remove  */
+  name: string;
+  /** 0-based index to disambiguate duplicate field names; omit to target the first match  */
+  occurrence?: number;
+}
+
+/**
+ * undefined
+ */
 export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject {
   name: string;
+  /** 0-based index to disambiguate duplicate field names; omit to target the first match  */
+  occurrence?: number;
   x?: number;
   y?: number;
   width?: number;
@@ -1022,6 +1034,8 @@ export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInp
 export interface IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRenamedFieldsItemObject {
   originalName: string;
   newName: string;
+  /** 0-based index to disambiguate duplicate field names; omit to target the first match  */
+  occurrence?: number;
 }
 
 /**
@@ -1036,11 +1050,11 @@ export interface IAnnotateFormPdfFieldsActionInput {
   formFileName?: string;
   /** New fields to add to the PDF  */
   fields: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldsItemObject[];
-  /** Names of existing fields to remove from the PDF  */
-  removeFieldNames?: string[];
-  /** Geometry updates for existing fields (move/resize without removing)  */
+  /** Existing fields to remove from the PDF. Each entry has a name and optional occurrence (0-based) to disambiguate duplicates.  */
+  removeFieldNames?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRemoveFieldNamesItemObject[];
+  /** Geometry updates for existing fields (move/resize without removing). Supports occurrence to disambiguate duplicate field names.  */
   fieldGeometryUpdates?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputFieldGeometryUpdatesItemObject[];
-  /** Fields to rename: each entry has originalName and newName  */
+  /** Fields to rename. Supports occurrence to disambiguate duplicate field names.  */
   renamedFields?: IAnnotateFormPdfFieldsActionInputAnnotateFormPdfFieldsActionInputRenamedFieldsItemObject[];
 }
 
@@ -1158,7 +1172,7 @@ export interface IAnnotateFormPdfFieldsActionOutput {
 
 /**
  * AnnotateFormPdfFieldsAction
- * Annotates the PDF form fields for a given form. Uses EditPdfFormFields to handle deletions, renames, and geometry updates on existing fields, then uses AnnotatePdfFormFields to add new fields. Finally updates the form record's fileData URL in the Forms table with the newly annotated PDF.
+ * Annotates the PDF form fields for a given form. Uses EditPdfFormFields to handle deletions, renames, and geometry updates on existing fields (with occurrence support for duplicate field names), then uses AnnotatePdfFormFields to add new fields. Finally updates the form record's fileData URL in the Forms table with the newly annotated PDF.
  */
 export const AnnotateFormPdfFieldsAction = {
   actionBlockId: "69f6438f5200c9748117efab",
