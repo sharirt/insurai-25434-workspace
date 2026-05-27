@@ -1,17 +1,18 @@
 // ─── ask_user tool ──────────────────────────────────────────────────────────
 
 import { cva } from 'class-variance-authority';
-import { ArrowLeft, ArrowRight, Check, Pencil } from 'lucide-react';
+import { ArrowRight, Check, Pencil, X } from 'lucide-react';
 import * as React from 'react';
 import z from 'zod';
 
+import { AgentChatLoadingDots } from '@/components/ui/agent-chat-loading-dots';
+import { Button } from '@/components/ui/button';
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,7 @@ const askUserQuestionSchema = z.object({
 
 export const askUserParametersSchema = z.object({
   questions: z.array(askUserQuestionSchema),
+  submitButtonText: z.string().optional(),
 });
 
 export type AskUserParameters = z.infer<typeof askUserParametersSchema>;
@@ -63,6 +65,9 @@ export interface AskUserSubmittedAnswer {
 }
 
 export type AskUserSize = 'sm' | 'md' | 'lg';
+
+type AskUserFormAnswers = Record<string, string | string[]>;
+type AskUserOtherAnswers = Record<string, string>;
 
 // ─── Payload helpers ────────────────────────────────────────────────────────
 
@@ -103,11 +108,14 @@ const getQuestionOptionLabel = (
   optionId: string,
 ) => options.find((option) => option.id === optionId)?.label ?? optionId;
 
+const isAskUserQuestionRequired = (question: AskUserQuestion) =>
+  question.required !== false;
+
 const askUserAnswersToFormState = (
   submittedAnswers: AskUserSubmittedAnswer[] | undefined,
 ) => {
-  const answerValues: Record<string, string | string[]> = {};
-  const otherAnswerValues: Record<string, string> = {};
+  const answerValues: AskUserFormAnswers = {};
+  const otherAnswerValues: AskUserOtherAnswers = {};
 
   for (const answer of submittedAnswers || []) {
     if (answer.type === 'multi_select') {
@@ -136,14 +144,91 @@ const askUserAnswersToFormState = (
   return { answerValues, otherAnswerValues };
 };
 
+const buildSubmittedAnswer = (
+  question: AskUserQuestion,
+  sourceAnswers: AskUserFormAnswers,
+  sourceOtherAnswers: AskUserOtherAnswers,
+): AskUserSubmittedAnswer => {
+  const options = normalizeAskUserOptions(question);
+  const answer = sourceAnswers[question.id];
+  const otherAnswer = sourceOtherAnswers[question.id]?.trim();
+
+  if (question.type === 'multi_select') {
+    const values = Array.isArray(answer) ? answer : [];
+    const realValues = values.filter(
+      (value) => value !== ASK_USER_OTHER_OPTION_ID,
+    );
+    return {
+      questionId: question.id,
+      question: question.label,
+      type: question.type,
+      values: realValues,
+      labels: realValues.map((value) => getQuestionOptionLabel(options, value)),
+      other: values.includes(ASK_USER_OTHER_OPTION_ID)
+        ? otherAnswer
+        : undefined,
+    };
+  }
+
+  if (question.type === 'single_select') {
+    const value = typeof answer === 'string' ? answer : '';
+    return {
+      questionId: question.id,
+      question: question.label,
+      type: question.type,
+      value: value === ASK_USER_OTHER_OPTION_ID ? undefined : value,
+      label:
+        value && value !== ASK_USER_OTHER_OPTION_ID
+          ? getQuestionOptionLabel(options, value)
+          : undefined,
+      other: value === ASK_USER_OTHER_OPTION_ID ? otherAnswer : undefined,
+    };
+  }
+
+  return {
+    questionId: question.id,
+    question: question.label,
+    type: question.type,
+    value: typeof answer === 'string' ? answer.trim() : '',
+  };
+};
+
+const isQuestionInvalid = (
+  question: AskUserQuestion,
+  sourceAnswers: AskUserFormAnswers,
+  sourceOtherAnswers: AskUserOtherAnswers,
+) => {
+  if (!isAskUserQuestionRequired(question)) {
+    return false;
+  }
+
+  const answer = sourceAnswers[question.id];
+  const otherAnswer = sourceOtherAnswers[question.id]?.trim();
+  if (question.type === 'text') {
+    return typeof answer !== 'string' || !answer.trim();
+  }
+  if (question.type === 'single_select') {
+    return (
+      typeof answer !== 'string' ||
+      !answer ||
+      (answer === ASK_USER_OTHER_OPTION_ID && !otherAnswer)
+    );
+  }
+  return (
+    !Array.isArray(answer) ||
+    answer.length === 0 ||
+    (answer.includes(ASK_USER_OTHER_OPTION_ID) && !otherAnswer)
+  );
+};
+
 // ─── Variants ───────────────────────────────────────────────────────────────
 
 const askUserWrapperVariants = cva('flex w-full min-w-0 flex-col', {
   variants: {
     size: {
-      sm: 'gap-6',
-      md: 'gap-8',
-      lg: 'gap-10',
+      sm: 'gap-4',
+      md: 'gap-6',
+      lg: 'gap-8',
     },
   },
   defaultVariants: { size: 'md' },
@@ -161,37 +246,40 @@ const askUserQuestionGapVariants = cva('', {
 });
 
 const askUserQuestionLabelVariants = cva(
-  'prose prose-p:my-0 max-w-none leading-[1.6] font-normal',
+  'prose-p:my-0 text-base font-normal leading-normal',
   {
     variants: {
       size: {
-        sm: 'prose-sm',
-        md: 'prose-base',
-        lg: 'prose-lg',
+        sm: '',
+        md: '',
+        lg: '',
       },
       invalid: {
         true: 'text-destructive/80',
-        false: 'text-foreground',
+        false: '',
       },
     },
     defaultVariants: { size: 'md', invalid: false },
   },
 );
 
-const askUserHelperTextVariants = cva('text-muted-foreground/70 leading-snug', {
-  variants: {
-    size: {
-      sm: 'text-xs',
-      md: 'text-xs',
-      lg: 'text-sm',
+const askUserHelperTextVariants = cva(
+  'text-base font-normal leading-normal text-muted-foreground/70',
+  {
+    variants: {
+      size: {
+        sm: '',
+        md: '',
+        lg: '',
+      },
     },
+    defaultVariants: { size: 'md' },
   },
-  defaultVariants: { size: 'md' },
-});
+);
 
 const askUserChipItemVariants = cva(
   cn(
-    'inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background text-foreground transition-colors',
+    'inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background text-base font-normal leading-normal text-foreground transition-colors',
     'hover:bg-background hover:text-foreground hover:border-foreground',
     'data-[state=on]:bg-background data-[state=on]:text-foreground',
     'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
@@ -199,9 +287,9 @@ const askUserChipItemVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-7 min-w-7 px-3 text-xs',
-        md: 'h-8 min-w-8 px-4 text-sm',
-        lg: 'h-9 min-w-9 px-5 text-base',
+        sm: 'h-7 min-w-7 px-3',
+        md: 'h-8 min-w-8 px-4',
+        lg: 'h-9 min-w-9 px-5',
       },
     },
     defaultVariants: { size: 'md' },
@@ -210,7 +298,7 @@ const askUserChipItemVariants = cva(
 
 const askUserOtherChipItemVariants = cva(
   cn(
-    'inline-flex items-center justify-center rounded-full border border-input bg-background text-muted-foreground transition-colors',
+    'inline-flex items-center justify-center rounded-full border border-input bg-background text-base font-normal leading-normal text-muted-foreground transition-colors',
     'hover:bg-background hover:text-foreground hover:border-foreground',
     'data-[state=on]:bg-background data-[state=on]:text-foreground',
     'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
@@ -227,9 +315,23 @@ const askUserOtherChipItemVariants = cva(
   },
 );
 
+const askUserOtherTextareaVariants = cva(
+  'w-1/2 resize-none overflow-hidden rounded-full text-base font-normal leading-normal',
+  {
+    variants: {
+      size: {
+        sm: 'h-7 min-h-7 px-3 py-0.5',
+        md: 'h-8 min-h-8 px-4 py-1',
+        lg: 'h-9 min-h-9 px-5 py-1.5',
+      },
+    },
+    defaultVariants: { size: 'md' },
+  },
+);
+
 const askUserCardItemVariants = cva(
   cn(
-    'group/card relative flex w-full items-start gap-3 rounded-lg border border-input bg-background text-left text-foreground transition-colors',
+    'group/card relative flex w-full items-start gap-3 rounded-lg border border-input bg-background text-left text-base font-normal leading-normal text-foreground transition-colors',
     'hover:bg-background hover:text-foreground hover:border-foreground',
     'data-[state=on]:bg-background data-[state=on]:text-foreground',
     'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
@@ -238,34 +340,38 @@ const askUserCardItemVariants = cva(
   {
     variants: {
       size: {
-        sm: 'h-auto min-h-12 px-3 py-2 text-sm',
-        md: 'h-auto min-h-14 px-3 py-2.5 text-sm',
-        lg: 'h-auto min-h-16 px-4 py-3 text-base',
+        sm: 'h-auto min-h-12 px-3 py-2',
+        md: 'h-auto min-h-14 px-3 py-2.5',
+        lg: 'h-auto min-h-16 px-4 py-3',
       },
     },
     defaultVariants: { size: 'md' },
   },
 );
 
-const askUserCardTitleVariants = cva('font-semibold leading-tight', {
+const askUserCardTitleVariants = cva('text-base font-normal leading-normal', {
   variants: {
     size: {
-      sm: 'text-sm',
-      md: 'text-sm',
-      lg: 'text-base',
+      sm: '',
+      md: '',
+      lg: '',
+    },
+    invalid: {
+      true: 'text-destructive/80',
+      false: '',
     },
   },
-  defaultVariants: { size: 'md' },
+  defaultVariants: { size: 'md', invalid: false },
 });
 
 const askUserCardDescriptionVariants = cva(
-  'mt-0.5 text-muted-foreground leading-snug',
+  'mt-0.5 text-base font-normal leading-normal text-muted-foreground',
   {
     variants: {
       size: {
-        sm: 'text-xs',
-        md: 'text-sm',
-        lg: 'text-sm',
+        sm: '',
+        md: '',
+        lg: '',
       },
     },
     defaultVariants: { size: 'md' },
@@ -306,7 +412,7 @@ const askUserChipsGroupClass =
 const askUserCardsGroupClass =
   'flex w-full min-w-0 flex-col items-stretch justify-start';
 
-const askUserActionRowVariants = cva('flex w-full items-center justify-end', {
+const askUserActionRowVariants = cva('flex w-full items-center justify-start', {
   variants: {
     size: {
       sm: 'gap-1.5',
@@ -316,25 +422,6 @@ const askUserActionRowVariants = cva('flex w-full items-center justify-end', {
   },
   defaultVariants: { size: 'md' },
 });
-
-const askUserSendButtonVariants = cva(
-  cn(
-    'inline-flex shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors',
-    'hover:bg-primary/90',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-    'disabled:pointer-events-none disabled:opacity-50',
-  ),
-  {
-    variants: {
-      size: {
-        sm: 'size-7',
-        md: 'size-8',
-        lg: 'size-9',
-      },
-    },
-    defaultVariants: { size: 'md' },
-  },
-);
 
 const askUserIconVariants = cva('', {
   variants: {
@@ -369,65 +456,38 @@ const askUserBackButtonVariants = cva(
 const askUserGroupSpacing = (size: AskUserSize): number =>
   size === 'sm' ? 1.5 : size === 'lg' ? 2.5 : 2;
 
-const askUserSkeletonLabelVariants = cva('rounded-sm', {
-  variants: {
-    size: {
-      sm: 'h-[1.4rem]',
-      md: 'h-[1.6rem]',
-      lg: 'h-[1.8rem]',
-    },
-  },
-  defaultVariants: { size: 'md' },
-});
-
-const askUserSkeletonChipVariants = cva('rounded-full', {
-  variants: {
-    size: {
-      sm: 'h-7',
-      md: 'h-8',
-      lg: 'h-9',
-    },
-  },
-  defaultVariants: { size: 'md' },
-});
-
-const askUserSkeletonChipsRowGap: Record<AskUserSize, string> = {
-  sm: 'gap-1.5',
-  md: 'gap-2',
-  lg: 'gap-2.5',
-};
-
-const SKELETON_CHIP_WIDTHS = ['w-16', 'w-20', 'w-14'] as const;
-
 // ─── Subcomponents ──────────────────────────────────────────────────────────
 
 interface AskUserActionButtonProps {
   size: AskUserSize;
   label: string;
+  text?: string;
   onClick: () => void;
   disabled?: boolean;
 }
 
 function SendArrowButton({
-  size,
   label,
+  text,
   onClick,
   disabled,
 }: AskUserActionButtonProps) {
+  const buttonText = text?.trim();
   return (
-    <button
+    <Button
       type="button"
+      size="sm"
       onClick={onClick}
       disabled={disabled}
-      aria-label={label}
-      className={cn(askUserSendButtonVariants({ size }))}
+      aria-label={buttonText || label}
     >
-      <ArrowRight className={cn(askUserIconVariants({ size }))} />
-    </button>
+      {buttonText ? <span>{buttonText}</span> : null}
+      <ArrowRight />
+    </Button>
   );
 }
 
-function BackArrowButton({
+function ClearOtherButton({
   size,
   label,
   onClick,
@@ -441,7 +501,7 @@ function BackArrowButton({
       aria-label={label}
       className={cn(askUserBackButtonVariants({ size }))}
     >
-      <ArrowLeft className={cn(askUserIconVariants({ size }))} />
+      <X className={cn(askUserIconVariants({ size }))} />
     </button>
   );
 }
@@ -487,15 +547,416 @@ function CardItemChildren({
 
 interface AskQuestionToolProps {
   questions: AskUserQuestion[];
+  submitButtonText?: string;
   answers?: AskUserSubmittedAnswer[];
   respond?: (result: unknown) => Promise<void>;
+  onSubmittedAnswers?: (answers: AskUserSubmittedAnswer[]) => void;
+  isWaitingForAgentAfterSubmit?: boolean;
   size?: AskUserSize;
+}
+
+export function AskQuestionSkipped({
+  questions,
+  submitButtonText,
+  size = 'md',
+}: {
+  questions: AskUserQuestion[];
+  submitButtonText?: string;
+  size?: AskUserSize;
+}) {
+  // `answers` being defined puts the form in submitted/read-only mode.
+  return (
+    <AskQuestionTool
+      questions={questions}
+      submitButtonText={submitButtonText}
+      answers={[]}
+      size={size}
+    />
+  );
+}
+
+interface AskQuestionItemProps {
+  question: AskUserQuestion;
+  formId: string;
+  formAnswers: AskUserFormAnswers;
+  otherAnswers: AskUserOtherAnswers;
+  isInvalid: boolean;
+  isReadOnly: boolean;
+  isInteractionLocked: boolean;
+  isInstantSubmitFlow: boolean;
+  size: AskUserSize;
+  setAnswerValue: (questionId: string, value: string | string[]) => void;
+  setOtherAnswers: React.Dispatch<React.SetStateAction<AskUserOtherAnswers>>;
+  submitWith: (
+    sourceAnswers: AskUserFormAnswers,
+    sourceOtherAnswers: AskUserOtherAnswers,
+  ) => Promise<void>;
+}
+
+interface TextQuestionInputProps {
+  question: AskUserQuestion;
+  controlId: string;
+  value: string;
+  isInvalid: boolean;
+  isReadOnly: boolean;
+  setAnswerValue: (questionId: string, value: string | string[]) => void;
+}
+
+function TextQuestionInput({
+  question,
+  controlId,
+  value,
+  isInvalid,
+  isReadOnly,
+  setAnswerValue,
+}: TextQuestionInputProps) {
+  return (
+    <Textarea
+      id={controlId}
+      value={value}
+      onChange={(event) => setAnswerValue(question.id, event.target.value)}
+      placeholder={question.placeholder}
+      disabled={isReadOnly}
+      aria-invalid={isInvalid || undefined}
+      className="text-base font-normal leading-normal"
+    />
+  );
+}
+
+interface ToggleQuestionOptionProps {
+  option: AskUserQuestionOption;
+  isCards: boolean;
+  isMulti?: boolean;
+  isSelected: boolean;
+  size: AskUserSize;
+}
+
+function ToggleQuestionOption({
+  option,
+  isCards,
+  isMulti,
+  isSelected,
+  size,
+}: ToggleQuestionOptionProps) {
+  return (
+    <ToggleGroupItem
+      value={option.id}
+      {...(isCards && option.description
+        ? { 'aria-label': `${option.label} — ${option.description}` }
+        : {})}
+      className={cn(
+        isCards
+          ? askUserCardItemVariants({ size })
+          : askUserChipItemVariants({ size }),
+      )}
+    >
+      {isCards ? (
+        <CardItemChildren
+          option={option}
+          size={size}
+          multi={isMulti}
+          selected={isSelected}
+        />
+      ) : (
+        <span>{option.label}</span>
+      )}
+    </ToggleGroupItem>
+  );
+}
+
+interface MultiSelectQuestionInputProps {
+  question: AskUserQuestion;
+  labelId: string;
+  options: AskUserQuestionOption[];
+  values: string[];
+  isCards: boolean;
+  isReadOnly: boolean;
+  size: AskUserSize;
+  onChange: (values: string[]) => void;
+}
+
+function MultiSelectQuestionInput({
+  question,
+  labelId,
+  options,
+  values,
+  isCards,
+  isReadOnly,
+  size,
+  onChange,
+}: MultiSelectQuestionInputProps) {
+  return (
+    <ToggleGroup
+      type="multiple"
+      value={values}
+      onValueChange={onChange}
+      disabled={isReadOnly}
+      aria-labelledby={labelId}
+      spacing={askUserGroupSpacing(size)}
+      className={cn(isCards ? askUserCardsGroupClass : askUserChipsGroupClass)}
+    >
+      {options.map((option) => (
+        <ToggleQuestionOption
+          key={option.id}
+          option={option}
+          isCards={isCards}
+          isMulti
+          isSelected={values.includes(option.id)}
+          size={size}
+        />
+      ))}
+
+      {question.allowOther && (
+        <ToggleGroupItem
+          value={ASK_USER_OTHER_OPTION_ID}
+          aria-label={question.otherLabel || 'Other'}
+          className={cn(askUserOtherChipItemVariants({ size }))}
+        >
+          <Pencil className={cn(askUserIconVariants({ size }))} />
+        </ToggleGroupItem>
+      )}
+    </ToggleGroup>
+  );
+}
+
+interface SingleSelectQuestionInputProps {
+  question: AskUserQuestion;
+  labelId: string;
+  options: AskUserQuestionOption[];
+  value: string;
+  isCards: boolean;
+  isReadOnly: boolean;
+  size: AskUserSize;
+  onChange: (value: string) => void;
+}
+
+function SingleSelectQuestionInput({
+  question,
+  labelId,
+  options,
+  value,
+  isCards,
+  isReadOnly,
+  size,
+  onChange,
+}: SingleSelectQuestionInputProps) {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={onChange}
+      disabled={isReadOnly}
+      aria-labelledby={labelId}
+      spacing={askUserGroupSpacing(size)}
+      className={cn(isCards ? askUserCardsGroupClass : askUserChipsGroupClass)}
+    >
+      {options.map((option) => (
+        <ToggleQuestionOption
+          key={option.id}
+          option={option}
+          isCards={isCards}
+          isSelected={value === option.id}
+          size={size}
+        />
+      ))}
+
+      {question.allowOther && (
+        <ToggleGroupItem
+          value={ASK_USER_OTHER_OPTION_ID}
+          aria-label={question.otherLabel || 'Other'}
+          className={cn(askUserOtherChipItemVariants({ size }))}
+        >
+          <Pencil className={cn(askUserIconVariants({ size }))} />
+        </ToggleGroupItem>
+      )}
+    </ToggleGroup>
+  );
+}
+
+interface OtherAnswerInputProps {
+  question: AskUserQuestion;
+  labelId: string;
+  values: string[];
+  isMulti: boolean;
+  isInvalid: boolean;
+  isReadOnly: boolean;
+  isInteractionLocked: boolean;
+  otherAnswers: AskUserOtherAnswers;
+  size: AskUserSize;
+  setAnswerValue: (questionId: string, value: string | string[]) => void;
+  setOtherAnswers: React.Dispatch<React.SetStateAction<AskUserOtherAnswers>>;
+}
+
+function OtherAnswerInput({
+  question,
+  labelId,
+  values,
+  isMulti,
+  isInvalid,
+  isReadOnly,
+  isInteractionLocked,
+  otherAnswers,
+  size,
+  setAnswerValue,
+  setOtherAnswers,
+}: OtherAnswerInputProps) {
+  return (
+    <div className="flex w-full items-start gap-2">
+      <Textarea
+        rows={1}
+        value={otherAnswers[question.id] || ''}
+        onChange={(event) =>
+          setOtherAnswers((current) =>
+            isInteractionLocked
+              ? current
+              : { ...current, [question.id]: event.target.value },
+          )
+        }
+        placeholder={question.placeholder}
+        disabled={isReadOnly}
+        aria-invalid={isInvalid || undefined}
+        aria-labelledby={labelId}
+        className={cn(askUserOtherTextareaVariants({ size }))}
+      />
+      <ClearOtherButton
+        size={size}
+        label="Clear other answer"
+        disabled={isReadOnly}
+        onClick={() => {
+          if (isMulti) {
+            setAnswerValue(
+              question.id,
+              values.filter((v) => v !== ASK_USER_OTHER_OPTION_ID),
+            );
+          } else {
+            setAnswerValue(question.id, '');
+          }
+        }}
+      />
+    </div>
+  );
+}
+
+function AskQuestionItem({
+  question,
+  formId,
+  formAnswers,
+  otherAnswers,
+  isInvalid,
+  isReadOnly,
+  isInteractionLocked,
+  isInstantSubmitFlow,
+  size,
+  setAnswerValue,
+  setOtherAnswers,
+  submitWith,
+}: AskQuestionItemProps) {
+  const options = normalizeAskUserOptions(question);
+  const isCards = shouldRenderAsCards(question, options);
+  const currentAnswer = formAnswers[question.id];
+  const currentValues = Array.isArray(currentAnswer) ? currentAnswer : [];
+  const currentSingleValue =
+    typeof currentAnswer === 'string' ? currentAnswer : '';
+  const labelId = `${formId}-${question.id}-label`;
+  const controlId = `${formId}-${question.id}-control`;
+  const isOtherSelected =
+    question.type === 'multi_select'
+      ? currentValues.includes(ASK_USER_OTHER_OPTION_ID)
+      : currentSingleValue === ASK_USER_OTHER_OPTION_ID;
+
+  const onSingleChange = (value: string) => {
+    setAnswerValue(question.id, value);
+    if (isInstantSubmitFlow && value && value !== ASK_USER_OTHER_OPTION_ID) {
+      const next = { ...formAnswers, [question.id]: value };
+      void submitWith(next, otherAnswers);
+    }
+  };
+
+  return (
+    <Field
+      data-invalid={isInvalid || undefined}
+      className={cn(askUserQuestionGapVariants({ size }))}
+    >
+      <FieldLabel
+        id={labelId}
+        htmlFor={question.type === 'text' ? controlId : undefined}
+        className={cn(
+          'w-full cursor-text opacity-100',
+          askUserQuestionLabelVariants({ size, invalid: isInvalid }),
+        )}
+      >
+        {question.label}
+      </FieldLabel>
+
+      {question.placeholder && question.type !== 'text' && (
+        <FieldDescription className={cn(askUserHelperTextVariants({ size }))}>
+          {question.placeholder}
+        </FieldDescription>
+      )}
+
+      {question.type === 'text' && (
+        <TextQuestionInput
+          question={question}
+          controlId={controlId}
+          value={currentSingleValue}
+          isInvalid={isInvalid}
+          isReadOnly={isReadOnly}
+          setAnswerValue={setAnswerValue}
+        />
+      )}
+
+      {question.type === 'multi_select' && (
+        <MultiSelectQuestionInput
+          question={question}
+          labelId={labelId}
+          options={options}
+          values={currentValues}
+          isCards={isCards}
+          isReadOnly={isReadOnly}
+          size={size}
+          onChange={(values) => setAnswerValue(question.id, values)}
+        />
+      )}
+
+      {question.type === 'single_select' && (
+        <SingleSelectQuestionInput
+          question={question}
+          labelId={labelId}
+          options={options}
+          value={currentSingleValue}
+          isCards={isCards}
+          isReadOnly={isReadOnly}
+          size={size}
+          onChange={onSingleChange}
+        />
+      )}
+
+      {isOtherSelected && question.type !== 'text' && (
+        <OtherAnswerInput
+          question={question}
+          labelId={labelId}
+          values={currentValues}
+          isMulti={question.type === 'multi_select'}
+          isInvalid={isInvalid}
+          isReadOnly={isReadOnly}
+          isInteractionLocked={isInteractionLocked}
+          otherAnswers={otherAnswers}
+          size={size}
+          setAnswerValue={setAnswerValue}
+          setOtherAnswers={setOtherAnswers}
+        />
+      )}
+    </Field>
+  );
 }
 
 export function AskQuestionTool({
   questions,
+  submitButtonText,
   answers,
   respond,
+  onSubmittedAnswers,
+  isWaitingForAgentAfterSubmit = false,
   size = 'md',
 }: AskQuestionToolProps) {
   const formId = React.useId();
@@ -503,161 +964,110 @@ export function AskQuestionTool({
     () => askUserAnswersToFormState(answers),
     [answers],
   );
-  const [formAnswers, setFormAnswers] = React.useState<
-    Record<string, string | string[]>
-  >(initialFormState.answerValues);
-  const [otherAnswers, setOtherAnswers] = React.useState<
-    Record<string, string>
-  >(initialFormState.otherAnswerValues);
-  const [invalidQuestionId, setInvalidQuestionId] = React.useState<
-    string | null
-  >(null);
-  const [submitted, setSubmitted] = React.useState(Boolean(answers?.length));
+  const [formAnswers, setFormAnswers] = React.useState<AskUserFormAnswers>(
+    initialFormState.answerValues,
+  );
+  const [otherAnswers, setOtherAnswers] = React.useState<AskUserOtherAnswers>(
+    initialFormState.otherAnswerValues,
+  );
+  const [invalidQuestionIds, setInvalidQuestionIds] = React.useState<
+    Set<string>
+  >(() => new Set());
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const isSubmittedState = answers !== undefined;
 
   React.useEffect(() => {
-    if (!answers?.length) {
+    if (!isSubmittedState) {
       return;
     }
     setFormAnswers(initialFormState.answerValues);
     setOtherAnswers(initialFormState.otherAnswerValues);
-    setSubmitted(true);
-  }, [answers, initialFormState]);
+    setIsSubmitting(false);
+  }, [isSubmittedState, initialFormState]);
 
-  const isDisabled = submitted || !respond;
+  const isReadOnly = isSubmittedState || !respond;
+  const isInteractionLocked = isReadOnly || isSubmitting;
 
-  const setSingleValue = React.useCallback(
-    (questionId: string, value: string) => {
+  const setAnswerValue = React.useCallback(
+    (questionId: string, value: string | string[]) => {
+      if (isInteractionLocked) {
+        return;
+      }
       setFormAnswers((current) => ({ ...current, [questionId]: value }));
     },
-    [],
-  );
-
-  const setMultiValues = React.useCallback(
-    (questionId: string, values: string[]) => {
-      setFormAnswers((current) => ({ ...current, [questionId]: values }));
-    },
-    [],
+    [isInteractionLocked],
   );
 
   const buildSubmittedAnswers = React.useCallback(
     (
-      sourceAnswers: Record<string, string | string[]>,
-      sourceOtherAnswers: Record<string, string>,
+      sourceAnswers: AskUserFormAnswers,
+      sourceOtherAnswers: AskUserOtherAnswers,
     ): AskUserSubmittedAnswer[] =>
-      questions.map((question): AskUserSubmittedAnswer => {
-        const options = normalizeAskUserOptions(question);
-        const answer = sourceAnswers[question.id];
-        const otherAnswer = sourceOtherAnswers[question.id]?.trim();
-
-        if (question.type === 'multi_select') {
-          const values = Array.isArray(answer) ? answer : [];
-          const realValues = values.filter(
-            (value) => value !== ASK_USER_OTHER_OPTION_ID,
-          );
-          return {
-            questionId: question.id,
-            question: question.label,
-            type: question.type,
-            values: realValues,
-            labels: realValues.map((value) =>
-              getQuestionOptionLabel(options, value),
-            ),
-            other: values.includes(ASK_USER_OTHER_OPTION_ID)
-              ? otherAnswer
-              : undefined,
-          };
-        }
-
-        if (question.type === 'single_select') {
-          const value = typeof answer === 'string' ? answer : '';
-          return {
-            questionId: question.id,
-            question: question.label,
-            type: question.type,
-            value: value === ASK_USER_OTHER_OPTION_ID ? undefined : value,
-            label:
-              value && value !== ASK_USER_OTHER_OPTION_ID
-                ? getQuestionOptionLabel(options, value)
-                : undefined,
-            other: value === ASK_USER_OTHER_OPTION_ID ? otherAnswer : undefined,
-          };
-        }
-
-        return {
-          questionId: question.id,
-          question: question.label,
-          type: question.type,
-          value: typeof answer === 'string' ? answer.trim() : '',
-        };
-      }),
+      questions.map((question) =>
+        buildSubmittedAnswer(question, sourceAnswers, sourceOtherAnswers),
+      ),
     [questions],
   );
 
   const validateAnswers = React.useCallback(
     (
-      sourceAnswers: Record<string, string | string[]>,
-      sourceOtherAnswers: Record<string, string>,
+      sourceAnswers: AskUserFormAnswers,
+      sourceOtherAnswers: AskUserOtherAnswers,
     ) => {
-      for (const question of questions) {
-        if (!question.required) {
-          continue;
-        }
-        const answer = sourceAnswers[question.id];
-        const otherAnswer = sourceOtherAnswers[question.id]?.trim();
-        if (
-          question.type === 'text' &&
-          (typeof answer !== 'string' || !answer.trim())
-        ) {
-          return question.id;
-        }
-        if (
-          question.type === 'single_select' &&
-          (typeof answer !== 'string' || !answer)
-        ) {
-          return question.id;
-        }
-        if (
-          question.type === 'multi_select' &&
-          (!Array.isArray(answer) || answer.length === 0)
-        ) {
-          return question.id;
-        }
-        if (answer === ASK_USER_OTHER_OPTION_ID && !otherAnswer) {
-          return question.id;
-        }
-        if (
-          Array.isArray(answer) &&
-          answer.includes(ASK_USER_OTHER_OPTION_ID) &&
-          !otherAnswer
-        ) {
-          return question.id;
-        }
-      }
-      return null;
+      return new Set(
+        questions
+          .filter((question) =>
+            isQuestionInvalid(question, sourceAnswers, sourceOtherAnswers),
+          )
+          .map((question) => question.id),
+      );
     },
     [questions],
   );
 
+  const currentInvalidQuestionIds = React.useMemo(
+    () => validateAnswers(formAnswers, otherAnswers),
+    [formAnswers, otherAnswers, validateAnswers],
+  );
+  const isSendDisabled =
+    isSubmitting || isReadOnly || currentInvalidQuestionIds.size > 0;
+
   const submitWith = React.useCallback(
     async (
-      sourceAnswers: Record<string, string | string[]>,
-      sourceOtherAnswers: Record<string, string>,
+      sourceAnswers: AskUserFormAnswers,
+      sourceOtherAnswers: AskUserOtherAnswers,
     ) => {
-      if (!respond) {
+      if (!respond || isSubmitting) {
         return;
       }
       const invalid = validateAnswers(sourceAnswers, sourceOtherAnswers);
-      if (invalid) {
-        setInvalidQuestionId(invalid);
+      if (invalid.size > 0) {
+        setInvalidQuestionIds(invalid);
         return;
       }
-      setInvalidQuestionId(null);
-      setSubmitted(true);
-      await respond({
-        answers: buildSubmittedAnswers(sourceAnswers, sourceOtherAnswers),
-      });
+      setInvalidQuestionIds(new Set());
+      setIsSubmitting(true);
+      const submittedAnswers = buildSubmittedAnswers(
+        sourceAnswers,
+        sourceOtherAnswers,
+      );
+      onSubmittedAnswers?.(submittedAnswers);
+      try {
+        await respond({
+          answers: submittedAnswers,
+        });
+      } catch (error) {
+        setIsSubmitting(false);
+        throw error;
+      }
     },
-    [buildSubmittedAnswers, respond, validateAnswers],
+    [
+      buildSubmittedAnswers,
+      isSubmitting,
+      onSubmittedAnswers,
+      respond,
+      validateAnswers,
+    ],
   );
 
   const firstQuestion = questions[0];
@@ -669,9 +1079,11 @@ export function AskQuestionTool({
     firstQuestion?.type === 'single_select' &&
     !firstQuestion.allowOther &&
     !shouldRenderAsCards(firstQuestion, firstQuestionOptions);
+  const showSubmitButton =
+    !isInstantSubmitFlow && (Boolean(respond) || isSubmittedState);
 
   const handleSendClick = () => {
-    if (isDisabled) {
+    if (isSendDisabled) {
       return;
     }
     void submitWith(formAnswers, otherAnswers);
@@ -681,278 +1093,49 @@ export function AskQuestionTool({
     <FieldGroup
       className={cn(
         askUserWrapperVariants({ size }),
-        '[container-type:normal]',
+        '@container-normal',
+        isSubmitting && 'pointer-events-none',
       )}
     >
-      {questions.map((question) => {
-        const options = normalizeAskUserOptions(question);
-        const isCards = shouldRenderAsCards(question, options);
-        const isInvalid = invalidQuestionId === question.id;
-        const isMulti = question.type === 'multi_select';
-        const isSingle = question.type === 'single_select';
-        const isText = question.type === 'text';
+      {questions.map((question) => (
+        <AskQuestionItem
+          key={question.id}
+          question={question}
+          formId={formId}
+          formAnswers={formAnswers}
+          otherAnswers={otherAnswers}
+          isInvalid={invalidQuestionIds.has(question.id)}
+          isReadOnly={isReadOnly}
+          isInteractionLocked={isInteractionLocked}
+          isInstantSubmitFlow={isInstantSubmitFlow}
+          size={size}
+          setAnswerValue={setAnswerValue}
+          setOtherAnswers={setOtherAnswers}
+          submitWith={submitWith}
+        />
+      ))}
 
-        const currentAnswer = formAnswers[question.id];
-        const currentValues = Array.isArray(currentAnswer) ? currentAnswer : [];
-        const currentSingleValue =
-          typeof currentAnswer === 'string' ? currentAnswer : '';
-        const isOtherSelected = isMulti
-          ? currentValues.includes(ASK_USER_OTHER_OPTION_ID)
-          : currentSingleValue === ASK_USER_OTHER_OPTION_ID;
-
-        const onSingleChange = (value: string) => {
-          setSingleValue(question.id, value);
-          if (
-            isInstantSubmitFlow &&
-            value &&
-            value !== ASK_USER_OTHER_OPTION_ID
-          ) {
-            const next = { ...formAnswers, [question.id]: value };
-            void submitWith(next, otherAnswers);
-          }
-        };
-
-        const onMultiChange = (values: string[]) => {
-          setMultiValues(question.id, values);
-        };
-
-        const labelId = `${formId}-${question.id}-label`;
-        const controlId = `${formId}-${question.id}-control`;
-
-        return (
-          <Field
-            key={question.id}
-            data-invalid={isInvalid || undefined}
-            className={cn(askUserQuestionGapVariants({ size }))}
-          >
-            <FieldLabel
-              id={labelId}
-              htmlFor={isText ? controlId : undefined}
-              className={cn(
-                'w-full cursor-text opacity-100',
-                askUserQuestionLabelVariants({ size, invalid: isInvalid }),
-              )}
-            >
-              {question.label}
-            </FieldLabel>
-
-            {question.placeholder && !isText && (
-              <FieldDescription
-                className={cn(askUserHelperTextVariants({ size }))}
-              >
-                {question.placeholder}
-              </FieldDescription>
-            )}
-
-            {isText && (
-              <Textarea
-                id={controlId}
-                value={currentSingleValue}
-                onChange={(event) =>
-                  setSingleValue(question.id, event.target.value)
-                }
-                placeholder={question.placeholder}
-                disabled={isDisabled}
-                aria-invalid={isInvalid || undefined}
-              />
-            )}
-
-            {(isSingle || isMulti) && (
-              <>
-                {isMulti ? (
-                  <ToggleGroup
-                    type="multiple"
-                    value={currentValues}
-                    onValueChange={onMultiChange}
-                    disabled={isDisabled}
-                    aria-labelledby={labelId}
-                    className={cn(
-                      isCards ? askUserCardsGroupClass : askUserChipsGroupClass,
-                    )}
-                  >
-                    {options.map((option) => (
-                      <ToggleGroupItem
-                        key={option.id}
-                        value={option.id}
-                        {...(isCards && option.description
-                          ? {
-                              'aria-label': `${option.label} — ${option.description}`,
-                            }
-                          : {})}
-                        className={cn(
-                          isCards
-                            ? askUserCardItemVariants({ size })
-                            : askUserChipItemVariants({ size }),
-                        )}
-                      >
-                        {isCards ? (
-                          <CardItemChildren
-                            option={option}
-                            size={size}
-                            multi
-                            selected={currentValues.includes(option.id)}
-                          />
-                        ) : (
-                          <span>{option.label}</span>
-                        )}
-                      </ToggleGroupItem>
-                    ))}
-
-                    {question.allowOther && (
-                      <ToggleGroupItem
-                        value={ASK_USER_OTHER_OPTION_ID}
-                        aria-label={question.otherLabel || 'Other'}
-                        className={cn(askUserOtherChipItemVariants({ size }))}
-                      >
-                        <Pencil className={cn(askUserIconVariants({ size }))} />
-                      </ToggleGroupItem>
-                    )}
-                  </ToggleGroup>
-                ) : (
-                  <ToggleGroup
-                    type="single"
-                    value={currentSingleValue}
-                    onValueChange={onSingleChange}
-                    disabled={isDisabled}
-                    aria-labelledby={labelId}
-                    className={cn(
-                      isCards ? askUserCardsGroupClass : askUserChipsGroupClass,
-                    )}
-                  >
-                    {options.map((option) => (
-                      <ToggleGroupItem
-                        key={option.id}
-                        value={option.id}
-                        {...(isCards && option.description
-                          ? {
-                              'aria-label': `${option.label} — ${option.description}`,
-                            }
-                          : {})}
-                        className={cn(
-                          isCards
-                            ? askUserCardItemVariants({ size })
-                            : askUserChipItemVariants({ size }),
-                        )}
-                      >
-                        {isCards ? (
-                          <CardItemChildren
-                            option={option}
-                            size={size}
-                            selected={currentSingleValue === option.id}
-                          />
-                        ) : (
-                          <span>{option.label}</span>
-                        )}
-                      </ToggleGroupItem>
-                    ))}
-
-                    {question.allowOther && (
-                      <ToggleGroupItem
-                        value={ASK_USER_OTHER_OPTION_ID}
-                        aria-label={question.otherLabel || 'Other'}
-                        className={cn(askUserOtherChipItemVariants({ size }))}
-                      >
-                        <Pencil className={cn(askUserIconVariants({ size }))} />
-                      </ToggleGroupItem>
-                    )}
-                  </ToggleGroup>
-                )}
-
-                {isOtherSelected && (
-                  <div className="flex w-full items-start gap-2">
-                    <BackArrowButton
-                      size={size}
-                      label="Back"
-                      disabled={isDisabled}
-                      onClick={() => {
-                        if (isMulti) {
-                          setMultiValues(
-                            question.id,
-                            currentValues.filter(
-                              (v) => v !== ASK_USER_OTHER_OPTION_ID,
-                            ),
-                          );
-                        } else {
-                          setSingleValue(question.id, '');
-                        }
-                      }}
-                    />
-                    <Textarea
-                      value={otherAnswers[question.id] || ''}
-                      onChange={(event) =>
-                        setOtherAnswers((current) => ({
-                          ...current,
-                          [question.id]: event.target.value,
-                        }))
-                      }
-                      placeholder={question.placeholder}
-                      disabled={isDisabled}
-                      aria-invalid={isInvalid || undefined}
-                      aria-labelledby={labelId}
-                      className="flex-1"
-                    />
-                  </div>
-                )}
-              </>
-            )}
-          </Field>
-        );
-      })}
-
-      {!isInstantSubmitFlow && !isDisabled && (
+      {showSubmitButton && (
         <div className={cn(askUserActionRowVariants({ size }))}>
           <SendArrowButton
             size={size}
             label="Send"
-            disabled={isDisabled}
+            text={submitButtonText}
+            disabled={isSendDisabled}
             onClick={handleSendClick}
           />
         </div>
       )}
-    </FieldGroup>
-  );
-}
-
-export function AskQuestionToolSkeleton({
-  size = 'md',
-  questionCount = 2,
-}: {
-  size?: AskUserSize;
-  questionCount?: number;
-}) {
-  const safeCount = Math.max(1, questionCount);
-  return (
-    <FieldGroup
-      className={cn(
-        askUserWrapperVariants({ size }),
-        '[container-type:normal]',
-      )}
-      aria-label="Generating questions"
-      data-disabled
-    >
-      {Array.from({ length: safeCount }).map((_, questionIndex) => (
-        <Field
-          key={questionIndex}
-          className={cn(askUserQuestionGapVariants({ size }))}
+      {isWaitingForAgentAfterSubmit && (
+        <div
+          className={cn(
+            'flex items-center',
+            size === 'lg' ? 'min-h-9' : size === 'sm' ? 'min-h-7' : 'min-h-8',
+          )}
         >
-          <Skeleton
-            className={cn(askUserSkeletonLabelVariants({ size }), 'w-3/4')}
-          />
-          <div
-            className={cn('flex flex-wrap', askUserSkeletonChipsRowGap[size])}
-          >
-            {SKELETON_CHIP_WIDTHS.map((widthClass, chipIndex) => (
-              <Skeleton
-                key={chipIndex}
-                className={cn(
-                  askUserSkeletonChipVariants({ size }),
-                  widthClass,
-                )}
-              />
-            ))}
-          </div>
-        </Field>
-      ))}
+          <AgentChatLoadingDots className="text-[2px]" />
+        </div>
+      )}
     </FieldGroup>
   );
 }

@@ -2543,3 +2543,14 @@ export const TestRoetoConnectionAction = {
   inputInstanceType: {} as ITestRoetoConnectionActionInput,
   outputInstanceType: {} as ITestRoetoConnectionActionOutput,
 } as const;
+
+export const NicoAgent = {
+  id: "69db99a87d23f0bc9a294e93",
+  name: "Nico",
+  title: "",
+  harness: undefined,
+  photoUrl:
+    "https://res.cloudinary.com/blocksws/image/upload/Blocks/app-agents/Nico/Nico_image.png",
+  avatarUrl:
+    "https://res.cloudinary.com/blocksws/image/upload/Blocks/app-agents/Nico/Nico_avatar.png",
+} as const;

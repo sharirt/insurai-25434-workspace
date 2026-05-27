@@ -1,5 +1,8 @@
+import 'streamdown/styles.css';
+
 import { AgentChat as SDKAgentChat } from '@blocksdiy/blocks-client-sdk';
 import { useClient } from '@blocksdiy/blocks-client-sdk/reactSdk';
+import type { AgentChatComponent } from '@blocksdiy/react-common/new-agent-chat';
 import * as AgentChatPrimitive from '@blocksdiy/react-common/new-agent-chat';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { format } from 'date-fns';
@@ -12,26 +15,24 @@ import {
   Send,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import * as React from 'react';
 import { Streamdown } from 'streamdown';
+import { z } from 'zod';
 
+import { ChatCodeComponent } from '@/components/ui/agent-chat-code-component';
+import { AgentChatLoadingDots } from '@/components/ui/agent-chat-loading-dots';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   ASK_USER_TOOL_NAME,
+  AskQuestionSkipped,
   AskQuestionTool,
-  AskQuestionToolSkeleton,
-  askUserParametersSchema,
+  type AskUserParameters,
   type AskUserSubmittedAnswer,
+  askUserParametersSchema,
 } from '@/components/ui/deep-agent-chat-ask-user';
-import {
-  GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME,
-  generateDynamicChatComponentParametersSchema,
-  type GenerateDynamicChatComponentResult,
-  GenerateDynamicChatComponentTool,
-} from '@/components/ui/deep-agent-chat-dynamic-component';
 import { ToolCallFallback } from '@/components/ui/deep-agent-chat-tool-fallback';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -103,6 +104,21 @@ export const agentChatMessageTimestampVariants = cva(
       },
     },
     compoundVariants: [
+      {
+        variant: 'bubble',
+        size: 'sm',
+        className: 'px-2 py-1',
+      },
+      {
+        variant: 'bubble',
+        size: 'md',
+        className: 'px-3 py-1.5',
+      },
+      {
+        variant: 'bubble',
+        size: 'lg',
+        className: 'px-4 py-2',
+      },
       {
         userPosition: 'bottom',
         size: 'sm',
@@ -195,9 +211,9 @@ export const messageContentVariants = cva('relative flex flex-col', {
       minimal: 'max-w-none',
     },
     size: {
-      sm: '',
-      md: '',
-      lg: '',
+      sm: 'gap-y-2',
+      md: 'gap-y-3',
+      lg: 'gap-y-4',
     },
     role: {
       user: '',
@@ -234,6 +250,18 @@ export const messageContentVariants = cva('relative flex flex-col', {
     {
       variant: 'minimal',
       className: '!px-0 !py-0 !ml-0 !mr-0',
+    },
+    {
+      size: 'sm',
+      className: 'min-h-8',
+    },
+    {
+      size: 'md',
+      className: 'min-h-9',
+    },
+    {
+      size: 'lg',
+      className: 'min-h-10',
     },
   ],
   defaultVariants: {
@@ -291,17 +319,17 @@ export const agentChatAvatarVariants = cva('shrink-0', {
     {
       userPosition: 'side',
       size: 'sm',
-      className: 'h-7 w-7',
+      className: 'h-6 w-6',
     },
     {
       userPosition: 'side',
       size: 'md',
-      className: 'h-9 w-9',
+      className: 'h-8 w-8',
     },
     {
       userPosition: 'side',
       size: 'lg',
-      className: 'h-11 w-11',
+      className: 'h-10 w-10',
     },
   ],
   defaultVariants: {
@@ -360,17 +388,17 @@ export const agentChatMessageContentWrapperVariants = cva(
       {
         variant: 'bubble',
         size: 'sm',
-        className: 'gap-2',
+        className: '',
       },
       {
         variant: 'bubble',
         size: 'md',
-        className: 'gap-2',
+        className: '',
       },
       {
         variant: 'bubble',
         size: 'lg',
-        className: 'gap-3',
+        className: '',
       },
       {
         role: 'user',
@@ -533,6 +561,8 @@ export interface AgentChatMessageProps {
   showTimestamp?: boolean;
   dateFormat?: string;
   userPosition?: 'side' | 'bottom';
+  hideAvatar?: boolean;
+  renderToolCall: ReturnType<typeof AgentChatPrimitive.useRenderToolCall>;
 }
 
 function AgentChatAvatar({
@@ -636,12 +666,222 @@ type ToolCallForDisplay = NonNullable<
   Extract<AgentChatPrimitive.Message, { role: 'assistant' }>['toolCalls']
 >[number];
 
+const dedupeMessagesById = (messages: AgentChatPrimitive.Message[]) => {
+  // CopilotKit/AG-UI can briefly provide overlapping live + replayed messages
+  // with the same id. Render one message per id and keep React keys stable.
+  const byId = new Map<string, AgentChatPrimitive.Message>();
+  for (const message of messages) {
+    byId.set(message.id, message);
+  }
+  return Array.from(byId.values());
+};
+
+const chatComponentParametersSchema = z.object({}).loose();
+
+const GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME =
+  'generate_dynamic_chat_component';
+
+type ChatComponentWithToolName = AgentChatComponent & { toolName?: string };
+
+const getChatComponentToolName = (component: ChatComponentWithToolName) => {
+  return (
+    component.toolName ??
+    component.name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase()
+  );
+};
+
+const parseAskUserToolResult = (
+  result?: string,
+): { answers?: AskUserSubmittedAnswer[]; skipped?: boolean } | undefined => {
+  if (!result) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(result) as {
+      answers?: AskUserSubmittedAnswer[];
+      skipped?: boolean;
+    };
+  } catch {
+    return undefined;
+  }
+};
+
+function useAskUserSubmissionState({
+  answers,
+  isThinking,
+  messages,
+  toolCallId,
+}: {
+  answers?: AskUserSubmittedAnswer[];
+  isThinking: boolean;
+  messages: AgentChatPrimitive.Message[];
+  toolCallId?: string;
+}) {
+  const [submittedAnswers, setSubmittedAnswers] = React.useState<
+    AskUserSubmittedAnswer[] | undefined
+  >();
+  const [isPostSubmitWaitComplete, setIsPostSubmitWaitComplete] =
+    React.useState(false);
+  const [hasObservedPostSubmitThinking, setHasObservedPostSubmitThinking] =
+    React.useState(false);
+  const visibleAnswers = answers ?? submittedAnswers;
+  const toolCallOwnerIndex = toolCallId
+    ? messages.findIndex(
+        (message) =>
+          message.role === 'assistant' &&
+          (message as { toolCalls?: { id?: string }[] }).toolCalls?.some(
+            (toolCall) => toolCall.id === toolCallId,
+          ),
+      )
+    : -1;
+  const hasNewerAssistantMessage =
+    toolCallOwnerIndex >= 0 &&
+    messages
+      .slice(toolCallOwnerIndex + 1)
+      .some((message) => message.role === 'assistant');
+  const isWaitingForAgentAfterSubmit = Boolean(
+    submittedAnswers && !hasNewerAssistantMessage && !isPostSubmitWaitComplete,
+  );
+
+  React.useEffect(() => {
+    if (!submittedAnswers) {
+      return;
+    }
+    if (isThinking) {
+      setHasObservedPostSubmitThinking(true);
+      return;
+    }
+    if (hasNewerAssistantMessage || hasObservedPostSubmitThinking) {
+      setIsPostSubmitWaitComplete(true);
+    }
+  }, [
+    hasNewerAssistantMessage,
+    hasObservedPostSubmitThinking,
+    isThinking,
+    submittedAnswers,
+  ]);
+
+  const handleSubmittedAnswers = React.useCallback(
+    (nextAnswers: AskUserSubmittedAnswer[]) => {
+      setSubmittedAnswers(nextAnswers);
+      setHasObservedPostSubmitThinking(false);
+      setIsPostSubmitWaitComplete(false);
+    },
+    [],
+  );
+
+  return {
+    visibleAnswers,
+    isWaitingForAgentAfterSubmit,
+    handleSubmittedAnswers,
+  };
+}
+
+const AskUserToolResult = ({
+  status,
+  result,
+  args,
+  respond,
+  toolCallId,
+}: {
+  result?: string;
+  status: AgentChatPrimitive.ToolCallStatus;
+  args: AskUserParameters;
+  respond?: (result: unknown) => Promise<void>;
+  toolCallId?: string;
+}) => {
+  const { messages, isThinking } = useAgentChat();
+  const questions = args?.questions || [];
+  const submitButtonText = args?.submitButtonText;
+  const parsedResult = parseAskUserToolResult(result);
+  const answers = parsedResult?.answers;
+  const {
+    visibleAnswers,
+    isWaitingForAgentAfterSubmit,
+    handleSubmittedAnswers,
+  } = useAskUserSubmissionState({
+    answers,
+    isThinking,
+    messages,
+    toolCallId,
+  });
+
+  if (
+    status === AgentChatPrimitive.ToolCallStatus.InProgress &&
+    questions.length === 0
+  ) {
+    return <AgentChatLoadingDots className="text-[2px]" />;
+  }
+
+  if (parsedResult?.skipped) {
+    return (
+      <AskQuestionSkipped
+        questions={questions}
+        submitButtonText={submitButtonText}
+      />
+    );
+  }
+
+  return (
+    <AskQuestionTool
+      questions={questions}
+      submitButtonText={submitButtonText}
+      answers={visibleAnswers}
+      respond={respond}
+      onSubmittedAnswers={handleSubmittedAnswers}
+      isWaitingForAgentAfterSubmit={isWaitingForAgentAfterSubmit}
+    />
+  );
+};
+
+const GenerateDynamicChatComponentToolResult = ({
+  status,
+  result,
+}: {
+  toolCallId: string;
+  result?: string;
+  status: AgentChatPrimitive.ToolCallStatus;
+  parameters: Record<string, unknown>;
+}) => {
+  const { code, props } = result
+    ? JSON.parse(result)
+    : { code: undefined, props: undefined };
+  return <ChatCodeComponent status={status} code={code} props={props} />;
+};
+
+const ChatComponentToolResult = ({
+  status,
+  component,
+  parameters,
+}: {
+  status: AgentChatPrimitive.ToolCallStatus;
+  toolCallId: string;
+  component: ChatComponentWithToolName;
+  parameters: Record<string, unknown>;
+}) => {
+  return (
+    <ChatCodeComponent
+      status={status}
+      code={component.code}
+      props={parameters}
+    />
+  );
+};
+
 const isVisibleToolCall = (
   toolCall: ToolCallForDisplay,
   agentChat: AgentChatPrimitive.AgentChat | null,
+  components: AgentChatComponent[],
 ) => {
-  const name = toolCall.function.name;
-  switch (name) {
+  const toolCallName = toolCall.function.name;
+  const isToolCallChatComponent = components.some(
+    (component) => getChatComponentToolName(component) === toolCallName,
+  );
+  if (isToolCallChatComponent) {
+    return true;
+  }
+
+  switch (toolCallName) {
     case ASK_USER_TOOL_NAME:
     case GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME:
       return true;
@@ -696,15 +936,16 @@ export function AgentChatMessage({
   variant = 'bubble',
   size = 'md',
   userPosition = 'side',
+  hideAvatar = false,
   showTimestamp = true,
   dateFormat = 'HH:mm',
+  renderToolCall,
   className,
   ...props
 }: AgentChatMessageComponentProps) {
   const client = useClient();
   const user = client.getUser();
-  const { messages, isThinking, agentChat } = useAgentChat();
-  const renderToolCall = AgentChatPrimitive.useRenderToolCall();
+  const { messages, isThinking, agentChat, components } = useAgentChat();
 
   if (message.role !== 'user' && message.role !== 'assistant') {
     return null;
@@ -717,18 +958,30 @@ export function AgentChatMessage({
   const latestAssistantMessage = [...messages]
     .reverse()
     .find((m) => m.role === 'assistant');
-  const isStreamingMessage =
-    isThinking && latestAssistantMessage?.id === message.id;
   const toolMessages = messages.filter((m) => m.role === 'tool');
   const visibleToolCalls =
     message.role === 'assistant'
       ? message.toolCalls?.filter((toolCall) =>
-          isVisibleToolCall(toolCall, agentChat),
+          isVisibleToolCall(toolCall, agentChat, components ?? []),
         )
       : undefined;
   const hasVisibleToolCalls = Boolean(visibleToolCalls?.length);
   const hasMessageText = Boolean(extractMessageText(message.content));
+  const isStreamingMessage = Boolean(
+    isThinking &&
+    latestAssistantMessage?.id === message.id &&
+    hasMessageText &&
+    !hasVisibleToolCalls,
+  );
   const hasAttachments = getMessageAttachments(message).length > 0;
+  const isAssistantPlaceholder = Boolean(
+    message.role === 'assistant' &&
+    isThinking &&
+    latestAssistantMessage?.id === message.id &&
+    !hasMessageText &&
+    !hasAttachments &&
+    !hasVisibleToolCalls,
+  );
   const createdAt = getMessageCreatedAt(message)
     ? new Date(getMessageCreatedAt(message) || '')
     : null;
@@ -740,6 +993,7 @@ export function AgentChatMessage({
   if (
     message.role === 'assistant' &&
     !isStreamingMessage &&
+    !isAssistantPlaceholder &&
     !hasMessageText &&
     !hasAttachments &&
     !hasVisibleToolCalls
@@ -761,23 +1015,19 @@ export function AgentChatMessage({
       )}
       {...props}
     >
-      {variant === 'bubble' && userPosition === 'side' && (
-        <AgentChatAvatar
-          role={message.role}
-          size={size}
-          userPosition={userPosition}
-          // Hide the avatar when the message it sits in is preceded by
-          // another message of the same role — only the first of a group
-          // shows the avatar, the rest invisibly hold the indent.
-          className={cn(
-            '[[data-message-role=user]+[data-message-role=user]_&]:invisible',
-            '[[data-message-role=assistant]+[data-message-role=assistant]_&]:invisible',
-            message.role === 'assistant' &&
-              isStreamingMessage &&
-              'animate-agent-avatar-pulse',
-          )}
-        />
-      )}
+      {!hideAvatar &&
+        variant === 'bubble' &&
+        userPosition === 'side' &&
+        message.role === 'assistant' && (
+          <AgentChatAvatar
+            role={message.role}
+            size={size}
+            userPosition={userPosition}
+            className={cn(
+              '[[data-message-role=assistant]+[data-message-role=assistant]_&]:invisible',
+            )}
+          />
+        )}
 
       <div
         className={agentChatMessageContentWrapperVariants({
@@ -789,7 +1039,11 @@ export function AgentChatMessage({
         <div
           data-slot="agent-chat-message-content"
           className={cn(
-            messageContentVariants({ size, role: message.role, variant }),
+            messageContentVariants({
+              size,
+              role: message.role,
+              variant,
+            }),
           )}
         >
           <MessageTextContent
@@ -811,8 +1065,27 @@ export function AgentChatMessage({
               toolMessage,
             });
 
-            return toolCallElement;
+            return (
+              <React.Fragment key={toolCall.id}>
+                {toolCallElement}
+              </React.Fragment>
+            );
           })}
+          <AnimatePresence initial={false}>
+            {isAssistantPlaceholder && (
+              <AgentChatLoadingDots
+                key="assistant-loading"
+                className={cn(
+                  'absolute top-1/2 -translate-y-1/2',
+                  size === 'sm'
+                    ? 'left-2 text-[2px]'
+                    : size === 'lg'
+                      ? 'left-4 text-[2px]'
+                      : 'left-3 text-[2px]',
+                )}
+              />
+            )}
+          </AnimatePresence>
         </div>
 
         {getMessageAttachments(message).length > 0 && (
@@ -834,7 +1107,10 @@ export function AgentChatMessage({
           </div>
         )}
         {showTimestamp &&
-          (hasMessageText || hasVisibleToolCalls || hasAttachments) && (
+          (hasMessageText ||
+            hasVisibleToolCalls ||
+            hasAttachments ||
+            isAssistantPlaceholder) && (
             <div
               data-slot="agent-chat-message-timestamp"
               // Visible only on the last message of a same-role group — when
@@ -848,18 +1124,32 @@ export function AgentChatMessage({
                   size,
                   role: message.role,
                 }),
+                message.role === 'assistant' &&
+                  userPosition === 'side' &&
+                  'opacity-100',
                 '[[data-message-role=user]:has(+[data-message-role=user])_&]:hidden',
                 '[[data-message-role=assistant]:has(+[data-message-role=assistant])_&]:hidden',
               )}
             >
-              {userPosition === 'bottom' && (
-                <AgentChatAvatar
-                  role={message.role}
-                  size={size}
-                  userPosition={userPosition}
-                />
-              )}
-              <span className="text-xs text-muted-foreground">
+              {!hideAvatar &&
+                userPosition === 'bottom' &&
+                message.role === 'assistant' && (
+                  <AgentChatAvatar
+                    role={message.role}
+                    size={size}
+                    userPosition={userPosition}
+                  />
+                )}
+              <span
+                className={cn(
+                  'text-xs text-muted-foreground',
+                  message.role === 'assistant' &&
+                    userPosition === 'side' &&
+                    'opacity-0 transition-opacity group-hover:opacity-100',
+                  !(createdAt && !Number.isNaN(createdAt.getTime())) &&
+                    'invisible',
+                )}
+              >
                 {timestampText}
               </span>
             </div>
@@ -933,8 +1223,10 @@ export function AgentChat({
   > & {
     agentId?: string;
     agentHarness?: string;
+    componentIds?: string[];
   };
-  const { agentChatId, agentId, agentHarness, appId, token } = agentChatProps;
+  const { agentChatId, agentId, agentHarness, componentIds, appId, token } =
+    agentChatProps;
 
   const finalChatContext = {
     currentUserData: user,
@@ -951,6 +1243,7 @@ export function AgentChat({
       agentChatId={agentChatId}
       noPersistency={noPersistency || !user.isAuthenticated}
       chatContext={finalChatContext}
+      componentIds={componentIds}
       {...props}
     />
   );
@@ -975,38 +1268,40 @@ const GenerateDynamicChatComponentToolCall = () => {
   AgentChatPrimitive.useRenderTool(
     {
       name: GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME,
-      parameters: generateDynamicChatComponentParametersSchema,
-      render: ({ parameters, status, result }) => {
-        if (status !== 'complete') {
-          return (
-            <GenerateDynamicChatComponentTool
-              args={parameters}
-              isComplete={false}
-            />
-          );
-        }
-
-        // The tool returns a JSON string of `{title, code, chatComponent?, componentProps?}`.
-        // Parse defensively — if the agent ever returns a non-JSON error
-        // string we surface the failure state instead of crashing the chat.
-        let parsedResult: GenerateDynamicChatComponentResult | undefined;
-        let isFailed = false;
-        try {
-          const parsed = JSON.parse(
-            result,
-          ) as GenerateDynamicChatComponentResult;
-          parsedResult =
-            typeof parsed === 'object' && parsed !== null ? parsed : undefined;
-        } catch {
-          isFailed = true;
-        }
-
+      parameters: z.object({}).loose(),
+      render: ({ toolCallId, status, result, parameters }) => {
         return (
-          <GenerateDynamicChatComponentTool
-            args={parameters}
-            result={parsedResult}
-            isComplete
-            isFailed={isFailed}
+          <GenerateDynamicChatComponentToolResult
+            toolCallId={toolCallId}
+            status={status as AgentChatPrimitive.ToolCallStatus}
+            result={result}
+            parameters={parameters}
+          />
+        );
+      },
+    },
+    [],
+  );
+
+  return null;
+};
+
+const ChatComponentToolCall = ({
+  component,
+}: {
+  component: ChatComponentWithToolName;
+}) => {
+  AgentChatPrimitive.useRenderTool(
+    {
+      name: getChatComponentToolName(component),
+      parameters: chatComponentParametersSchema,
+      render: ({ toolCallId, status, parameters }) => {
+        return (
+          <ChatComponentToolResult
+            toolCallId={toolCallId}
+            status={status as AgentChatPrimitive.ToolCallStatus}
+            component={component}
+            parameters={parameters}
           />
         );
       },
@@ -1065,47 +1360,14 @@ export function AgentChatContent({
     {
       name: ASK_USER_TOOL_NAME,
       parameters: askUserParametersSchema,
-      render: ({ args, status, result, respond }) => {
-        const askUserArgs = args as {
-          questions?: Parameters<typeof AskQuestionTool>[0]['questions'];
-        };
-
-        if (status === 'inProgress') {
-          return (
-            <AskQuestionToolSkeleton
-              questionCount={askUserArgs.questions?.length || undefined}
-            />
-          );
-        }
-
-        if (status === 'executing') {
-          return (
-            <AskQuestionTool
-              questions={askUserArgs.questions || []}
-              respond={respond}
-            />
-          );
-        }
-
-        // status === "complete": the tool returned a JSON string of
-        // `{"answers":[...]}` — parse so we can re-render the form
-        // read-only with the user's original picks.
-        let persistedAnswers: AskUserSubmittedAnswer[] | undefined;
-        try {
-          const parsed = JSON.parse(result) as {
-            answers?: AskUserSubmittedAnswer[];
-          };
-          persistedAnswers = Array.isArray(parsed.answers)
-            ? parsed.answers
-            : undefined;
-        } catch {
-          persistedAnswers = undefined;
-        }
-
+      render: (renderProps) => {
         return (
-          <AskQuestionTool
-            questions={askUserArgs.questions || []}
-            answers={persistedAnswers}
+          <AskUserToolResult
+            args={renderProps.args as AskUserParameters}
+            status={renderProps.status}
+            result={renderProps.result}
+            respond={renderProps.respond}
+            toolCallId={(renderProps as { toolCallId?: string }).toolCallId}
           />
         );
       },
@@ -1128,6 +1390,7 @@ export interface AgentChatMessagesProps {
   showTimestamps?: boolean;
   dateFormat?: string;
   userPosition?: 'side' | 'bottom';
+  hideAvatar?: boolean;
 }
 
 export type AgentChatMessagesComponentProps = AgentChatMessagesProps &
@@ -1138,12 +1401,15 @@ export function AgentChatMessages({
   variant = 'bubble',
   size = 'md',
   userPosition = 'side',
+  hideAvatar = false,
   showTimestamps = true,
   dateFormat = 'HH:mm',
   className,
   ...props
 }: AgentChatMessagesComponentProps) {
-  const { messages, agentChat } = useAgentChat();
+  const { messages, agentChat, components } = useAgentChat();
+  const renderToolCall = AgentChatPrimitive.useRenderToolCall();
+  const displayMessages = dedupeMessagesById(messages);
 
   return (
     <AgentChatPrimitive.AgentChatMessages
@@ -1155,24 +1421,30 @@ export function AgentChatMessages({
         className={cn(agentChatMessagesVariants({ variant, size }), className)}
         {...props}
       >
-        {messages.map((message, index) => {
-          return (
-            <AgentChatMessage
-              key={message.id}
-              message={message}
-              index={index}
-              variant={variant}
-              size={size}
-              userPosition={userPosition}
-              showTimestamp={showTimestamps}
-              dateFormat={dateFormat}
-            />
-          );
-        })}
+        {displayMessages.map((message, index) => (
+          <AgentChatMessage
+            key={message.id}
+            message={message}
+            index={index}
+            variant={variant}
+            size={size}
+            userPosition={userPosition}
+            hideAvatar={hideAvatar}
+            showTimestamp={showTimestamps}
+            dateFormat={dateFormat}
+            renderToolCall={renderToolCall}
+          />
+        ))}
         {agentChat?.hideToolsUi === true ? null : <ToolCall />}
         {agentChat?.disableGeneratingDynamicChatComponent === true ? null : (
           <GenerateDynamicChatComponentToolCall />
         )}
+        {components.map((component) => (
+          <ChatComponentToolCall
+            key={`chat-component-tool-call-${component.id}`}
+            component={component}
+          />
+        ))}
         <AgentChatFetching size={size} />
       </div>
     </AgentChatPrimitive.AgentChatMessages>
@@ -1235,7 +1507,7 @@ export function AgentChatFooterInner({
   children,
   ...props
 }: AgentChatFooterComponentProps) {
-  const { attachments, isThinking, removeAttachment } = useAgentChat();
+  const { attachments, removeAttachment } = useAgentChat();
   // const { isConnected, isConnecting, isSpeaking, stream, startVoiceCall, endVoiceCall } =
   //   AgentChatPrimitive.useAgentChatVoice();
 
@@ -1248,20 +1520,14 @@ export function AgentChatFooterInner({
       className={cn(agentChatFooterVariants({ size, className }))}
       {...props}
     >
-      <AnimatePresence mode="wait" initial={false}>
-        {isVoiceActive ? (
-          <motion.div
-            key="voice"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className={cn(
-              'flex items-center',
-              size === 'lg' ? 'gap-3 p-3' : 'gap-2 p-2',
-            )}
-          >
-            {/* <LiveWaveform
+      {isVoiceActive ? (
+        <div
+          className={cn(
+            'flex items-center',
+            size === 'lg' ? 'gap-3 p-3' : 'gap-2 p-2',
+          )}
+        >
+          {/* <LiveWaveform
               active={isConnected && !isSpeaking}
               processing={isConnecting || isSpeaking}
               stream={stream}
@@ -1287,62 +1553,57 @@ export function AgentChatFooterInner({
               <X />
               <span>{isConnecting ? "Connecting..." : "Voice mode"}</span>
             </Button> */}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="text"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+        </div>
+      ) : (
+        <>
+          {attachments.length > 0 && (
+            <div className={agentChatFooterAttachmentsVariants({ size })}>
+              {attachments.map((attachment) => (
+                <AgentChatAttachmentBadge
+                  key={attachment.url}
+                  attachment={attachment}
+                  size={size}
+                  onRemove={() => removeAttachment(attachment.url)}
+                />
+              ))}
+            </div>
+          )}
+
+          <div
+            className={cn(
+              'flex items-end',
+              size === 'lg' ? 'gap-3 p-3' : 'gap-2 p-2',
+            )}
           >
-            {attachments.length > 0 && (
-              <div className={agentChatFooterAttachmentsVariants({ size })}>
-                {attachments.map((attachment) => (
-                  <AgentChatAttachmentBadge
-                    key={attachment.url}
-                    attachment={attachment}
-                    size={size}
-                    onRemove={() => removeAttachment(attachment.url)}
-                  />
-                ))}
-              </div>
+            <AgentChatInput size={size} className="flex-1 min-w-0" />
+
+            {!hideAttachmentButton && (
+              <AgentChatPrimitive.AgentChatAttachmentTrigger asChild>
+                <Button size={iconSize} variant="outline">
+                  <Paperclip />
+                  <span className="sr-only">Attach file</span>
+                </Button>
+              </AgentChatPrimitive.AgentChatAttachmentTrigger>
             )}
 
-            <div
-              className={cn(
-                'flex items-center',
-                size === 'lg' ? 'gap-3 p-3' : 'gap-2 p-2',
-              )}
-            >
-              <AgentChatInput size={size} className="flex-1 min-w-0" />
-
-              {!hideAttachmentButton && (
-                <AgentChatPrimitive.AgentChatAttachmentTrigger asChild>
-                  <Button size={iconSize} variant="outline">
-                    <Paperclip />
-                    <span className="sr-only">Attach file</span>
-                  </Button>
-                </AgentChatPrimitive.AgentChatAttachmentTrigger>
-              )}
-
-              {/* {withVoice && (
+            {/* {withVoice && (
                 <Button size={iconSize} variant="outline" onClick={startVoiceCall}>
                   <Mic />
                   <span className="sr-only">Start voice mode</span>
                 </Button>
               )} */}
 
-              <AgentChatPrimitive.AgentChatSendTrigger asChild>
-                <Button size={iconSize} variant="default">
-                  {isThinking ? <Loader2 className="animate-spin" /> : <Send />}
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </AgentChatPrimitive.AgentChatSendTrigger>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <AgentChatPrimitive.AgentChatSendTrigger asChild>
+              <Button size={iconSize} variant="default">
+                <Send />
+                {/* {isThinking ? <Square className="fill-current" /> : <Send />} */}
+                <span className="sr-only">Send message</span>
+                {/* <span className="sr-only">{isThinking ? 'Stop run' : 'Send message'}</span> */}
+              </Button>
+            </AgentChatPrimitive.AgentChatSendTrigger>
+          </div>
+        </>
+      )}
 
       {children}
     </div>
@@ -1357,6 +1618,7 @@ export function AgentChatSimple({
   chatContext,
   chatContextFiles,
   withVoice = false,
+  hideAvatar = false,
   ...props
 }: AgentChatSimpleProps) {
   return (
@@ -1373,6 +1635,7 @@ export function AgentChatSimple({
           variant={props.variant}
           size={props.size}
           userPosition={props.userPosition || undefined}
+          hideAvatar={hideAvatar}
         />
         <AgentChatFooter size={props.size} withVoice={withVoice} />
       </AgentChatContent>
@@ -1382,6 +1645,7 @@ export function AgentChatSimple({
 
 export type AgentChatSimpleProps = AgentChatProps & {
   withVoice?: boolean;
+  hideAvatar?: boolean;
 } & VariantProps<typeof agentChatContentVariants> &
   React.ComponentProps<'div'>;
 

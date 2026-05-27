@@ -156,9 +156,9 @@ export default {
             backgroundPosition: '-200% 0',
           },
         },
-        'agent-avatar-pulse': {
-          '0%, 100%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.12)' },
+        bubbleLoader: {
+          '0%, 80%, 100%': { boxShadow: '0 2.5em 0 -1.3em' },
+          '40%': { boxShadow: '0 2.5em 0 0' },
         },
         typingDot: {
           '0%, 60%, 100%': { opacity: '0.25' },
@@ -173,7 +173,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         shimmer: 'shimmer 2s linear infinite',
-        'agent-avatar-pulse': 'agent-avatar-pulse 1.4s ease-in-out infinite',
+        'bubble-loader': 'bubbleLoader 1.8s infinite ease-in-out',
         'typing-dot': 'typingDot 1.4s ease-in-out infinite',
         fadeIn: 'fadeIn 0.5s ease-out',
         slideIn: 'slideIn 0.5s ease-out',

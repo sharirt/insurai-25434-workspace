@@ -74,6 +74,8 @@ You may only create or modify files in these locations:
 
 **Only import `@/components/ui/*` paths that already exist** in `src/components/ui/`. Check the filesystem before importing a primitive.
 
+**PDF viewing:** For any PDF preview or viewer, load the `file-parsing` skill and use `PdfViewer` from `@/components/ui/pdf-viewer`. Do not use `FilePreviewer`, `<iframe>`, `<object>`, `react-pdf`, or `pdfjs` directly for PDFs.
+
 ---
 
 ## Performance

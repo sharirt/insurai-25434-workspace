@@ -1,6 +1,6 @@
 ---
 name: file-parsing
-description: Parsing and previewing files in this project — CSV parsing, Excel/XLSX reading, PDF viewing, and file preview rendering (PDFs, Word docs, images, spreadsheets). Load this skill whenever the task involves reading uploaded files, parsing structured data from CSV or Excel, previewing a PDF, or showing a file preview to the user.
+description: Parsing and previewing files in this project — CSV parsing, Excel/XLSX reading, PDF viewing with PdfViewer, and non-PDF file preview rendering (Word docs, images, spreadsheets). Load this skill whenever the task involves reading uploaded files, parsing structured data from CSV or Excel, previewing a PDF, or showing a file preview to the user.
 user-invocable: false
 ---
 
@@ -12,7 +12,7 @@ Use this skill when working with file parsing (CSV, Excel) or file preview funct
 
 - User needs to parse CSV data
 - User needs to parse Excel/XLSX files
-- User wants to display file previews (PDFs, Word docs, Excel, images, etc.)
+- User wants to display a PDF or other file preview (Word docs, Excel, images, etc.)
 - User needs to process uploaded files on the frontend
 
 ---
@@ -108,7 +108,7 @@ const data = XLSX.utils.sheet_to_json(worksheet);
 
 ## File Preview with FilePreviewer
 
-For displaying file previews (PDFs, Word docs, Excel sheets, PowerPoints, images, CSVs, etc.), use the `FilePreviewer` component. It automatically handles different file types with appropriate viewers.
+For displaying non-PDF file previews (Word docs, Excel sheets, PowerPoints, images, CSVs, etc.), use the `FilePreviewer` component. It automatically handles those file types with appropriate viewers. For PDFs, always use `PdfViewer` instead.
 
 ```tsx
 import { FilePreviewer } from '@/components/ui/file-previewer';
@@ -181,7 +181,7 @@ function UploadAndPreview() {
 
 ## PDF Preview with PdfViewer
 
-**For PDF files, use `PdfViewer` instead of `FilePreviewer`.** It provides page navigation, zoom, and optional field overlays.
+**For any PDF viewing, always use `PdfViewer` instead of `FilePreviewer`, `<iframe>`, `<object>`, `react-pdf`, or `pdfjs` directly.** It provides page navigation, zoom, and optional field overlays.
 
 ```tsx
 import { PdfViewer } from '@/components/ui/pdf-viewer';

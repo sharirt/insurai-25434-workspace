@@ -6,7 +6,7 @@ user-invocable: false
 
 # Blocks Client SDK Skill
 
-Use this skill to interact with the Blocks platform - entity CRUD operations, action execution, file uploads, user management, navigation, and AI chat.
+Use this skill to interact with the Blocks platform - entity CRUD operations, action execution, file uploads, user management, navigation, agents, and agent chats.
 
 ## When to Use
 
@@ -15,16 +15,15 @@ Use this skill to interact with the Blocks platform - entity CRUD operations, ac
 - User needs file upload functionality
 - User needs to access current user information
 - User needs page navigation
+- User needs to reference app agents
 - User needs AI chat interface
 - Any interaction with the Blocks platform
 
 ## Overview
 
-The **Blocks Client SDK** provides React hooks for interacting with the Blocks platform. Import from `@blocksdiy/blocks-client-sdk/reactSdk`. Entities and actions are imported from `@/product-types`.
+The **Blocks Client SDK** provides React hooks for interacting with the Blocks platform. Import from `@blocksdiy/blocks-client-sdk/reactSdk`. Entities, actions, pages, agents, and agent chats are imported from `@/product-types`.
 
 A `<ClientProvider>` is already wrapping the app - call hooks directly without manual setup.
-
----
 
 ## Entity System
 
@@ -289,7 +288,7 @@ const handleSubmit = async () => {
 
 ```typescript
 type ActionConfig<InputType, OutputType> = {
-  tableBlockId: string;
+  actionBlockId: string;
   inputInstanceType: InputType;
   outputInstanceType: OutputType;
 };
@@ -433,6 +432,75 @@ const isLoginPage = location.pathname === getPageUrl(loginPageConfig);
 
 ---
 
+## Agents
+
+Agents are app AI teammates created in the Logic section. Use `useAgent(GeneratedAgent)` when the UI needs an agent's generated identity or metadata.
+
+### useAgent - Read Agent Metadata
+
+Use for agent profile cards, chat headers, sidebars, assigned-agent UI, assistant/team lists, and any place that shows an agent name, title, avatar, or photo.
+
+```tsx
+import { useAgent } from '@blocksdiy/blocks-client-sdk/reactSdk';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CustomerSupportAgent } from '@/product-types';
+
+function AgentProfileCard() {
+  const agent = useAgent(CustomerSupportAgent);
+  const { name, title, avatarUrl, photoUrl } = agent.getAgentProps();
+  const fallback = name
+    ?.split(' ')
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase();
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border bg-card p-4">
+      <Avatar>
+        <AvatarImage src={avatarUrl ?? photoUrl} />
+        <AvatarFallback>{fallback}</AvatarFallback>
+      </Avatar>
+      <div>
+        <div className="font-medium">{name}</div>
+        <div className="text-sm text-muted-foreground">{title}</div>
+      </div>
+    </div>
+  );
+}
+```
+
+### Agent Config Type
+
+```typescript
+type AgentConfig = {
+  id: string;
+  name?: string;
+  title?: string;
+  harness?: string;
+  photoUrl?: string;
+  avatarUrl?: string;
+};
+```
+
+### Return Values
+
+`useAgent()` returns an `Agent` instance. Call `agent.getAgentProps()` to read:
+
+- `id`
+- `name`
+- `title`
+- `harness`
+- `photoUrl`
+- `avatarUrl`
+- `appId`
+- `token`
+
+Do not hardcode agent names, titles, avatars, or profile URLs when a generated agent exists. Import the generated agent constant from `@/product-types` and call `useAgent()`.
+
+Use `useAgentChat` and `<AgentChatSimple>` for the conversational UI. Use `useAgent` for the identity around that chat, such as headers, sidebars, and profile cards.
+
+---
+
 ## AI Agent Chat
 
 ```tsx
@@ -474,12 +542,14 @@ Either:
 2. **Use the agent's own photo** (preferred when the agent has one):
 
 ```tsx
+import { useAgent } from '@blocksdiy/blocks-client-sdk/reactSdk';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CustomerSupportAgent } from '@/product-types';
 
 function ChatHeader() {
-  const agentChat = useAgentChat(CustomerSupportChatAgent);
-  const agent = agentChat.agentChatData?.agent;
-  const initials = (agent?.title ?? 'A')
+  const agent = useAgent(CustomerSupportAgent);
+  const { name, title, avatarUrl, photoUrl } = agent.getAgentProps();
+  const initials = (name ?? 'A')
     .split(' ')
     .map((w) => w[0])
     .join('')
@@ -488,10 +558,13 @@ function ChatHeader() {
   return (
     <header className="flex items-center gap-3 px-4 py-3">
       <Avatar className="h-9 w-9">
-        <AvatarImage src={agent?.photoUrl} alt={agent?.title} />
+        <AvatarImage src={avatarUrl ?? photoUrl} alt={name} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
-      <div className="font-semibold">{agent?.title ?? 'Assistant'}</div>
+      <div>
+        <div className="font-semibold">{name}</div>
+        <div className="text-sm text-muted-foreground">{title}</div>
+      </div>
     </header>
   );
 }
@@ -516,24 +589,25 @@ The fallback initials ensure the avatar always renders something specific to the
 
 ## Quick Reference: All Hooks
 
-| Hook                  | Import               | Purpose                  |
-| --------------------- | -------------------- | ------------------------ |
-| `useEntityGetAll`     | `reactSdk`           | Fetch multiple entities  |
-| `useEntityGetOne`     | `reactSdk`           | Fetch single entity      |
-| `useEntityCreate`     | `reactSdk`           | Create one entity        |
-| `useEntityCreateMany` | `reactSdk`           | Create multiple entities |
-| `useEntityUpdate`     | `reactSdk`           | Update one entity        |
-| `useEntityDelete`     | `reactSdk`           | Delete one entity        |
-| `useEntityDeleteMany` | `reactSdk`           | Delete multiple entities |
-| `useExecuteAction`    | `reactSdk`           | Execute backend action   |
-| `useFileUpload`       | `reactSdk`           | Upload files             |
-| `useUser`             | `reactSdk`           | Get current user         |
-| `useGoogleLogin`      | `reactSdk`           | Google OAuth URL         |
-| `useSendLoginLink`    | `reactSdk`           | Send email login link    |
-| `useChangeUserRole`   | `reactSdk`           | Change user roles        |
-| `useThemeMode`        | `reactSdk`           | Dark/light/system mode   |
-| `useAgentChat`        | `reactSdk`           | AI chat instance         |
-| `getPageUrl`          | `@/lib/utils`        | Generate page URLs       |
-| `logOut`              | `@/lib/utils`        | Log out user             |
-| `cn`                  | `@/lib/utils`        | Merge class names        |
-| `useIsMobile`         | `@/hooks/use-mobile` | Mobile detection         |
+| Hook                  | Import               | Purpose                      |
+| --------------------- | -------------------- | ---------------------------- |
+| `useEntityGetAll`     | `reactSdk`           | Fetch multiple entities      |
+| `useEntityGetOne`     | `reactSdk`           | Fetch single entity          |
+| `useEntityCreate`     | `reactSdk`           | Create one entity            |
+| `useEntityCreateMany` | `reactSdk`           | Create multiple entities     |
+| `useEntityUpdate`     | `reactSdk`           | Update one entity            |
+| `useEntityDelete`     | `reactSdk`           | Delete one entity            |
+| `useEntityDeleteMany` | `reactSdk`           | Delete multiple entities     |
+| `useExecuteAction`    | `reactSdk`           | Execute backend action       |
+| `useFileUpload`       | `reactSdk`           | Upload files                 |
+| `useUser`             | `reactSdk`           | Get current user             |
+| `useGoogleLogin`      | `reactSdk`           | Google OAuth URL             |
+| `useSendLoginLink`    | `reactSdk`           | Send email login link        |
+| `useChangeUserRole`   | `reactSdk`           | Change user roles            |
+| `useThemeMode`        | `reactSdk`           | Dark/light/system mode       |
+| `useAgent`            | `reactSdk`           | Get generated agent metadata |
+| `useAgentChat`        | `reactSdk`           | AI chat instance             |
+| `getPageUrl`          | `@/lib/utils`        | Generate page URLs           |
+| `logOut`              | `@/lib/utils`        | Log out user                 |
+| `cn`                  | `@/lib/utils`        | Merge class names            |
+| `useIsMobile`         | `@/hooks/use-mobile` | Mobile detection             |

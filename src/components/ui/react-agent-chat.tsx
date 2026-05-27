@@ -1,7 +1,5 @@
-// import 'streamdown/styles.css';
-// Temporary note: although this file is the React-agent chat entry point, it
-// still contains the old Deep Agent-compatible implementation until the new
-// boilerplate Deep Agent chat is implemented separately.
+// React-agent chat UI — workflow streaming via `@blocksdiy/react-common/agent-chat`.
+// Deep agents use `deep-agent-chat.tsx` + `@blocksdiy/react-common/new-agent-chat`.
 
 import { AgentChat as SDKAgentChat } from '@blocksdiy/blocks-client-sdk';
 import { useClient } from '@blocksdiy/blocks-client-sdk/reactSdk';
@@ -23,11 +21,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Streamdown } from 'streamdown';
 
-import {
-  AgentChatAskUserPart,
-  ASK_USER_TOOL_NAME,
-  ASK_USER_TOOL_TYPE,
-} from '@/components/ui/agent-chat-ask-user-part';
 import { AgentChatLiveComponentPart } from '@/components/ui/agent-chat-live-component-part';
 import {
   AgentChatToolCard,
@@ -36,10 +29,10 @@ import {
   AgentChatToolContent,
   AgentChatToolContentInner,
   AgentChatToolHeader,
+  agentChatToolHeaderVariants,
   AgentChatToolLeadChevron,
   type AgentChatToolStatusIconValue,
   AgentChatToolTitle,
-  agentChatToolHeaderVariants,
   agentChatToolTitleStateVariants,
 } from '@/components/ui/agent-chat-tool-card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -618,9 +611,6 @@ const isGenerateDynamicChatComponentToolCall = (
   toolCall.type === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_TYPE ||
   toolCall.toolName === GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME ||
   toolCall.output?.chatComponent === true;
-const isAskUserToolCall = (toolCall: AgentChatToolCallData) =>
-  toolCall.type === ASK_USER_TOOL_TYPE ||
-  toolCall.toolName === ASK_USER_TOOL_NAME;
 
 const getRawToolName = (toolCall: AgentChatToolCallData) =>
   toolCall.toolName ||
@@ -1000,6 +990,7 @@ function AgentChatToolCallsContent({
   size?: AgentChatSize;
   variant?: 'bubble' | 'minimal';
 }) {
+  const { sendMessage } = useAgentChat();
   const liveComponentScopeExtras = React.useMemo(
     () => ({
       AgentChatPrimitive,
@@ -1013,29 +1004,23 @@ function AgentChatToolCallsContent({
       AgentChatFooter,
       AgentChatSimple,
       useAgentChat,
+      sendMessage,
     }),
-    [],
+    [sendMessage],
   );
 
   const generatedToolCalls = toolCalls.filter(
     isGenerateDynamicChatComponentToolCall,
   );
-  const askUserToolCalls = toolCalls.filter(isAskUserToolCall);
   const activityToolCalls = toolCalls.filter(
-    (toolCall) =>
-      !isGenerateDynamicChatComponentToolCall(toolCall) &&
-      !isAskUserToolCall(toolCall),
+    (toolCall) => !isGenerateDynamicChatComponentToolCall(toolCall),
   );
 
   // O(n) and cheap; useMemo would never hit cache anyway because
   // `activityToolCalls` is a fresh array reference each render.
   const activityGroups = groupConsecutiveToolCalls(activityToolCalls);
 
-  if (
-    generatedToolCalls.length === 0 &&
-    askUserToolCalls.length === 0 &&
-    activityGroups.length === 0
-  ) {
+  if (generatedToolCalls.length === 0 && activityGroups.length === 0) {
     return null;
   }
 
@@ -1045,14 +1030,6 @@ function AgentChatToolCallsContent({
         <AgentChatActivityPart
           key={group.key}
           group={group}
-          size={size}
-          variant={variant}
-        />
-      ))}
-      {askUserToolCalls.map((toolCall, index) => (
-        <AgentChatAskUserPart
-          key={toolCall.toolCallId || `${toolCall.type}-${index}`}
-          part={toolCall}
           size={size}
           variant={variant}
         />
@@ -1377,7 +1354,6 @@ export interface AgentChatProps {
   noPersistency?: boolean;
   chatContext?: any;
   chatContextFiles?: Attachment[];
-  useAgentBlockDirectChat?: boolean;
   children?: React.ReactNode;
 }
 
@@ -1385,8 +1361,6 @@ const AgentChatRootPrimitive =
   AgentChatPrimitive.AgentChatRoot as React.ComponentType<{
     appId: string;
     token?: string;
-    agentBlockId?: string;
-    agentProvider?: string;
     agentChatId?: string;
     chatId?: string;
     defaultThreadId?: string;
@@ -1395,7 +1369,6 @@ const AgentChatRootPrimitive =
     agentChatData?: AgentChatData;
     noPersistency?: boolean;
     shortTermMemory?: { isEnabled: boolean; isPersistent?: boolean };
-    useAgentBlockDirectChat?: boolean;
     children?: React.ReactNode;
   }>;
 
@@ -1403,7 +1376,6 @@ export function AgentChat({
   agentChat,
   chatContext,
   noPersistency,
-  useAgentBlockDirectChat,
   ...props
 }: AgentChatProps) {
   const client = useClient();
@@ -1421,7 +1393,6 @@ export function AgentChat({
     <AgentChatRootPrimitive
       appId={appId}
       token={token}
-      useAgentBlockDirectChat={useAgentBlockDirectChat}
       agentChatId={agentChatId}
       chatContext={finalChatContext}
       noPersistency={noPersistency || !user.isAuthenticated}

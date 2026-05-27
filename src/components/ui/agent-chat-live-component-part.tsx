@@ -8,6 +8,20 @@ import * as Recharts from 'recharts';
 import { Streamdown } from 'streamdown';
 
 import * as AccordionUI from '@/components/ui/accordion';
+import {
+  AgentChatToolCard,
+  type AgentChatToolCardSize,
+  type AgentChatToolCardVariant,
+  AgentChatToolContent,
+  AgentChatToolContentInner,
+  AgentChatToolControls,
+  AgentChatToolHeader,
+  AgentChatToolLeadChevron,
+  AgentChatToolSecondaryAction,
+  type AgentChatToolStatusIconValue,
+  AgentChatToolTitle,
+  agentChatToolTitleStateVariants,
+} from '@/components/ui/agent-chat-tool-card';
 import * as AlertUI from '@/components/ui/alert';
 import * as AlertDialogUI from '@/components/ui/alert-dialog';
 import * as AspectRatioUI from '@/components/ui/aspect-ratio';
@@ -67,27 +81,13 @@ import * as ToasterUI from '@/components/ui/toaster';
 import * as ToggleUI from '@/components/ui/toggle';
 import * as ToggleGroupUI from '@/components/ui/toggle-group';
 import * as TooltipUI from '@/components/ui/tooltip';
-import {
-  AgentChatToolCard,
-  AgentChatToolContent,
-  AgentChatToolContentInner,
-  AgentChatToolControls,
-  AgentChatToolHeader,
-  AgentChatToolLeadChevron,
-  AgentChatToolSecondaryAction,
-  AgentChatToolTitle,
-  agentChatToolTitleStateVariants,
-  type AgentChatToolCardSize,
-  type AgentChatToolCardVariant,
-  type AgentChatToolStatusIconValue,
-} from '@/components/ui/agent-chat-tool-card';
 import { cn } from '@/lib/utils';
 import * as ProductTypes from '@/product-types';
 
 export type AgentChatLiveComponentSize = AgentChatToolCardSize;
 export type AgentChatLiveComponentVariant = AgentChatToolCardVariant;
 
-type AgentChatLiveComponentPartData = {
+interface AgentChatLiveComponentPartData {
   id?: string;
   state?: string;
   toolCallId?: string;
@@ -96,7 +96,7 @@ type AgentChatLiveComponentPartData = {
     code?: string;
     componentProps?: Record<string, unknown>;
   };
-};
+}
 
 const normalizeLiveCode = (code: string) => {
   const trimmed = code.trim();
@@ -387,7 +387,7 @@ export function AgentChatLiveComponentPart({
         ...ToggleGroupUI,
         ...TooltipUI,
       }),
-    [scopeExtras],
+    [componentProps, scopeExtras],
   );
 
   const isCodeReady = Boolean(displayCode && part.state === 'output-available');

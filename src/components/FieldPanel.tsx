@@ -60,7 +60,7 @@ export const FieldPanel = ({
   });
 
   return (
-    <div className="flex flex-col h-full bg-card border-r overflow-hidden" dir="rtl">
+    <div className="flex flex-col h-full w-full min-w-0 bg-card border-r overflow-hidden" dir="rtl">
       {/* Header */}
       <div className="p-4 border-b flex flex-col gap-3">
         <div className="flex items-center gap-2">
@@ -71,7 +71,7 @@ export const FieldPanel = ({
           </Link>
           <h2 className="text-lg font-semibold truncate flex-1">{formTitle}</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"

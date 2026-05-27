@@ -1,9 +1,9 @@
-import { cva } from "class-variance-authority";
-import * as React from "react";
+import { cva } from 'class-variance-authority';
+import * as React from 'react';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-export type ToolFallbackStatus = "inProgress" | "executing" | "complete";
+export type ToolFallbackStatus = 'inProgress' | 'executing' | 'complete';
 
 export interface ToolFallbackProps {
   name: string;
@@ -12,83 +12,87 @@ export interface ToolFallbackProps {
   result: string | undefined;
 }
 
-type ToolFallbackVisualState = "loading" | "completed" | "failed";
+type ToolFallbackVisualState = 'loading' | 'completed' | 'failed';
 
-const formatToolName = (rawName: string) =>
-  rawName
-    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replace(/[_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-
-const getVisualState = (status: ToolFallbackStatus, result: string | undefined): ToolFallbackVisualState => {
-  if (status !== "complete") {
-    return "loading";
+const getVisualState = (
+  status: ToolFallbackStatus,
+  result: string | undefined,
+): ToolFallbackVisualState => {
+  if (status !== 'complete') {
+    return 'loading';
   }
-  if (typeof result === "string") {
+  if (typeof result === 'string') {
     const trimmed = result.trim();
     if (/^"?(error|failed)/i.test(trimmed)) {
-      return "failed";
+      return 'failed';
     }
-    if (trimmed.startsWith("{")) {
+    if (trimmed.startsWith('{')) {
       try {
         const parsed = JSON.parse(trimmed) as { error?: unknown };
         if (parsed?.error) {
-          return "failed";
+          return 'failed';
         }
       } catch {
         // not JSON, treat as completed
       }
     }
   }
-  return "completed";
+  return 'completed';
 };
 
-export type ToolFallbackSize = "sm" | "md" | "lg";
+export type ToolFallbackSize = 'sm' | 'md' | 'lg';
 
-const toolFallbackRowVariants = cva("flex w-full min-w-0 items-baseline", {
+const toolFallbackRowVariants = cva('flex w-full min-w-0 items-baseline', {
   variants: {
     size: {
-      sm: "gap-1 py-0.5",
-      md: "gap-1.5 py-1",
-      lg: "gap-1.5 py-1.5",
+      sm: 'gap-1',
+      md: 'gap-1.5',
+      lg: 'gap-1.5',
     },
   },
-  defaultVariants: { size: "md" },
+  defaultVariants: { size: 'md' },
 });
 
-const toolFallbackTitleVariants = cva("min-w-0 flex-1 truncate font-normal leading-[1.6]", {
-  variants: {
-    size: {
-      sm: "text-sm",
-      md: "text-base",
-      lg: "text-lg",
+const toolFallbackTitleVariants = cva(
+  'min-w-0 flex-1 truncate font-normal leading-[1.6]',
+  {
+    variants: {
+      size: {
+        sm: 'text-sm',
+        md: 'text-base',
+        lg: 'text-lg',
+      },
     },
+    defaultVariants: { size: 'md' },
   },
-  defaultVariants: { size: "md" },
-});
+);
 
-const toolFallbackTitleStateVariants = cva("", {
+const toolFallbackTitleStateVariants = cva('', {
   variants: {
     state: {
       loading:
-        "animate-shimmer bg-gradient-to-r from-muted-foreground/30 via-foreground/80 to-muted-foreground/30 bg-[length:200%_100%] bg-clip-text text-transparent",
-      completed: "text-muted-foreground/70",
-      failed: "text-destructive/80",
+        'animate-shimmer bg-gradient-to-r from-muted-foreground/30 via-foreground/80 to-muted-foreground/30 bg-[length:200%_100%] bg-clip-text text-transparent',
+      completed: 'text-muted-foreground/70',
+      failed: 'text-destructive/80',
     },
   },
-  defaultVariants: { state: "loading" },
+  defaultVariants: { state: 'loading' },
 });
 
 const TYPING_DOT_DELAYS_MS = [0, 200, 400] as const;
 
 function TypingDots() {
   return (
-    <span className="ml-px inline-flex items-baseline text-muted-foreground/60" aria-hidden="true">
+    <span
+      className="ml-px inline-flex items-baseline text-muted-foreground/60"
+      aria-hidden="true"
+    >
       {TYPING_DOT_DELAYS_MS.map((delay) => (
-        <span key={delay} className="animate-typing-dot" style={{ animationDelay: `${delay}ms` }}>
+        <span
+          key={delay}
+          className="animate-typing-dot"
+          style={{ animationDelay: `${delay}ms` }}
+        >
           .
         </span>
       ))}
@@ -104,15 +108,24 @@ interface ToolCallFallbackProps {
   size?: ToolFallbackSize;
 }
 
-export function ToolCallFallback({ name, status, result, size = "md" }: ToolCallFallbackProps) {
-  const title = React.useMemo(() => formatToolName(name), [name]);
+export function ToolCallFallback({
+  name,
+  status,
+  result,
+  size = 'md',
+}: ToolCallFallbackProps) {
   const visualState = getVisualState(status, result);
-  const isLoading = visualState === "loading";
+  const isLoading = visualState === 'loading';
 
   return (
     <div className={cn(toolFallbackRowVariants({ size }))}>
-      <span className={cn(toolFallbackTitleVariants({ size }), toolFallbackTitleStateVariants({ state: visualState }))}>
-        {title}
+      <span
+        className={cn(
+          toolFallbackTitleVariants({ size }),
+          toolFallbackTitleStateVariants({ state: visualState }),
+        )}
+      >
+        {name}
       </span>
       {isLoading && <TypingDots />}
     </div>
