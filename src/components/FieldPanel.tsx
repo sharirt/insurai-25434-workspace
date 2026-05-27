@@ -71,12 +71,13 @@ export const FieldPanel = ({
           </Link>
           <h2 className="text-lg font-semibold truncate flex-1">{formTitle}</h2>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-nowrap overflow-x-auto">
           <Button
             variant="outline"
             size="sm"
             onClick={onRefresh}
             disabled={isRefreshing}
+            className="shrink-0"
           >
             {isRefreshing ? (
               <Loader2 className="animate-spin" data-icon="inline-start" />
@@ -85,11 +86,11 @@ export const FieldPanel = ({
             )}
             רענן שדות
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onAddField(targetPage - 1)}>
+          <Button variant="outline" size="sm" className="shrink-0" onClick={() => onAddField(targetPage - 1)}>
             <Plus data-icon="inline-start" />
             הוסף שדה
           </Button>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <span className="text-sm text-muted-foreground">עמוד:</span>
             <Input
               type="number"
@@ -100,7 +101,7 @@ export const FieldPanel = ({
               className="w-[60px] h-8 text-center"
             />
           </div>
-          <Button size="sm" onClick={onSave} disabled={isSaving}>
+          <Button size="sm" className="shrink-0" onClick={onSave} disabled={isSaving}>
             {isSaving ? (
               <Loader2 className="animate-spin" data-icon="inline-start" />
             ) : (
