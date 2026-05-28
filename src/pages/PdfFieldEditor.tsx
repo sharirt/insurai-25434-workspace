@@ -145,9 +145,9 @@ export default function PdfFieldEditor() {
       }));
 
     const fieldGeometryUpdates = fields
-      .filter((f) => f.isModified && !f.isNew && !f.isDeleted && !isRenamed(f))
+      .filter((f) => f.isModified && !f.isNew && !f.isDeleted)
       .map((f) => ({
-        name: f.name,
+        name: f.originalName || f.name,
         ...(f.occurrence !== undefined ? { occurrence: f.occurrence } : {}),
         x: f.x,
         y: f.y,

@@ -484,13 +484,13 @@ const agentChatAttachmentBadgeVariants = cva(
 );
 
 const agentChatInputVariants = cva(
-  'resize-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none',
+  'resize-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none [field-sizing:content] min-h-[auto]',
   {
     variants: {
       size: {
-        sm: 'p-4 text-sm md:text-sm',
-        md: 'p-4 text-sm md:text-base',
-        lg: 'p-6 text-lg md:text-lg',
+        sm: 'p-2 text-sm md:text-sm leading-4',
+        md: 'p-2 text-sm md:text-base leading-6',
+        lg: 'p-2 text-lg md:text-lg leading-6',
       },
     },
     defaultVariants: {
@@ -692,14 +692,19 @@ const getChatComponentToolName = (component: ChatComponentWithToolName) => {
 
 const parseAskUserToolResult = (
   result?: string,
-): { answers?: AskUserSubmittedAnswer[]; skipped?: boolean } | undefined => {
+):
+  | {
+      status?: 'answered' | 'skipped';
+      answers?: AskUserSubmittedAnswer[];
+    }
+  | undefined => {
   if (!result) {
     return undefined;
   }
   try {
     return JSON.parse(result) as {
+      status?: 'answered' | 'skipped';
       answers?: AskUserSubmittedAnswer[];
-      skipped?: boolean;
     };
   } catch {
     return undefined;
@@ -813,7 +818,7 @@ const AskUserToolResult = ({
     return <AgentChatLoadingDots className="text-[2px]" />;
   }
 
-  if (parsedResult?.skipped) {
+  if (parsedResult?.status === 'skipped') {
     return (
       <AskQuestionSkipped
         questions={questions}
@@ -1185,14 +1190,17 @@ export function AgentChatFetching({
   return (
     <AgentChatPrimitive.AgentChatFetching
       className={cn(
-        'absolute inset-0 bg-background/80 backdrop-blur-sm',
+        'absolute inset-0 bg-background',
         'flex items-center justify-center',
+        'transition-opacity duration-200 ease-out',
+        'data-[state=open]:opacity-100 data-[state=closed]:opacity-0',
+        'data-[state=open]:pointer-events-auto data-[state=closed]:pointer-events-none',
         className,
       )}
       {...props}
     >
       <div className={agentChatFetchingContentVariants({ size })}>
-        <Loader2 className="animate-spin text-muted-foreground" />
+        <Loader2 className="animate-spin text-muted-foreground/60" />
       </div>
     </AgentChatPrimitive.AgentChatFetching>
   );
@@ -1380,6 +1388,7 @@ export function AgentChatContent({
       data-slot="agent-chat-content"
       className={cn(
         agentChatContentVariants({ variant, size, userPosition, className }),
+        'relative',
       )}
       {...props}
     />
@@ -1391,6 +1400,7 @@ export interface AgentChatMessagesProps {
   dateFormat?: string;
   userPosition?: 'side' | 'bottom';
   hideAvatar?: boolean;
+  messageClassName?: string;
 }
 
 export type AgentChatMessagesComponentProps = AgentChatMessagesProps &
@@ -1404,6 +1414,7 @@ export function AgentChatMessages({
   hideAvatar = false,
   showTimestamps = true,
   dateFormat = 'HH:mm',
+  messageClassName,
   className,
   ...props
 }: AgentChatMessagesComponentProps) {
@@ -1414,45 +1425,39 @@ export function AgentChatMessages({
   return (
     <AgentChatPrimitive.AgentChatMessages
       scrollAreaClassName="flex-1 relative"
-      autoScroll
-      asChild
+      className={cn(agentChatMessagesVariants({ variant, size }), className)}
+      {...props}
     >
-      <div
-        className={cn(agentChatMessagesVariants({ variant, size }), className)}
-        {...props}
-      >
-        {displayMessages.map((message, index) => (
-          <AgentChatMessage
-            key={message.id}
-            message={message}
-            index={index}
-            variant={variant}
-            size={size}
-            userPosition={userPosition}
-            hideAvatar={hideAvatar}
-            showTimestamp={showTimestamps}
-            dateFormat={dateFormat}
-            renderToolCall={renderToolCall}
-          />
-        ))}
-        {agentChat?.hideToolsUi === true ? null : <ToolCall />}
-        {agentChat?.disableGeneratingDynamicChatComponent === true ? null : (
-          <GenerateDynamicChatComponentToolCall />
-        )}
-        {components.map((component) => (
-          <ChatComponentToolCall
-            key={`chat-component-tool-call-${component.id}`}
-            component={component}
-          />
-        ))}
-        <AgentChatFetching size={size} />
-      </div>
+      {displayMessages.map((message, index) => (
+        <AgentChatMessage
+          key={message.id}
+          message={message}
+          index={index}
+          variant={variant}
+          size={size}
+          userPosition={userPosition}
+          hideAvatar={hideAvatar}
+          showTimestamp={showTimestamps}
+          dateFormat={dateFormat}
+          renderToolCall={renderToolCall}
+          className={messageClassName}
+        />
+      ))}
+      {agentChat?.hideToolsUi === true ? null : <ToolCall />}
+      {agentChat?.disableGeneratingDynamicChatComponent === true ? null : (
+        <GenerateDynamicChatComponentToolCall />
+      )}
+      {components.map((component) => (
+        <ChatComponentToolCall
+          key={`chat-component-tool-call-${component.id}`}
+          component={component}
+        />
+      ))}
     </AgentChatPrimitive.AgentChatMessages>
   );
 }
 
 export interface AgentChatInputProps {
-  acceptFiles?: boolean;
   sendOnEnter?: boolean;
 }
 
@@ -1463,6 +1468,7 @@ export type AgentChatInputComponentProps = AgentChatInputProps &
 export function AgentChatInput({
   className,
   onSubmit,
+  size = 'md',
   sendOnEnter = true,
   placeholder = 'Type a message...',
   ...props
@@ -1471,7 +1477,7 @@ export function AgentChatInput({
     <AgentChatPrimitive.AgentChatInput asChild>
       <Textarea
         placeholder={placeholder}
-        className={cn(agentChatInputVariants({ size: props.size }), className)}
+        className={cn(agentChatInputVariants({ size }), className)}
         onSubmit={sendOnEnter ? undefined : onSubmit}
         {...props}
       />
@@ -1480,8 +1486,10 @@ export function AgentChatInput({
 }
 
 export interface AgentChatFooterProps {
-  hideAttachmentButton?: boolean;
   withVoice?: boolean;
+  inputClassName?: string;
+  sendButtonClassName?: string;
+  attachmentButtonClassName?: string;
 }
 
 export type AgentChatFooterComponentProps = AgentChatFooterProps &
@@ -1502,17 +1510,27 @@ export function AgentChatFooter({
 export function AgentChatFooterInner({
   size = 'md',
   className,
-  hideAttachmentButton = false,
+  inputClassName,
+  sendButtonClassName,
+  attachmentButtonClassName,
   // withVoice = false,
   children,
   ...props
 }: AgentChatFooterComponentProps) {
-  const { attachments, removeAttachment } = useAgentChat();
+  const { attachments, removeAttachment, agentChat } = useAgentChat();
+  const disableAttachments = agentChat
+    ? agentChat.disableAttachments === true
+    : true;
   // const { isConnected, isConnecting, isSpeaking, stream, startVoiceCall, endVoiceCall } =
   //   AgentChatPrimitive.useAgentChatVoice();
 
   // const isVoiceActive = withVoice && (isConnected || isConnecting);
   const iconSize = 'icon';
+  const iconButtonClassName = cn(
+    size === 'sm' && 'h-9 w-9 [&_svg]:size-4',
+    size === 'md' && '[&_svg]:size-5',
+    size === 'lg' && 'h-11 w-11 [&_svg]:size-5',
+  );
   const isVoiceActive = false;
 
   return (
@@ -1556,7 +1574,7 @@ export function AgentChatFooterInner({
         </div>
       ) : (
         <>
-          {attachments.length > 0 && (
+          {!disableAttachments && attachments.length > 0 && (
             <div className={agentChatFooterAttachmentsVariants({ size })}>
               {attachments.map((attachment) => (
                 <AgentChatAttachmentBadge
@@ -1575,11 +1593,18 @@ export function AgentChatFooterInner({
               size === 'lg' ? 'gap-3 p-3' : 'gap-2 p-2',
             )}
           >
-            <AgentChatInput size={size} className="flex-1 min-w-0" />
+            <AgentChatInput
+              size={size}
+              className={cn('flex-1 min-w-0', inputClassName)}
+            />
 
-            {!hideAttachmentButton && (
+            {!disableAttachments && (
               <AgentChatPrimitive.AgentChatAttachmentTrigger asChild>
-                <Button size={iconSize} variant="outline">
+                <Button
+                  size={iconSize}
+                  variant="outline"
+                  className={cn(iconButtonClassName, attachmentButtonClassName)}
+                >
                   <Paperclip />
                   <span className="sr-only">Attach file</span>
                 </Button>
@@ -1594,7 +1619,11 @@ export function AgentChatFooterInner({
               )} */}
 
             <AgentChatPrimitive.AgentChatSendTrigger asChild>
-              <Button size={iconSize} variant="default">
+              <Button
+                size={iconSize}
+                variant="default"
+                className={cn(iconButtonClassName, sendButtonClassName)}
+              >
                 <Send />
                 {/* {isThinking ? <Square className="fill-current" /> : <Send />} */}
                 <span className="sr-only">Send message</span>
@@ -1619,6 +1648,12 @@ export function AgentChatSimple({
   chatContextFiles,
   withVoice = false,
   hideAvatar = false,
+  messagesContainerClassName,
+  messageClassName,
+  footerClassName,
+  inputClassName,
+  sendButtonClassName,
+  attachmentButtonClassName,
   ...props
 }: AgentChatSimpleProps) {
   return (
@@ -1636,8 +1671,18 @@ export function AgentChatSimple({
           size={props.size}
           userPosition={props.userPosition || undefined}
           hideAvatar={hideAvatar}
+          className={messagesContainerClassName}
+          messageClassName={messageClassName}
         />
-        <AgentChatFooter size={props.size} withVoice={withVoice} />
+        <AgentChatFooter
+          size={props.size}
+          withVoice={withVoice}
+          className={footerClassName}
+          inputClassName={inputClassName}
+          sendButtonClassName={sendButtonClassName}
+          attachmentButtonClassName={attachmentButtonClassName}
+        />
+        <AgentChatFetching size={props.size} />
       </AgentChatContent>
     </AgentChat>
   );
@@ -1646,6 +1691,12 @@ export function AgentChatSimple({
 export type AgentChatSimpleProps = AgentChatProps & {
   withVoice?: boolean;
   hideAvatar?: boolean;
+  messagesContainerClassName?: string;
+  messageClassName?: string;
+  footerClassName?: string;
+  inputClassName?: string;
+  sendButtonClassName?: string;
+  attachmentButtonClassName?: string;
 } & VariantProps<typeof agentChatContentVariants> &
   React.ComponentProps<'div'>;
 

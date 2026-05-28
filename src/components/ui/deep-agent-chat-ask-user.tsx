@@ -31,7 +31,7 @@ const askUserOptionSchema = z.object({
 
 const askUserQuestionSchema = z.object({
   id: z.string(),
-  label: z.string(),
+  label: z.string().optional(),
   type: z.enum(['text', 'single_select', 'multi_select']),
   required: z.boolean().optional(),
   placeholder: z.string().optional(),
@@ -108,6 +108,9 @@ const getQuestionOptionLabel = (
   optionId: string,
 ) => options.find((option) => option.id === optionId)?.label ?? optionId;
 
+const getSubmittedQuestionText = (question: AskUserQuestion) =>
+  question.label?.trim() || question.id;
+
 const isAskUserQuestionRequired = (question: AskUserQuestion) =>
   question.required !== false;
 
@@ -160,7 +163,7 @@ const buildSubmittedAnswer = (
     );
     return {
       questionId: question.id,
-      question: question.label,
+      question: getSubmittedQuestionText(question),
       type: question.type,
       values: realValues,
       labels: realValues.map((value) => getQuestionOptionLabel(options, value)),
@@ -174,7 +177,7 @@ const buildSubmittedAnswer = (
     const value = typeof answer === 'string' ? answer : '';
     return {
       questionId: question.id,
-      question: question.label,
+      question: getSubmittedQuestionText(question),
       type: question.type,
       value: value === ASK_USER_OTHER_OPTION_ID ? undefined : value,
       label:
@@ -187,7 +190,7 @@ const buildSubmittedAnswer = (
 
   return {
     questionId: question.id,
-    question: question.label,
+    question: getSubmittedQuestionText(question),
     type: question.type,
     value: typeof answer === 'string' ? answer.trim() : '',
   };
@@ -859,6 +862,7 @@ function AskQuestionItem({
     typeof currentAnswer === 'string' ? currentAnswer : '';
   const labelId = `${formId}-${question.id}-label`;
   const controlId = `${formId}-${question.id}-control`;
+  const visibleQuestionLabel = question.label?.trim();
   const isOtherSelected =
     question.type === 'multi_select'
       ? currentValues.includes(ASK_USER_OTHER_OPTION_ID)
@@ -883,9 +887,10 @@ function AskQuestionItem({
         className={cn(
           'w-full cursor-text opacity-100',
           askUserQuestionLabelVariants({ size, invalid: isInvalid }),
+          !visibleQuestionLabel && 'sr-only',
         )}
       >
-        {question.label}
+        {visibleQuestionLabel || 'Question'}
       </FieldLabel>
 
       {question.placeholder && question.type !== 'text' && (
@@ -1054,6 +1059,7 @@ export function AskQuestionTool({
       onSubmittedAnswers?.(submittedAnswers);
       try {
         await respond({
+          status: 'answered',
           answers: submittedAnswers,
         });
       } catch (error) {
