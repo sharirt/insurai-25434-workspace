@@ -45,6 +45,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const userRole = user.isAuthenticated ? (user as any).role : undefined;
   const isAdmin = isAdminRole(userRole);
 
+  if (location.pathname.startsWith("/ClientIntakeForm")) {
+    return <>{children}</>;
+  }
+
   const filteredNavItems = isAdmin
     ? navigationItems
     : isOfficeRole(userRole)
