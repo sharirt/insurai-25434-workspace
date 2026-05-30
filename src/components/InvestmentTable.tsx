@@ -21,6 +21,7 @@ type SortKey = "rank" | "name" | "returnMonthly" | "returnYearly" | "return3Year
 type SortDir = "asc" | "desc";
 
 interface InvestmentTableProps {
+  categoryName: string;
   trackType: string;
   funds: Fund[];
   averageReturns?: IFetchMyGemelDataActionOutputAverageReturnsObject;
@@ -44,7 +45,7 @@ function formatReturn(val?: string) {
   );
 }
 
-export const InvestmentTable = ({ trackType, funds, averageReturns }: InvestmentTableProps) => {
+export const InvestmentTable = ({ categoryName, trackType, funds, averageReturns }: InvestmentTableProps) => {
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -86,7 +87,7 @@ export const InvestmentTable = ({ trackType, funds, averageReturns }: Investment
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold mb-3 text-foreground">{trackType}</h3>
+      <h3 className="text-lg font-semibold mb-3 text-foreground">{categoryName} - {trackType}</h3>
       <div className="rounded-lg border border-border overflow-hidden">
         <Table>
           <TableHeader>
