@@ -282,10 +282,10 @@ const askUserHelperTextVariants = cva(
 
 const askUserChipItemVariants = cva(
   cn(
-    'inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-background text-base font-normal leading-normal text-foreground transition-colors',
-    'hover:bg-background hover:text-foreground hover:border-foreground',
-    'data-[state=on]:bg-background data-[state=on]:text-foreground',
-    'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
+    'inline-flex items-center justify-center gap-1.5 rounded-full border border-input bg-transparent text-base font-normal leading-normal text-foreground transition-colors',
+    'hover:bg-transparent hover:text-foreground hover:border-foreground',
+    'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+    'data-[state=on]:border-2 data-[state=on]:border-primary data-[state=on]:-m-px',
   ),
   {
     variants: {
@@ -301,10 +301,10 @@ const askUserChipItemVariants = cva(
 
 const askUserOtherChipItemVariants = cva(
   cn(
-    'inline-flex items-center justify-center rounded-full border border-input bg-background text-base font-normal leading-normal text-muted-foreground transition-colors',
-    'hover:bg-background hover:text-foreground hover:border-foreground',
-    'data-[state=on]:bg-background data-[state=on]:text-foreground',
-    'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
+    'inline-flex items-center justify-center rounded-full border border-input bg-transparent text-base font-normal leading-normal text-muted-foreground transition-colors',
+    'hover:bg-transparent hover:text-foreground hover:border-foreground',
+    'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+    'data-[state=on]:border-2 data-[state=on]:border-primary data-[state=on]:-m-px',
   ),
   {
     variants: {

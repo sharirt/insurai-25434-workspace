@@ -82,6 +82,55 @@ export const BeneficiariesEntity = {
   instanceType: {} as IBeneficiariesEntity,
 } as const;
 
+export type ClientFormTokensEntityStatusEnum =
+  | "pending"
+  | "submitted"
+  | "expired";
+
+/**
+ * The full form data submitted by the client, stored as a JSON object matching the Clients table fields
+ */
+export interface IClientFormTokensEntityFormDataObject {}
+
+/**
+ * Stores unique tokens for client intake forms. Each token links to an optional existing client (for pre-filling) or is for a new client. Tracks the recipient phone/email, submission status, expiry, and the submitted form data including ID document URLs.
+ */
+export interface IClientFormTokensEntity {
+  /** Display name of the recipient (for personalization in SMS/email messages)  */
+  recipientName?: string;
+  /** Current status of the form token: pending (sent, not yet filled), submitted (client completed the form), expired (token no longer valid)  */
+  status?: ClientFormTokensEntityStatusEnum;
+  /** Expiration datetime of the token. After this time the form link is no longer valid.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  expiresAt?: string;
+  /** Datetime when the client submitted the form. Null until submitted.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  submittedAt?: string;
+  /** Email of the agent/user who sent this form token  */
+  sentByAgentEmail?: string;
+  /** The full form data submitted by the client, stored as a JSON object matching the Clients table fields  */
+  formData?: IClientFormTokensEntityFormDataObject;
+  /** URL of the uploaded front side of the client's ID card image  */
+  idFrontUrl?: string;
+  /** URL of the uploaded back side of the client's ID card image  */
+  idBackUrl?: string;
+  /** URL of the uploaded ID card appendix (ספח) image  */
+  idAppendixUrl?: string;
+  /** The ID of the newly created client record after form submission (for new clients only)  */
+  createdClientId?: string;
+  /** Unique UUID token used in the form URL to identify this form session  */
+  token?: string;
+  /** Optional reference to an existing client ID in the Clients table. Null if this is for a new client.  */
+  clientId?: string;
+  /** Phone number of the recipient to whom the form link was sent via SMS  */
+  recipientPhone?: string;
+  /** Email address of the recipient to whom the form link was sent via email  */
+  recipientEmail?: string;
+}
+
+export const ClientFormTokensEntity = {
+  tableBlockId: "6a1abcf03702184f08211d89",
+  instanceType: {} as IClientFormTokensEntity,
+} as const;
+
 export type ClientsEntityGenderEnum = "זכר" | "נקבה";
 
 export type ClientsEntityClientStatusEnum = "פעיל" | "טרום יעוץ";
@@ -816,6 +865,16 @@ export const AgentProfilePage = {
 export const AgentsManagerPage = {
   pageBlockId: "69db99a87d23f0bc9a294eb1",
   pageName: "AgentsManager",
+} as const;
+
+export const ClientFormSenderPage = {
+  pageBlockId: "6a1abd73539c423fc0d9bc4b",
+  pageName: "ClientFormSender",
+} as const;
+
+export const ClientIntakeFormPage = {
+  pageBlockId: "6a1abd74539c423fc0d9bc59",
+  pageName: "ClientIntakeForm",
 } as const;
 
 export const ClientProfilePage = {
@@ -2124,6 +2183,49 @@ export const SendAllFormsForSignatureDocuSealAction = {
 } as const;
 
 /**
+ * SendClientIntakeForm input payload
+ */
+export interface ISendClientIntakeFormActionInput {
+  /** Optional existing client ID. If provided, the form will be pre-filled with client data.  */
+  clientId?: string;
+  /** Phone number of the recipient in E.164 format (e.g. +972501234567)  */
+  recipientPhone: string;
+  /** Email address of the recipient  */
+  recipientEmail: string;
+  /** Display name of the recipient for personalization  */
+  recipientName: string;
+  /** Email of the agent sending the form  */
+  agentEmail: string;
+}
+
+/**
+ * SendClientIntakeForm output payload
+ */
+export interface ISendClientIntakeFormActionOutput {
+  /** Whether the form was sent successfully  */
+  success?: boolean;
+  /** The ID of the created token record  */
+  tokenId?: string;
+  /** The unique token value  */
+  token?: string;
+  /** The full URL of the form sent to the client  */
+  formUrl?: string;
+  /** Status message  */
+  message?: string;
+}
+
+/**
+ * SendClientIntakeFormAction
+ * Execute code action
+ */
+export const SendClientIntakeFormAction = {
+  actionBlockId: "6a1abd0f3702184f08216aea",
+
+  inputInstanceType: {} as ISendClientIntakeFormActionInput,
+  outputInstanceType: {} as ISendClientIntakeFormActionOutput,
+} as const;
+
+/**
  * undefined
  */
 export interface ISendCustomProviderEmailActionInputSendCustomProviderEmailActionInputAttachmentUrlsItemObject {
@@ -2441,6 +2543,54 @@ export const SendSignedDocsToProviderEmailAction = {
 
   inputInstanceType: {} as ISendSignedDocsToProviderEmailActionInput,
   outputInstanceType: {} as ISendSignedDocsToProviderEmailActionOutput,
+} as const;
+
+/**
+ * All form fields submitted by the client
+ */
+export interface ISubmitClientIntakeFormActionInputFormDataObject {}
+
+/**
+ * SubmitClientIntakeForm input payload
+ */
+export interface ISubmitClientIntakeFormActionInput {
+  /** The unique token from the form URL  */
+  token: string;
+  /** All form fields submitted by the client  */
+  formData: ISubmitClientIntakeFormActionInputFormDataObject;
+  /** URL of the uploaded front side of the ID card  */
+  idFrontUrl?: string;
+  /** URL of the uploaded back side of the ID card  */
+  idBackUrl?: string;
+  /** URL of the uploaded ID appendix (ספח)  */
+  idAppendixUrl?: string;
+}
+
+/**
+ * SubmitClientIntakeForm output payload
+ */
+export interface ISubmitClientIntakeFormActionOutput {
+  /** Whether the submission was successful  */
+  success?: boolean;
+  /** The ID of the created or updated client  */
+  clientId?: string;
+  /** True if a new client was created, false if existing client was updated  */
+  isNewClient?: boolean;
+  /** Status message  */
+  message?: string;
+  /** Error message if submission failed  */
+  error?: string;
+}
+
+/**
+ * SubmitClientIntakeFormAction
+ * Execute code action
+ */
+export const SubmitClientIntakeFormAction = {
+  actionBlockId: "6a1abd0f3702184f08216af3",
+
+  inputInstanceType: {} as ISubmitClientIntakeFormActionInput,
+  outputInstanceType: {} as ISubmitClientIntakeFormActionOutput,
 } as const;
 
 export type SyncRoetoClientsActionInputSyncModeEnum =

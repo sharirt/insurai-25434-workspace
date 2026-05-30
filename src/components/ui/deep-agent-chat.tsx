@@ -7,12 +7,12 @@ import * as AgentChatPrimitive from '@blocksdiy/react-common/new-agent-chat';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { format } from 'date-fns';
 import {
+  ArrowUp,
   File,
   FileImage,
   FileText,
   Loader2,
   Paperclip,
-  Send,
   X,
 } from 'lucide-react';
 import { AnimatePresence } from 'motion/react';
@@ -1624,8 +1624,8 @@ export function AgentChatFooterInner({
                 variant="default"
                 className={cn(iconButtonClassName, sendButtonClassName)}
               >
-                <Send />
-                {/* {isThinking ? <Square className="fill-current" /> : <Send />} */}
+                <ArrowUp />
+                {/* {isThinking ? <Square className="fill-current" /> : <ArrowUp />} */}
                 <span className="sr-only">Send message</span>
                 {/* <span className="sr-only">{isThinking ? 'Stop run' : 'Send message'}</span> */}
               </Button>

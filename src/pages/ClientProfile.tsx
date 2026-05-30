@@ -4,7 +4,7 @@ import { useSearchParams, Link } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, AlertCircle, Calendar, Sparkles, Loader2, FileUp, Plus, Pencil, RefreshCw } from "lucide-react";
+import { ArrowLeft, AlertCircle, Calendar, Sparkles, Loader2, FileUp, Plus, Pencil, RefreshCw, Send } from "lucide-react";
 import { getPageUrl } from "@/lib/utils";
 import { FundsTable, FundsTableSkeleton } from "@/components/FundsTable";
 import { ClientProfileMeetingsSection } from "@/components/ClientProfileMeetingsSection";
@@ -12,6 +12,7 @@ import { DeleteMeetingDialog } from "@/components/DeleteMeetingDialog";
 import { ClientInfoCard } from "@/components/ClientInfoCard";
 import { ClientFormDialog } from "@/components/ClientFormDialog";
 import { ImportFundsDialog } from "@/components/ImportFundsDialog";
+import { SendIntakeFormDialog } from "@/components/SendIntakeFormDialog";
 import { ImportInvestmentTracksDialog } from "@/components/ImportInvestmentTracksDialog";
 import { FundsProviderPieChart } from "@/components/FundsProviderPieChart";
 import { StandaloneRequestsSection } from "@/components/StandaloneRequestsSection";
@@ -27,6 +28,7 @@ export default function ClientProfile() {
   const [isImportFundsDialogOpen, setIsImportFundsDialogOpen] = useState(false);
   const [isImportTracksDialogOpen, setIsImportTracksDialogOpen] = useState(false);
   const [isEditClientDialogOpen, setIsEditClientDialogOpen] = useState(false);
+  const [isSendFormDialogOpen, setIsSendFormDialogOpen] = useState(false);
 
   const { executeFunction: executeSyncClient, isLoading: isSyncing } = useExecuteAction(SyncSingleClientAction);
 
@@ -221,6 +223,10 @@ export default function ClientProfile() {
                 צור בקשה חדשה
               </Link>
             </Button>
+            <Button variant="outline" onClick={() => setIsSendFormDialogOpen(true)}>
+              <Send className="ml-2 h-4 w-4" />
+              שלח טופס
+            </Button>
             <Button variant="outline" onClick={handleSyncFromRoeto} disabled={isSyncing}>
               {isSyncing ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -340,6 +346,12 @@ export default function ClientProfile() {
       <ClientFormDialog
         open={isEditClientDialogOpen}
         onClose={handleEditClientClose}
+        client={client}
+      />
+
+      <SendIntakeFormDialog
+        open={isSendFormDialogOpen}
+        onClose={() => setIsSendFormDialogOpen(false)}
         client={client}
       />
 
