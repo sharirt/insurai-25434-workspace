@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { InvestmentLoadingSkeleton } from "@/components/InvestmentLoadingSkeleton";
 import { InvestmentErrorCard } from "@/components/InvestmentErrorCard";
-import { InvestmentCategoryTabs } from "@/components/InvestmentCategoryTabs";
+import { InvestmentTable } from "@/components/InvestmentTable";
 import { InvestmentEmptyState } from "@/components/InvestmentEmptyState";
 
 export default function InvestmentComparison() {
@@ -56,7 +56,20 @@ export default function InvestmentComparison() {
       )}
 
       {data && data?.status !== "error" && categories?.length > 0 && (
-        <InvestmentCategoryTabs categories={categories} />
+        <div className="flex flex-col gap-8">
+          {categories?.flatMap((cat) => (cat?.tables ?? []).map((table) => ({ table, categoryName: cat?.categoryName ?? "" })))
+            ?.filter((item) => item.table?.funds && item.table.funds.length > 0)
+            ?.map((item, idx) => (
+              <InvestmentTable
+                key={`${item.table?.trackType}-${idx}`}
+                tableTitle={(item.table as any)?.tableTitle}
+                categoryName={item.categoryName}
+                trackType={item.table?.trackType ?? ""}
+                funds={item.table?.funds ?? []}
+                averageReturns={item.table?.averageReturns}
+              />
+            ))}
+        </div>
       )}
 
       {data && data?.status !== "error" && categories?.length === 0 && <InvestmentEmptyState />}
