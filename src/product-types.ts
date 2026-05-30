@@ -82,20 +82,28 @@ export const BeneficiariesEntity = {
   instanceType: {} as IBeneficiariesEntity,
 } as const;
 
+/**
+ * The full form data submitted by the client, stored as a JSON object matching the Clients table fields
+ */
+export interface IClientFormTokensEntityFormDataObject {}
+
 export type ClientFormTokensEntityStatusEnum =
   | "pending"
   | "submitted"
   | "expired";
 
 /**
- * The full form data submitted by the client, stored as a JSON object matching the Clients table fields
- */
-export interface IClientFormTokensEntityFormDataObject {}
-
-/**
  * Stores unique tokens for client intake forms. Each token links to an optional existing client (for pre-filling) or is for a new client. Tracks the recipient phone/email, submission status, expiry, and the submitted form data including ID document URLs.
  */
 export interface IClientFormTokensEntity {
+  /** Email address of the recipient to whom the form link was sent via email  */
+  recipientEmail?: string;
+  /** Email of the agent/user who sent this form token  */
+  sentByAgentEmail?: string;
+  /** The full form data submitted by the client, stored as a JSON object matching the Clients table fields  */
+  formData?: IClientFormTokensEntityFormDataObject;
+  /** URL of the uploaded front side of the client's ID card image  */
+  idFrontUrl?: string;
   /** Display name of the recipient (for personalization in SMS/email messages)  */
   recipientName?: string;
   /** Current status of the form token: pending (sent, not yet filled), submitted (client completed the form), expired (token no longer valid)  */
@@ -104,12 +112,6 @@ export interface IClientFormTokensEntity {
   expiresAt?: string;
   /** Datetime when the client submitted the form. Null until submitted.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   submittedAt?: string;
-  /** Email of the agent/user who sent this form token  */
-  sentByAgentEmail?: string;
-  /** The full form data submitted by the client, stored as a JSON object matching the Clients table fields  */
-  formData?: IClientFormTokensEntityFormDataObject;
-  /** URL of the uploaded front side of the client's ID card image  */
-  idFrontUrl?: string;
   /** URL of the uploaded back side of the client's ID card image  */
   idBackUrl?: string;
   /** URL of the uploaded ID card appendix (ספח) image  */
@@ -122,8 +124,6 @@ export interface IClientFormTokensEntity {
   clientId?: string;
   /** Phone number of the recipient to whom the form link was sent via SMS  */
   recipientPhone?: string;
-  /** Email address of the recipient to whom the form link was sent via email  */
-  recipientEmail?: string;
 }
 
 export const ClientFormTokensEntity = {
@@ -902,6 +902,11 @@ export const FormsManagerPage = {
   pageName: "FormsManager",
 } as const;
 
+export const InvestmentComparisonPage = {
+  pageBlockId: "6a1b1390c13552552b4038ec",
+  pageName: "InvestmentComparison",
+} as const;
+
 export const LoginPage = {
   pageBlockId: "69db99aa7d23f0bc9a294fb0",
   pageName: "Login",
@@ -1517,6 +1522,86 @@ export const DescribeFormPdfFieldsAction = {
 
   inputInstanceType: {} as IDescribeFormPdfFieldsActionInput,
   outputInstanceType: {} as IDescribeFormPdfFieldsActionOutput,
+} as const;
+
+/**
+ * FetchMyGemelData input payload
+ */
+export interface IFetchMyGemelDataActionInput {
+  /** Optional list of category slugs to fetch. If empty, fetches all categories. (default: ) */
+  categories?: string[];
+}
+
+/**
+ * undefined
+ */
+export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject {
+  /** Rank within the table (1-based)  */
+  rank?: number;
+  /** Fund name in Hebrew  */
+  name?: string;
+  /** Monthly return percentage  */
+  returnMonthly?: string;
+  /** Yearly return percentage  */
+  returnYearly?: string;
+  /** 3-year return percentage  */
+  return3Years?: string;
+  /** 5-year return percentage  */
+  return5Years?: string;
+}
+
+/**
+ * undefined
+ */
+export interface IFetchMyGemelDataActionOutputAverageReturnsObject {
+  monthly?: string;
+  yearly?: string;
+  threeYears?: string;
+  fiveYears?: string;
+}
+
+/**
+ * undefined
+ */
+export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject {
+  /** Hebrew name of the investment track type (e.g. כללי, מניות, S&P500)  */
+  trackType?: string;
+  funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
+  averageReturns?: IFetchMyGemelDataActionOutputAverageReturnsObject;
+}
+
+/**
+ * undefined
+ */
+export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject {
+  /** Hebrew name of the product category  */
+  categoryName?: string;
+  /** URL slug of the category  */
+  categorySlug?: string;
+  tables?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject[];
+}
+
+/**
+ * FetchMyGemelData output payload
+ */
+export interface IFetchMyGemelDataActionOutput {
+  /** success or error  */
+  status?: string;
+  /** ISO timestamp of when data was fetched  */
+  fetchedAt?: string;
+  categories?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject[];
+  errors?: string[];
+}
+
+/**
+ * FetchMyGemelDataAction
+ * Execute code action
+ */
+export const FetchMyGemelDataAction = {
+  actionBlockId: "6a1b124b3702184f086526f5",
+
+  inputInstanceType: {} as IFetchMyGemelDataActionInput,
+  outputInstanceType: {} as IFetchMyGemelDataActionOutput,
 } as const;
 
 /**
