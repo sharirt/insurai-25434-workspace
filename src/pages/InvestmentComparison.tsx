@@ -111,6 +111,7 @@ export default function InvestmentComparison() {
                   {cat?.tables?.map?.((table, idx) => (
                     <InvestmentTable
                       key={`${table?.trackType}-${idx}`}
+                      tableTitle={(table as any)?.tableTitle}
                       categoryName={cat?.categoryName ?? ""}
                       trackType={table?.trackType ?? ""}
                       funds={table?.funds ?? []}
