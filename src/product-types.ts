@@ -1536,17 +1536,11 @@ export interface IFetchMyGemelDataActionInput {
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject {
-  /** Rank within the table (1-based)  */
   rank?: number;
-  /** Fund name in Hebrew  */
   name?: string;
-  /** Monthly return percentage  */
   returnMonthly?: string;
-  /** Yearly return percentage  */
   returnYearly?: string;
-  /** 3-year return percentage  */
   return3Years?: string;
-  /** 5-year return percentage  */
   return5Years?: string;
 }
 
@@ -1564,7 +1558,6 @@ export interface IFetchMyGemelDataActionOutputAverageReturnsObject {
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject {
-  /** Hebrew name of the investment track type (e.g. כללי, מניות, S&P500)  */
   trackType?: string;
   funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
   averageReturns?: IFetchMyGemelDataActionOutputAverageReturnsObject;
@@ -1574,9 +1567,7 @@ export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTables
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject {
-  /** Hebrew name of the product category  */
   categoryName?: string;
-  /** URL slug of the category  */
   categorySlug?: string;
   tables?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject[];
 }
