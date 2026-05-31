@@ -483,6 +483,14 @@ export const FundsEntity = {
  * Stores parsed fund data fetched from igemel-net.co.il. Each row represents one fund/track combination with performance metrics, management fees, AUM, and metadata. Data is refreshed on demand or via scheduled trigger.
  */
 export interface IIGemelFundsEntity {
+  /** Fund name in Hebrew  */
+  name?: string;
+  /** Total cumulative return percentage  */
+  retTotal?: number;
+  /** Management fee percentage  */
+  mgmtFee?: number;
+  /** Managing company name in Hebrew  */
+  company?: string;
   /** Assets under management in millions of ILS  */
   aumMn?: number;
   /** Sharpe ratio  */
@@ -499,20 +507,12 @@ export interface IIGemelFundsEntity {
   sourceCategory?: string;
   /** Timestamp when this record was last fetched/updated. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
   fetchedAt?: string;
-  /** Fund name in Hebrew  */
-  name?: string;
   /** 1-year return percentage  */
   ret1y?: number;
   /** 3-year return percentage  */
   ret3y?: number;
   /** 5-year return percentage  */
   ret5y?: number;
-  /** Total cumulative return percentage  */
-  retTotal?: number;
-  /** Management fee percentage  */
-  mgmtFee?: number;
-  /** Managing company name in Hebrew  */
-  company?: string;
   /** Unique fund identifier from igemel-net  */
   fundId?: string;
 }

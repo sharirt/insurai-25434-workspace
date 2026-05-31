@@ -20,16 +20,16 @@ interface IGemelTableProps {
 }
 
 const COLUMNS: { key: SortField; label: string }[] = [
-  { key: 'name', label: 'שם הקופה' },
-  { key: 'company', label: 'חברה מנהלת' },
-  { key: 'track', label: 'מסלול' },
-  { key: 'ret1y', label: 'תשואה שנה' },
-  { key: 'ret3y', label: 'תשואה 3 שנים' },
-  { key: 'ret5y', label: 'תשואה 5 שנים' },
-  { key: 'retTotal', label: 'תשואה מצטברת' },
-  { key: 'mgmtFee', label: 'דמי ניהול' },
-  { key: 'aumMn', label: 'גודל קופה' },
   { key: 'sharpe', label: 'שארפ' },
+  { key: 'aumMn', label: 'גודל קופה' },
+  { key: 'mgmtFee', label: 'דמי ניהול' },
+  { key: 'retTotal', label: 'תשואה מצטברת' },
+  { key: 'ret5y', label: 'תשואה 5 שנים' },
+  { key: 'ret3y', label: 'תשואה 3 שנים' },
+  { key: 'ret1y', label: 'תשואה שנה' },
+  { key: 'track', label: 'מסלול' },
+  { key: 'company', label: 'חברה מנהלת' },
+  { key: 'name', label: 'שם הקופה' },
 ];
 
 export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IGemelTableProps) => {
@@ -80,6 +80,15 @@ export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IG
             const retTotal = formatReturn(fund.retTotal);
             return (
               <TableRow key={fund.fundId ?? idx} className="hover:bg-muted/50">
+                <TableCell>{formatSharpe(fund.sharpe)}</TableCell>
+                <TableCell className="whitespace-nowrap">{formatAum(fund.aumMn)}</TableCell>
+                <TableCell>{formatFee(fund.mgmtFee)}</TableCell>
+                <TableCell className={retTotal.className}>{retTotal.text}</TableCell>
+                <TableCell className={ret5y.className}>{ret5y.text}</TableCell>
+                <TableCell className={ret3y.className}>{ret3y.text}</TableCell>
+                <TableCell className={ret1y.className}>{ret1y.text}</TableCell>
+                <TableCell className="whitespace-nowrap">{fund.track ?? '—'}</TableCell>
+                <TableCell className="whitespace-nowrap">{fund.company ?? '—'}</TableCell>
                 <TableCell className="whitespace-nowrap">
                   {fund.fundUrl ? (
                     <a
@@ -94,15 +103,6 @@ export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IG
                     fund.name ?? '—'
                   )}
                 </TableCell>
-                <TableCell className="whitespace-nowrap">{fund.company ?? '—'}</TableCell>
-                <TableCell className="whitespace-nowrap">{fund.track ?? '—'}</TableCell>
-                <TableCell className={ret1y.className}>{ret1y.text}</TableCell>
-                <TableCell className={ret3y.className}>{ret3y.text}</TableCell>
-                <TableCell className={ret5y.className}>{ret5y.text}</TableCell>
-                <TableCell className={retTotal.className}>{retTotal.text}</TableCell>
-                <TableCell>{formatFee(fund.mgmtFee)}</TableCell>
-                <TableCell className="whitespace-nowrap">{formatAum(fund.aumMn)}</TableCell>
-                <TableCell>{formatSharpe(fund.sharpe)}</TableCell>
               </TableRow>
             );
           })}
