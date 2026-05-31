@@ -1528,48 +1528,39 @@ export const DescribeFormPdfFieldsAction = {
  * FetchMyGemelData input payload
  */
 export interface IFetchMyGemelDataActionInput {
-  /** Optional list of category slugs to fetch. If empty, fetches all categories. (default: ) */
-  categories?: string[];
+  /** The URL of the mygemel.net page to scrape (e.g. https://www.mygemel.net/קרנות-השתלמות) (default: "https://www.mygemel.net/קרנות-השתלמות") */
+  pageUrl?: string;
 }
 
 /**
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject {
-  rank?: number;
   name?: string;
-  returnMonthly?: string;
-  returnYearly?: string;
-  return3Years?: string;
-  return5Years?: string;
+  april?: string;
+  yield_1y?: string;
+  yield_3y?: string;
+  yield_5y?: string;
 }
 
 /**
  * undefined
  */
-export interface IFetchMyGemelDataActionOutputAverageReturnsObject {
-  monthly?: string;
-  yearly?: string;
-  threeYears?: string;
-  fiveYears?: string;
-}
-
-/**
- * undefined
- */
-export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject {
-  trackType?: string;
-  funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
-  averageReturns?: IFetchMyGemelDataActionOutputAverageReturnsObject;
+export interface IFetchMyGemelDataActionOutputAverageObject {
+  april?: string;
+  yield_1y?: string;
+  yield_3y?: string;
+  yield_5y?: string;
 }
 
 /**
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject {
-  categoryName?: string;
-  categorySlug?: string;
-  tables?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputTablesItemObject[];
+  /** Category name from h2.title  */
+  category?: string;
+  funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
+  average?: IFetchMyGemelDataActionOutputAverageObject;
 }
 
 /**
@@ -1580,6 +1571,8 @@ export interface IFetchMyGemelDataActionOutput {
   status?: string;
   /** ISO timestamp of when data was fetched  */
   fetchedAt?: string;
+  /** Total number of categories parsed  */
+  totalCategories?: number;
   categories?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject[];
   errors?: string[];
 }

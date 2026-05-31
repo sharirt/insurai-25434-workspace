@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { InvestmentLoadingSkeleton } from "@/components/InvestmentLoadingSkeleton";
 import { InvestmentErrorCard } from "@/components/InvestmentErrorCard";
-import { InvestmentTable } from "@/components/InvestmentTable";
 import { InvestmentEmptyState } from "@/components/InvestmentEmptyState";
+import { CategoryCard } from "@/components/CategoryCard";
+import { Badge } from "@/components/ui/badge";
 
 export default function InvestmentComparison() {
   const { executeFunction, result, isLoading, error, clear } = useExecuteAction(FetchMyGemelDataAction);
@@ -14,7 +15,7 @@ export default function InvestmentComparison() {
 
   const fetchData = () => {
     clear();
-    executeFunction({});
+    executeFunction({ pageUrl: "https://www.mygemel.net/קרנות-השתלמות" });
   };
 
   useEffect(() => {
@@ -33,12 +34,17 @@ export default function InvestmentComparison() {
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto" style={{ direction: "rtl" }}>
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-6">
-        <div>
+        <div className="flex flex-col gap-1">
           <h1 className="text-2xl font-bold text-foreground">השוואת מסלולי השקעה</h1>
           {fetchedAt && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground">
               עדכון אחרון: {new Date(fetchedAt).toLocaleString("he-IL")}
             </p>
+          )}
+          {data && data.status !== "error" && (
+            <Badge variant="secondary" className="self-start mt-1">
+              נמצאו {data.totalCategories ?? categories.length} קטגוריות
+            </Badge>
           )}
         </div>
         <Button onClick={fetchData} disabled={isLoading} variant="outline" className="self-start">
@@ -51,28 +57,24 @@ export default function InvestmentComparison() {
 
       {error && !data && <InvestmentErrorCard onRetry={fetchData} />}
 
-      {data && data?.status === "error" && (
+      {data && data.status === "error" && (
         <InvestmentErrorCard onRetry={fetchData} errors={data?.errors as string[] | undefined} />
       )}
 
-      {data && data?.status !== "error" && categories?.length > 0 && (
-        <div className="flex flex-col gap-8">
-          {categories?.flatMap((cat) => (cat?.tables ?? []).map((table) => ({ table, categoryName: cat?.categoryName ?? "" })))
-            ?.filter((item) => item.table?.funds && item.table.funds.length > 0)
-            ?.map((item, idx) => (
-              <InvestmentTable
-                key={`${item.table?.trackType}-${idx}`}
-                tableTitle={(item.table as any)?.tableTitle}
-                categoryName={item.categoryName}
-                trackType={item.table?.trackType ?? ""}
-                funds={item.table?.funds ?? []}
-                averageReturns={item.table?.averageReturns}
-              />
-            ))}
+      {data && data.status !== "error" && categories.length > 0 && (
+        <div className="flex flex-col gap-6">
+          {categories.map((cat, idx) => (
+            <CategoryCard
+              key={`${cat?.category}-${idx}`}
+              category={cat?.category ?? ""}
+              funds={cat?.funds ?? []}
+              average={cat?.average}
+            />
+          ))}
         </div>
       )}
 
-      {data && data?.status !== "error" && categories?.length === 0 && <InvestmentEmptyState />}
+      {data && data.status !== "error" && categories.length === 0 && <InvestmentEmptyState />}
     </div>
   );
 }

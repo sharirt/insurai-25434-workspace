@@ -3,12 +3,11 @@
 import * as BlocksClientReactSdk from '@blocksdiy/blocks-client-sdk/reactSdk';
 import * as AgentChatPrimitive from '@blocksdiy/react-common/new-agent-chat';
 import { cva } from 'class-variance-authority';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import * as React from 'react';
 import { LiveError, LivePreview, LiveProvider } from 'react-live';
 import * as Recharts from 'recharts';
 
-import { AgentChatLoadingDots } from '@/components/ui/agent-chat-loading-dots';
 import * as AccordionUI from '@/components/ui/accordion';
 import * as AlertUI from '@/components/ui/alert';
 import * as AlertDialogUI from '@/components/ui/alert-dialog';
@@ -175,8 +174,6 @@ const chatComponentErrorVariants = cva(
 
 // ─── Main component ─────────────────────────────────────────────────────────
 
-export type ChatComponentStatus = 'loading' | 'completed' | 'failed';
-
 interface ChatCodeComponentProps {
   code?: string;
   props?: Record<string, unknown>;
@@ -219,23 +216,20 @@ export function ChatCodeComponent({
     status === AgentChatPrimitive.ToolCallStatus.Complete &&
     Boolean(displayCode);
 
+  if (!isCodeReady) {
+    return null;
+  }
+
   return (
-    <AnimatePresence initial={false}>
-      {isCodeReady ? (
-        <motion.div
-          key="live-preview"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          <LiveProvider code={displayCode} scope={scope} noInline>
-            <LivePreview />
-            <LiveError className={cn(chatComponentErrorVariants({ size }))} />
-          </LiveProvider>
-        </motion.div>
-      ) : (
-        <AgentChatLoadingDots key="loading" className="text-[2px]" />
-      )}
-    </AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: 'easeOut' }}
+    >
+      <LiveProvider code={displayCode} scope={scope} noInline>
+        <LivePreview />
+        <LiveError className={cn(chatComponentErrorVariants({ size }))} />
+      </LiveProvider>
+    </motion.div>
   );
 }
