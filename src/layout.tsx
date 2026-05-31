@@ -14,7 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, Sparkles, Send, BarChart2 } from "lucide-react";
+import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, Sparkles, Send, BarChart2, TrendingUp } from "lucide-react";
 import { useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getPageUrl, logOut } from "@/lib/utils";
 import { LoginPage, AgentDashboard2Page, AgentProfilePage } from "@/product-types";
@@ -36,6 +36,7 @@ const navigationItems = [
   { title: "ניהול סוכנות", url: "/AgencyManager", icon: Building2 },
   { title: "מנהל משרד", url: "/OfficeManager", icon: Briefcase },
   { title: "השוואת מסלולים", url: "/InvestmentComparison", icon: BarChart2 },
+  { title: "השוואת מסלולים - iGemel", url: "/IGemelComparison", icon: TrendingUp },
   { title: "הפרופיל שלי", url: getPageUrl(AgentProfilePage), icon: User },
 ];
 

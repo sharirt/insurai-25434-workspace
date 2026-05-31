@@ -480,6 +480,49 @@ export const FundsEntity = {
 } as const;
 
 /**
+ * Stores parsed fund data fetched from igemel-net.co.il. Each row represents one fund/track combination with performance metrics, management fees, AUM, and metadata. Data is refreshed on demand or via scheduled trigger.
+ */
+export interface IIGemelFundsEntity {
+  /** Assets under management in millions of ILS  */
+  aumMn?: number;
+  /** Sharpe ratio  */
+  sharpe?: number;
+  /** Percentage of tradable assets  */
+  tradablePct?: number;
+  /** Investment track type in Hebrew (e.g. כללי, מניות)  */
+  track?: string;
+  /** Target audience in Hebrew  */
+  audience?: string;
+  /** URL to the fund detail page on igemel-net  */
+  fundUrl?: string;
+  /** Category of fund: קרנות השתלמות, קופות גמל, פנסיה, etc.  */
+  sourceCategory?: string;
+  /** Timestamp when this record was last fetched/updated. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  fetchedAt?: string;
+  /** Fund name in Hebrew  */
+  name?: string;
+  /** 1-year return percentage  */
+  ret1y?: number;
+  /** 3-year return percentage  */
+  ret3y?: number;
+  /** 5-year return percentage  */
+  ret5y?: number;
+  /** Total cumulative return percentage  */
+  retTotal?: number;
+  /** Management fee percentage  */
+  mgmtFee?: number;
+  /** Managing company name in Hebrew  */
+  company?: string;
+  /** Unique fund identifier from igemel-net  */
+  fundId?: string;
+}
+
+export const IGemelFundsEntity = {
+  tableBlockId: "6a1c8fd5141a627844eaa151",
+  instanceType: {} as IIGemelFundsEntity,
+} as const;
+
+/**
  * Stores investment track records that can be associated with insurance funds, including track name, type, risk level, and other relevant investment track details.
  */
 export interface IInvestmentTracksEntity {
@@ -900,6 +943,11 @@ export const FormPreviewPage = {
 export const FormsManagerPage = {
   pageBlockId: "69db99a87d23f0bc9a294ed2",
   pageName: "FormsManager",
+} as const;
+
+export const IGemelComparisonPage = {
+  pageBlockId: "6a1c9030eb13087ab37351bb",
+  pageName: "IGemelComparison",
 } as const;
 
 export const InvestmentComparisonPage = {
@@ -1522,6 +1570,49 @@ export const DescribeFormPdfFieldsAction = {
 
   inputInstanceType: {} as IDescribeFormPdfFieldsActionInput,
   outputInstanceType: {} as IDescribeFormPdfFieldsActionOutput,
+} as const;
+
+/**
+ * FetchIGemelFunds input payload
+ */
+export interface IFetchIGemelFundsActionInput {
+  /** Optional list of category slugs to fetch. If omitted, fetches all 6 categories. (default: ) */
+  categories?: string[];
+}
+
+/**
+ * undefined
+ */
+export interface IFetchIGemelFundsActionOutputFetchIGemelFundsActionOutputCategorySummaryItemObject {
+  category?: string;
+  url?: string;
+  inserted?: number;
+  error?: string;
+}
+
+/**
+ * FetchIGemelFunds output payload
+ */
+export interface IFetchIGemelFundsActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Total number of fund records inserted  */
+  totalInserted?: number;
+  /** ISO timestamp of when data was fetched  */
+  fetchedAt?: string;
+  categorySummary?: IFetchIGemelFundsActionOutputFetchIGemelFundsActionOutputCategorySummaryItemObject[];
+  errors?: string[];
+}
+
+/**
+ * FetchIGemelFundsAction
+ * Execute code action
+ */
+export const FetchIGemelFundsAction = {
+  actionBlockId: "6a1c8ff2eb13087ab372a895",
+
+  inputInstanceType: {} as IFetchIGemelFundsActionInput,
+  outputInstanceType: {} as IFetchIGemelFundsActionOutput,
 } as const;
 
 /**
