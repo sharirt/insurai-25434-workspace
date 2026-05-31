@@ -35,7 +35,7 @@ const navigationItems = [
   { title: "אימיילים ליצרנים", url: "/ProviderEmailsManager", icon: Mail },
   { title: "ניהול סוכנות", url: "/AgencyManager", icon: Building2 },
   { title: "מנהל משרד", url: "/OfficeManager", icon: Briefcase },
-  { title: "השוואת מסלולים", url: "/InvestmentComparison", icon: BarChart2 },
+  { title: "השוואת מסלולים mygemel.net", url: "/InvestmentComparison", icon: BarChart2 },
   { title: "השוואת מסלולים - iGemel", url: "/IGemelComparison", icon: TrendingUp },
   { title: "הפרופיל שלי", url: getPageUrl(AgentProfilePage), icon: User },
 ];

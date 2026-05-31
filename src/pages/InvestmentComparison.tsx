@@ -74,7 +74,7 @@ export default function InvestmentComparison() {
     <div className="p-4 md:p-6 max-w-7xl mx-auto" style={{ direction: "rtl" }}>
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between mb-6">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold text-foreground">השוואת מסלולי השקעה</h1>
+          <h1 className="text-2xl font-bold text-foreground">השוואת מסלולים mygemel.net</h1>
           {fetchedAt && (
             <p className="text-sm text-muted-foreground">
               עדכון אחרון: {new Date(fetchedAt).toLocaleString("he-IL")}
