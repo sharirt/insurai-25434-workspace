@@ -59,7 +59,7 @@ export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IG
             {COLUMNS.map((col) => (
               <TableHead
                 key={col.key}
-                className="cursor-pointer select-none whitespace-nowrap text-right"
+                className={`cursor-pointer select-none text-center ${col.key === 'track' ? 'w-24 max-w-[6rem]' : col.key === 'name' ? 'w-32 max-w-[8rem]' : 'whitespace-nowrap'}`}
                 onClick={() => onSort(col.key)}
               >
                 <span className="inline-flex items-center gap-1">
@@ -80,16 +80,16 @@ export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IG
             const retTotal = formatReturn(fund.retTotal);
             return (
               <TableRow key={fund.fundId ?? idx} className="hover:bg-muted/50">
-                <TableCell>{formatSharpe(fund.sharpe)}</TableCell>
-                <TableCell className="whitespace-nowrap">{formatAum(fund.aumMn)}</TableCell>
-                <TableCell>{formatFee(fund.mgmtFee)}</TableCell>
-                <TableCell className={retTotal.className}>{retTotal.text}</TableCell>
-                <TableCell className={ret5y.className}>{ret5y.text}</TableCell>
-                <TableCell className={ret3y.className}>{ret3y.text}</TableCell>
-                <TableCell className={ret1y.className}>{ret1y.text}</TableCell>
-                <TableCell className="whitespace-nowrap">{fund.track ?? '—'}</TableCell>
-                <TableCell className="whitespace-nowrap">{fund.company ?? '—'}</TableCell>
-                <TableCell className="whitespace-nowrap">
+                <TableCell className="text-center">{formatSharpe(fund.sharpe)}</TableCell>
+                <TableCell className="text-center whitespace-nowrap">{formatAum(fund.aumMn)}</TableCell>
+                <TableCell className="text-center">{formatFee(fund.mgmtFee)}</TableCell>
+                <TableCell className={`text-center ${retTotal.className}`}>{retTotal.text}</TableCell>
+                <TableCell className={`text-center ${ret5y.className}`}>{ret5y.text}</TableCell>
+                <TableCell className={`text-center ${ret3y.className}`}>{ret3y.text}</TableCell>
+                <TableCell className={`text-center ${ret1y.className}`}>{ret1y.text}</TableCell>
+                <TableCell className="text-center w-24 max-w-[6rem]">{fund.track ?? '—'}</TableCell>
+                <TableCell className="text-center whitespace-nowrap">{fund.company ?? '—'}</TableCell>
+                <TableCell className="text-center w-32 max-w-[8rem]">
                   {fund.fundUrl ? (
                     <a
                       href={fund.fundUrl}
