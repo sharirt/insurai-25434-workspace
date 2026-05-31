@@ -1528,8 +1528,8 @@ export const DescribeFormPdfFieldsAction = {
  * FetchMyGemelData input payload
  */
 export interface IFetchMyGemelDataActionInput {
-  /** The URL of the mygemel.net page to scrape (e.g. https://www.mygemel.net/קרנות-השתלמות) (default: "https://www.mygemel.net/קרנות-השתלמות") */
-  pageUrl?: string;
+  /** List of mygemel.net page URLs to scrape. If omitted, defaults to all 6 standard category pages. (default: ) */
+  urls?: string[];
 }
 
 /**
@@ -1559,6 +1559,8 @@ export interface IFetchMyGemelDataActionOutputAverageObject {
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject {
   /** Category name from h2.title  */
   category?: string;
+  /** The URL this category was fetched from  */
+  sourceUrl?: string;
   funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
   average?: IFetchMyGemelDataActionOutputAverageObject;
 }
@@ -1571,7 +1573,7 @@ export interface IFetchMyGemelDataActionOutput {
   status?: string;
   /** ISO timestamp of when data was fetched  */
   fetchedAt?: string;
-  /** Total number of categories parsed  */
+  /** Total number of categories parsed across all pages  */
   totalCategories?: number;
   categories?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject[];
   errors?: string[];
