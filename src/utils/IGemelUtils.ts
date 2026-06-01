@@ -9,7 +9,7 @@ export const CATEGORY_ORDER = [
   'חיסכון לכל ילד',
 ] as const;
 
-export type SortField = 'ret1y' | 'ret3y' | 'ret5y' | 'retTotal' | 'mgmtFee' | 'aumMn' | 'sharpe' | 'name' | 'company' | 'track';
+export type SortField = 'ret1y' | 'ret3y' | 'ret5y' | 'retTotal' | 'mgmtFee' | 'aumMn' | 'sharpe' | 'name' | 'company' | 'track' | 'fundId';
 export type SortDir = 'asc' | 'desc';
 
 export function sortFunds(

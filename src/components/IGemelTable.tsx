@@ -29,6 +29,7 @@ const COLUMNS: { key: SortField; label: string }[] = [
   { key: 'ret1y', label: 'תשואה שנה' },
   { key: 'track', label: 'מסלול' },
   { key: 'company', label: 'חברה מנהלת' },
+  { key: 'fundId', label: 'מספר קופה' },
   { key: 'name', label: 'שם הקופה' },
 ];
 
@@ -89,6 +90,7 @@ export const IGemelTable = ({ funds, isLoading, sortField, sortDir, onSort }: IG
                 <TableCell className={`text-center ${ret1y.className}`}>{ret1y.text}</TableCell>
                 <TableCell className="text-center w-24 max-w-[6rem]">{fund.track ?? '—'}</TableCell>
                 <TableCell className="text-center whitespace-nowrap">{fund.company ?? '—'}</TableCell>
+                <TableCell className="text-center whitespace-nowrap">{fund.fundId ?? '—'}</TableCell>
                 <TableCell className="text-center w-32 max-w-[8rem]">
                   {fund.fundUrl ? (
                     <a
