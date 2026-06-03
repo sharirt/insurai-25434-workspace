@@ -1129,7 +1129,7 @@ export interface IAnalyzePortfolioRiskActionOutput {
 
 /**
  * AnalyzePortfolioRiskAction
- * Analyzes the risk level of a client's investment portfolio. Fetches all Funds and InvestmentTracks for the given clientId, strips all personal identifiers, and sends the anonymized portfolio data along with a user-provided prompt to AI for risk scoring on a 1-10 scale.
+ * Analyzes the risk level of a client's investment portfolio. Fetches all Funds for the given clientId, then fetches InvestmentTracks per fund by policyNumber using forEach, strips all personal identifiers, and sends the anonymized portfolio data along with a user-provided prompt to AI for risk scoring on a 1-10 scale.
  */
 export const AnalyzePortfolioRiskAction = {
   actionBlockId: "6a207061bb9f277e7c9a2047",
