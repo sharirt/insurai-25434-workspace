@@ -14,10 +14,10 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, Sparkles, Send, BarChart2, TrendingUp } from "lucide-react";
+import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, Sparkles, Send, BarChart2, TrendingUp, ShieldAlert } from "lucide-react";
 import { useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getPageUrl, logOut } from "@/lib/utils";
-import { LoginPage, AgentDashboard2Page, AgentProfilePage } from "@/product-types";
+import { LoginPage, AgentDashboard2Page, AgentProfilePage, PortfolioRiskAnalysisPage } from "@/product-types";
 import { Button } from "@/components/ui/button";
 import { isAdminRole, isOfficeRole, ADMIN_ONLY_NAV_TITLES, OFFICE_HIDDEN_NAV_TITLES, canAccessPage } from "@/utils/AccessControl";
 import { AccessDenied } from "@/components/AccessDenied";
@@ -37,6 +37,7 @@ const navigationItems = [
   { title: "מנהל משרד", url: "/OfficeManager", icon: Briefcase },
   { title: "השוואת מסלולים mygemel.net", url: "/InvestmentComparison", icon: BarChart2 },
   { title: "השוואת מסלולים - iGemel", url: "/IGemelComparison", icon: TrendingUp },
+  { title: "ניתוח סיכון תיק", url: getPageUrl(PortfolioRiskAnalysisPage), icon: ShieldAlert },
   { title: "הפרופיל שלי", url: getPageUrl(AgentProfilePage), icon: User },
 ];
 

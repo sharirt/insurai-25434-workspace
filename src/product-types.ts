@@ -990,6 +990,11 @@ export const PdfFieldEditorPage = {
   pageName: "PdfFieldEditor",
 } as const;
 
+export const PortfolioRiskAnalysisPage = {
+  pageBlockId: "6a2070947c1b4a9b7afd2d79",
+  pageName: "PortfolioRiskAnalysis",
+} as const;
+
 export const ProviderEmailsManagerPage = {
   pageBlockId: "69db99b27d23f0bc9a2954c6",
   pageName: "ProviderEmailsManager",
@@ -1079,6 +1084,58 @@ export const AnalyzePdfFormFieldsAction = {
 
   inputInstanceType: {} as IAnalyzePdfFormFieldsActionInput,
   outputInstanceType: {} as IAnalyzePdfFormFieldsActionOutput,
+} as const;
+
+/**
+ * AnalyzePortfolioRisk input payload
+ */
+export interface IAnalyzePortfolioRiskActionInput {
+  /** The ID of the client whose portfolio will be analyzed  */
+  clientId: string;
+  /** The analysis prompt to send to the AI model  */
+  prompt: string;
+}
+
+/**
+ * undefined
+ */
+export interface IAnalyzePortfolioRiskActionOutputBreakdownObject {
+  /** ניתוח חשיפה למניות  */
+  equityExposure?: string;
+  /** ניתוח חשיפה לחו"ל  */
+  foreignExposure?: string;
+  /** ניתוח פיזור  */
+  diversification?: string;
+  /** ניתוח תשואות  */
+  returns?: string;
+}
+
+/**
+ * AnalyzePortfolioRisk output payload
+ */
+export interface IAnalyzePortfolioRiskActionOutput {
+  /** ציון סיכון על סקאלה של 1-10 (1=שמרני מאוד, 10=אגרסיבי מאוד)  */
+  riskScore: number;
+  /** תווית רמת הסיכון בעברית (למשל: שמרני, מאוזן, אגרסיבי)  */
+  riskLabel: string;
+  /** סיכום קצר של ניתוח הסיכון  */
+  summary: string;
+  /** נקודות חוזק של התיק  */
+  strengths: string[];
+  /** נקודות לשיפור בתיק  */
+  improvements: string[];
+  breakdown: IAnalyzePortfolioRiskActionOutputBreakdownObject;
+}
+
+/**
+ * AnalyzePortfolioRiskAction
+ * Analyzes the risk level of a client's investment portfolio. Fetches all Funds and InvestmentTracks for the given clientId, strips all personal identifiers, and sends the anonymized portfolio data along with a user-provided prompt to AI for risk scoring on a 1-10 scale.
+ */
+export const AnalyzePortfolioRiskAction = {
+  actionBlockId: "6a207061bb9f277e7c9a2047",
+
+  inputInstanceType: {} as IAnalyzePortfolioRiskActionInput,
+  outputInstanceType: {} as IAnalyzePortfolioRiskActionOutput,
 } as const;
 
 export type AnnotateFormPdfFieldsActionInputTypeEnum =
