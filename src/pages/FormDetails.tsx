@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PdfViewer } from "@/components/ui/pdf-viewer";
 import { FieldMappingEditor } from "@/components/FieldMappingEditor";
+import { PdfFieldClickOverlay } from "@/components/PdfFieldClickOverlay";
 import { SignatureFieldsEditor, PdfDropZone } from "@/components/SignatureFieldsEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
@@ -46,6 +47,10 @@ export default function FormDetails() {
   const [showFieldOverlay, setShowFieldOverlay] = useState(false);
   const [highlightedFieldName, setHighlightedFieldName] = useState<string | null>(null);
   const [isReanalyzing, setIsReanalyzing] = useState(false);
+
+  // Selection state
+  const [selectedFieldName, setSelectedFieldName] = useState<string | null>(null);
+  const fieldCardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Filter state
   const [fieldSearchTerm, setFieldSearchTerm] = useState("");
@@ -334,6 +339,22 @@ export default function FormDetails() {
       setIsReanalyzing(false);
     }
   }, [form, analyzeFields]);
+
+  // Scroll selected field card into view
+  useEffect(() => {
+    if (!selectedFieldName) return;
+    const el = fieldCardRefs.current.get(selectedFieldName);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [selectedFieldName]);
+
+  const handlePdfFieldClick = useCallback((fieldName: string) => {
+    setActiveTab("fieldMapping");
+    setFieldSearchTerm("");
+    setActiveTypeFilter("הכל");
+    setSelectedFieldName(fieldName);
+  }, []);
 
   const handleFieldHover = useCallback((fieldName: string) => {
     if (showFieldOverlay) {
@@ -698,6 +719,17 @@ export default function FormDetails() {
               </div>
             )}
 
+            {showFieldOverlay && pdfNativeSize && activeTab === "fieldMapping" && (
+              <PdfFieldClickOverlay
+                fields={analyzedFields}
+                currentPage={currentPage}
+                pdfNativeWidth={pdfNativeSize.pdfW}
+                pdfNativeHeight={pdfNativeSize.pdfH}
+                onFieldClick={handlePdfFieldClick}
+                containerRef={sigDragDrop.pdfContainerRef}
+              />
+            )}
+
             {activeTab === "signatureFields" && form.fileData?.url && (
               <PdfDropZone
                 isDragOver={sigDragDrop.isDragOver}
@@ -846,15 +878,24 @@ export default function FormDetails() {
                           </div>
                         ) : (
                           filteredFieldMappings.map(({ fieldName, mapping }) => (
-                            <FieldMappingEditor
+                            <div
                               key={fieldName}
-                              fieldName={fieldName}
-                              mapping={mapping}
-                              formId={form.id}
-                              isHighlighted={highlightedFieldName === fieldName}
-                              onHover={handleFieldHover}
-                              onHoverEnd={handleFieldHoverEnd}
-                            />
+                              ref={(el) => {
+                                if (el) fieldCardRefs.current.set(fieldName, el);
+                                else fieldCardRefs.current.delete(fieldName);
+                              }}
+                            >
+                              <FieldMappingEditor
+                                fieldName={fieldName}
+                                mapping={mapping}
+                                formId={form.id}
+                                isHighlighted={highlightedFieldName === fieldName}
+                                isSelected={selectedFieldName === fieldName}
+                                onHover={handleFieldHover}
+                                onHoverEnd={handleFieldHoverEnd}
+                                onSelect={setSelectedFieldName}
+                              />
+                            </div>
                           ))
                         )}
                         {fieldsCount > 0 && filteredFieldMappings.length === 0 && (

@@ -35,8 +35,10 @@ interface FieldMappingEditorProps {
   mapping: any;
   formId: string;
   isHighlighted?: boolean;
+  isSelected?: boolean;
   onHover?: (fieldName: string) => void;
   onHoverEnd?: () => void;
+  onSelect?: (fieldName: string) => void;
 }
 
 interface ParsedValue {
@@ -174,7 +176,7 @@ function buildStoredValue(
   return "";
 }
 
-export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted = false, onHover, onHoverEnd }: FieldMappingEditorProps) => {
+export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted = false, isSelected = false, onHover, onHoverEnd, onSelect }: FieldMappingEditorProps) => {
   const parsed = useMemo(() => parseStoredValue(mapping), [mapping]);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -362,12 +364,15 @@ export const FieldMappingEditor = ({ fieldName, mapping, formId, isHighlighted =
     <Card
       className={cn(
         "transition-all duration-150 overflow-hidden",
-        isHighlighted
-          ? "border-l-4 border-l-primary shadow-md bg-primary/5"
-          : "hover:border-primary/50"
+        isSelected
+          ? "border-l-4 border-l-primary shadow-md bg-primary/5 ring-1 ring-primary/30"
+          : isHighlighted
+            ? "border-l-4 border-l-primary shadow-md bg-primary/5"
+            : "hover:border-primary/50"
       )}
       onMouseEnter={() => !isEditing && onHover?.(fieldName)}
       onMouseLeave={() => !isEditing && onHoverEnd?.()}
+      onClick={() => onSelect?.(fieldName)}
     >
       <CardContent className="p-4 flex flex-col">
         <div className="flex items-start justify-between mb-3">
