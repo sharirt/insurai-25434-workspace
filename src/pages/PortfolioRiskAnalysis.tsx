@@ -22,9 +22,11 @@ export default function PortfolioRiskAnalysis() {
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [promptOpen, setPromptOpen] = useState(false);
 
-  const { executeFunction, result, isLoading } = useExecuteAction(
+  const { executeFunction, result, streamResult, isLoading } = useExecuteAction(
     AnalyzePortfolioRiskAction
   );
+
+  const displayResult = result ?? streamResult;
 
   const handleAnalyze = async () => {
     try {
@@ -105,7 +107,7 @@ export default function PortfolioRiskAnalysis() {
             </CardContent>
           </Card>
 
-          {result && <RiskResults result={result} />}
+          {displayResult && <RiskResults result={displayResult} />}
         </>
       )}
     </div>
