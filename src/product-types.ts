@@ -472,6 +472,8 @@ export interface IFundsEntity {
   providerName?: string;
   /** Agent number (מספר סוכן) as imported from Excel - stored as string to support formats like '2-5000'  */
   agentNumber?: string;
+  /** שם מסלול ההשקעה של הקרן (למשל: מניות, כללי, אג"ח, כספי, הלכתי וכו'). נתון קריטי לניתוח רמת הסיכון של תיק הלקוח.  */
+  investmentTrack?: string;
 }
 
 export const FundsEntity = {

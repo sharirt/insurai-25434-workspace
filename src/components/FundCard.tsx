@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -33,6 +33,10 @@ export const FundCard = ({ fund, tracks }: FundCardProps) => {
                 <Badge variant={isActive ? "default" : "secondary"}>
                   {fund.status ?? "—"}
                 </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <TrendingUp data-icon="inline-start" />
+                  {fund.investmentTrack ? fund.investmentTrack : <span className="text-muted-foreground">לא צוין</span>}
+                </Badge>
               </div>
               <ChevronDown className={cn("transition-transform text-muted-foreground", open && "rotate-180")} />
             </div>
@@ -41,6 +45,7 @@ export const FundCard = ({ fund, tracks }: FundCardProps) => {
         <CollapsibleContent>
           <CardContent className="flex flex-col gap-4">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+              <DetailItem label="מסלול השקעה" value={fund.investmentTrack} />
               <DetailItem label="סוג מוצר" value={fund.productType} />
               <DetailItem label="שם תוכנית" value={fund.planName} />
               <DetailItem label="מספר פוליסה" value={fund.policyNumber} />
