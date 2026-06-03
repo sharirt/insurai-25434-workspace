@@ -6,15 +6,16 @@ import * as React from 'react';
 import z from 'zod';
 
 import { Button } from '@/components/ui/button';
+import { useDeepAgentChatAssistantMessage } from '@/components/ui/deep-agent-chat-assistant-message-context';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 // ─── Schema / types ─────────────────────────────────────────────────────────
 
 export const GET_USER_CHOICE_TOOL_NAME = 'get_user_choice';
 export const GET_USER_CHOICE_TOOL_DESCRIPTION =
-  'Show a structured choice control in chat. Use this when the next step depends on the user selecting one or more options, not for open-ended text answers. If assistant text asks or introduces the choice, put that same exact user-facing question in `question` and the choices in `options`; the UI can hide the tool question label when assistant text is already visible, while still using `question` as the accessible label for the controls. Use `selectionMode="single"` for one choice and `selectionMode="multiple"` for pick-many. After calling this tool, wait for the submitted tool result before continuing; if the user replies in the composer instead, treat that as their answer.';
+  'Ask one closed-ended choice question in chat. MUST use this for predefined answers, including yes/no, either/or, multiple-choice, suggested meanings, clarification options, inline choices, or bullet choices. If you would list answer choices in prose, call this tool instead. Ask only one choice question per turn; for sequences, wait for each result before asking the next. Do not invite freeform typing unless `allowOther` is enabled. Set `question` to the visible prompt. Put all choices in `options`. Use `single` for one choice, `multiple` for pick-many. Cards are for described choices; chips are for short labels.';
 
 const GET_USER_CHOICE_OTHER_VALUE = '__other__';
 
@@ -27,7 +28,7 @@ const getUserChoiceOptionSchema = z.object({
   description: z
     .string()
     .optional()
-    .describe('Optional secondary text for card-style options.'),
+    .describe('Secondary option text. Shown on cards, ignored on chips.'),
 });
 
 export const getUserChoiceParametersSchema = z.object({
@@ -35,7 +36,7 @@ export const getUserChoiceParametersSchema = z.object({
     .string()
     .min(1)
     .describe(
-      'Exact question the user should answer. If assistant text asks this question too, repeat the same text here; the renderer may hide this label visually to avoid duplicate prompts but still uses it for accessibility.',
+      'Visible prompt shown above the choice UI. Do not include answer choices here.',
     ),
   selectionMode: z.enum(['single', 'multiple']).default('single'),
   options: z
@@ -58,10 +59,28 @@ export const getUserChoiceParametersSchema = z.object({
       {
         message: 'Option values must be unique',
       },
+    )
+    .describe(
+      'Complete set of predefined answer choices. For closed-ended questions, put every intended choice here instead of in prose.',
     ),
-  allowOther: z.boolean().optional(),
-  otherLabel: z.string().optional(),
-  presentation: z.enum(['chips', 'cards']).optional(),
+  allowOther: z
+    .boolean()
+    .optional()
+    .describe(
+      'Adds an Other option with a text input. Enable only when a valid answer may fall outside the predefined options.',
+    ),
+  otherLabel: z
+    .string()
+    .optional()
+    .describe(
+      'Label and text-input placeholder for the custom answer option. Defaults to "Other".',
+    ),
+  presentation: z
+    .enum(['chips', 'cards'])
+    .optional()
+    .describe(
+      'Option layout. Use cards for described choices and chips for short labels. Omit to auto-use cards when any option has a description.',
+    ),
   submitButtonText: z.string().optional(),
 });
 
@@ -90,6 +109,7 @@ export type GetUserChoiceResult =
       selectionMode: 'single';
       value: string | null;
       label: string | null;
+      description?: string;
       other?: string;
     }
   | {
@@ -97,12 +117,34 @@ export type GetUserChoiceResult =
       selectionMode: 'multiple';
       values: string[];
       labels: string[];
+      descriptions?: string[];
       other?: string;
     };
 
 export type GetUserChoiceSize = 'sm' | 'md' | 'lg';
 
 // ─── Payload helpers ────────────────────────────────────────────────────────
+
+const getMessageText = (content: unknown): string => {
+  if (!content) {
+    return '';
+  }
+  if (typeof content === 'string') {
+    return content;
+  }
+  if (!Array.isArray(content)) {
+    return '';
+  }
+  return content
+    .map((part) => {
+      if (!part || typeof part !== 'object' || !('text' in part)) {
+        return '';
+      }
+      const text = (part as { text?: unknown }).text;
+      return typeof text === 'string' ? text : '';
+    })
+    .join('');
+};
 
 const getSelectionMode = (parameters: GetUserChoiceParametersRenderInput) =>
   parameters.selectionMode === 'multiple' ? 'multiple' : 'single';
@@ -170,6 +212,11 @@ const getChoiceOptionLabel = (
   value: string,
 ) => options.find((option) => option.value === value)?.label ?? value;
 
+const getChoiceOption = (
+  options: GetUserChoiceRenderableOption[],
+  value: string,
+) => options.find((option) => option.value === value);
+
 const getResultFormState = (
   result: GetUserChoiceResult | undefined,
 ): { selectedValues: string[]; otherAnswer: string } => {
@@ -208,11 +255,15 @@ const buildChoiceResult = (
     const values = selectedValues.filter(
       (value) => value !== GET_USER_CHOICE_OTHER_VALUE,
     );
+    const descriptions = values
+      .map((value) => getChoiceOption(options, value)?.description)
+      .filter((description): description is string => Boolean(description));
     return {
       status: 'answered',
       selectionMode: 'multiple',
       values,
       labels: values.map((value) => getChoiceOptionLabel(options, value)),
+      ...(descriptions.length ? { descriptions } : {}),
       ...(selectedValues.includes(GET_USER_CHOICE_OTHER_VALUE) && trimmedOther
         ? { other: trimmedOther }
         : {}),
@@ -230,11 +281,15 @@ const buildChoiceResult = (
     };
   }
 
+  const selectedOption = getChoiceOption(options, value);
   return {
     status: 'answered',
     selectionMode: 'single',
     value,
-    label: getChoiceOptionLabel(options, value),
+    label: selectedOption?.label ?? value,
+    ...(selectedOption?.description
+      ? { description: selectedOption.description }
+      : {}),
   };
 };
 
@@ -322,7 +377,7 @@ const getUserChoiceOtherChipItemVariants = cva(
   cn(
     'inline-flex cursor-pointer items-center justify-center rounded-full border border-input bg-transparent text-base font-normal leading-normal text-muted-foreground transition-colors disabled:cursor-default',
     'hover:bg-transparent hover:text-foreground hover:border-foreground',
-    'data-[state=on]:bg-primary data-[state=on]:text-primary-foreground',
+    'data-[state=on]:bg-transparent data-[state=on]:text-foreground',
     'data-[state=on]:border-2 data-[state=on]:border-primary data-[state=on]:-m-px',
   ),
   {
@@ -337,14 +392,14 @@ const getUserChoiceOtherChipItemVariants = cva(
   },
 );
 
-const getUserChoiceOtherTextareaVariants = cva(
-  'w-1/2 resize-none overflow-hidden rounded-full text-base font-normal leading-normal',
+const getUserChoiceOtherInputVariants = cva(
+  'w-1/2 rounded-full text-base font-normal leading-normal',
   {
     variants: {
       size: {
-        sm: 'h-7 min-h-7 px-3 py-0.5',
-        md: 'h-8 min-h-8 px-4 py-1',
-        lg: 'h-9 min-h-9 px-5 py-1.5',
+        sm: 'h-7 px-3 py-0.5',
+        md: 'h-8 px-4 py-1',
+        lg: 'h-9 px-5 py-1.5',
       },
     },
     defaultVariants: { size: 'md' },
@@ -353,18 +408,18 @@ const getUserChoiceOtherTextareaVariants = cva(
 
 const getUserChoiceCardItemVariants = cva(
   cn(
-    'group/card relative flex w-full cursor-pointer items-start gap-3 rounded-lg border border-input bg-background text-left text-base font-normal leading-normal text-foreground transition-colors disabled:cursor-default',
+    'group/card relative flex w-full cursor-pointer items-start gap-3 rounded-xl border border-input bg-background text-left text-base font-normal leading-normal text-foreground transition-colors disabled:cursor-default',
     'hover:bg-background hover:text-foreground hover:border-foreground',
     'data-[state=on]:bg-background data-[state=on]:text-foreground',
-    'data-[state=on]:border-2 data-[state=on]:border-foreground data-[state=on]:-m-px',
+    'data-[state=on]:border-foreground',
     'whitespace-normal',
   ),
   {
     variants: {
       size: {
-        sm: 'h-auto min-h-12 px-3 py-2',
-        md: 'h-auto min-h-14 px-3 py-2.5',
-        lg: 'h-auto min-h-16 px-4 py-3',
+        sm: 'h-auto px-3 py-2',
+        md: 'h-auto px-3 py-2.5',
+        lg: 'h-auto px-4 py-3',
       },
     },
     defaultVariants: { size: 'md' },
@@ -397,6 +452,10 @@ const getUserChoiceCardDescriptionVariants = cva(
     },
     defaultVariants: { size: 'md' },
   },
+);
+
+const getUserChoiceCardIndicatorWrapperVariants = cva(
+  'flex shrink-0 items-start justify-center self-stretch',
 );
 
 const getUserChoiceCardCheckIndicatorVariants = cva(
@@ -484,6 +543,8 @@ const getUserChoiceClearButtonVariants = cva(
 
 const getUserChoiceGroupSpacing = (size: GetUserChoiceSize): string =>
   size === 'sm' ? 'gap-1.5' : size === 'lg' ? 'gap-2.5' : 'gap-2';
+const getUserChoiceCardsSubmitSpacing = (size: GetUserChoiceSize): string =>
+  size === 'sm' ? 'mt-1.5' : size === 'lg' ? 'mt-2.5' : 'mt-2';
 
 // ─── Subcomponents ──────────────────────────────────────────────────────────
 
@@ -527,9 +588,11 @@ function CardOptionContent({
   selected: boolean;
 }) {
   return (
-    <>
+    <span className="flex min-w-0 flex-1 items-stretch gap-3">
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className={cn(getUserChoiceCardTitleVariants({ size }))}>
+        <span
+          className={cn('min-w-0', getUserChoiceCardTitleVariants({ size }))}
+        >
           {option.label}
         </span>
         {option.description && (
@@ -538,28 +601,32 @@ function CardOptionContent({
           </span>
         )}
       </span>
-      <span
-        className={cn(
-          getUserChoiceCardCheckIndicatorVariants({ size }),
-          selectionMode === 'single' ? 'rounded-full' : 'rounded-md',
-          selected
-            ? selectionMode === 'single'
-              ? 'border-primary bg-transparent'
-              : 'border-primary bg-primary text-primary-foreground'
-            : 'border-border bg-transparent',
-        )}
-        aria-hidden="true"
-      >
-        {selected &&
-          (selectionMode === 'single' ? (
-            <span className={cn(getUserChoiceCardRadioDotVariants({ size }))} />
-          ) : (
-            <Check
-              className={cn(getUserChoiceCardCheckIconVariants({ size }))}
-            />
-          ))}
+      <span className={cn(getUserChoiceCardIndicatorWrapperVariants())}>
+        <span
+          className={cn(
+            getUserChoiceCardCheckIndicatorVariants({ size }),
+            selectionMode === 'single' ? 'rounded-full' : 'rounded-md',
+            selected
+              ? selectionMode === 'single'
+                ? 'border-primary bg-transparent'
+                : 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-transparent',
+          )}
+          aria-hidden="true"
+        >
+          {selected &&
+            (selectionMode === 'single' ? (
+              <span
+                className={cn(getUserChoiceCardRadioDotVariants({ size }))}
+              />
+            ) : (
+              <Check
+                className={cn(getUserChoiceCardCheckIconVariants({ size }))}
+              />
+            ))}
+        </span>
       </span>
-    </>
+    </span>
   );
 }
 
@@ -637,7 +704,7 @@ function OtherOptionButton({
     <Button
       type="button"
       variant="primary-ghost"
-      size="sm"
+      size={isCards ? 'sm' : 'icon-sm'}
       role={selectionMode === 'single' ? 'radio' : 'checkbox'}
       aria-checked={isSelected}
       aria-label={label}
@@ -671,8 +738,12 @@ function OtherAnswerInput({
   isInvalid,
   isReadOnly,
   size,
+  submitButtonText,
+  showSubmitButton,
+  isSubmitDisabled,
   onChange,
   onClear,
+  onSubmit,
 }: {
   labelId: string;
   otherLabel?: string;
@@ -680,20 +751,23 @@ function OtherAnswerInput({
   isInvalid: boolean;
   isReadOnly: boolean;
   size: GetUserChoiceSize;
+  submitButtonText?: string;
+  showSubmitButton?: boolean;
+  isSubmitDisabled?: boolean;
   onChange: (value: string) => void;
   onClear: () => void;
+  onSubmit: () => void;
 }) {
   return (
-    <div className="flex w-full items-start gap-2">
-      <Textarea
-        rows={1}
+    <div className="flex w-full items-center gap-2">
+      <Input
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={otherLabel || 'Other'}
         disabled={isReadOnly}
         aria-invalid={isInvalid || undefined}
         aria-labelledby={labelId}
-        className={cn(getUserChoiceOtherTextareaVariants({ size }))}
+        className={cn(getUserChoiceOtherInputVariants({ size }))}
       />
       <Button
         type="button"
@@ -706,6 +780,15 @@ function OtherAnswerInput({
       >
         <X className={cn(getUserChoiceIconVariants({ size }))} />
       </Button>
+      {showSubmitButton && (
+        <SendArrowButton
+          size={size}
+          label="Send"
+          text={submitButtonText}
+          disabled={isSubmitDisabled}
+          onClick={onSubmit}
+        />
+      )}
     </div>
   );
 }
@@ -715,25 +798,21 @@ function OtherAnswerInput({
 interface GetUserChoiceToolProps {
   parameters: GetUserChoiceParametersRenderInput;
   result?: GetUserChoiceResult;
-  hideQuestionLabel?: boolean;
   respond?: (result: unknown) => Promise<void>;
   size?: GetUserChoiceSize;
 }
 
 export function GetUserChoiceSkipped({
   parameters,
-  hideQuestionLabel,
   size = 'md',
 }: {
   parameters: GetUserChoiceParametersRenderInput;
-  hideQuestionLabel?: boolean;
   size?: GetUserChoiceSize;
 }) {
   return (
     <GetUserChoiceTool
       parameters={parameters}
       result={{ status: 'skipped' }}
-      hideQuestionLabel={hideQuestionLabel}
       size={size}
     />
   );
@@ -742,11 +821,11 @@ export function GetUserChoiceSkipped({
 export function GetUserChoiceTool({
   parameters,
   result,
-  hideQuestionLabel = false,
   respond,
   size = 'md',
 }: GetUserChoiceToolProps) {
   const formId = React.useId();
+  const assistantMessage = useDeepAgentChatAssistantMessage();
   const options = React.useMemo(
     () => getValidatedChoiceOptions(parameters.options),
     [parameters.options],
@@ -777,15 +856,24 @@ export function GetUserChoiceTool({
   const isOtherSelected = selectedValues.includes(GET_USER_CHOICE_OTHER_VALUE);
   const isInvalid = isChoiceInvalid(parameters, selectedValues, otherAnswer);
   const showInvalid = hasSubmittedInvalidAnswer && isInvalid;
+  const isSingleAllowOtherFlow =
+    selectionMode === 'single' && Boolean(parameters.allowOther);
   const isInstantSubmitFlow =
     options.length > 0 &&
     selectionMode === 'single' &&
     !parameters.allowOther &&
     !isCards;
-  const showSubmitButton = options.length > 0 && !isInstantSubmitFlow;
+  const showSubmitButton =
+    options.length > 0 &&
+    (isSingleAllowOtherFlow ? isOtherSelected : !isInstantSubmitFlow);
+  const showOtherSubmitButton = showSubmitButton && isOtherSelected;
+  const showInlineSubmitButton =
+    showSubmitButton && !isCards && !showOtherSubmitButton;
+  const showCardsSubmitButton = showSubmitButton && isCards && !isOtherSelected;
   const question = parameters.question?.trim();
-  const isQuestionLabelHidden = !question || hideQuestionLabel;
-  const controlAccessibleLabel = question || 'Choose an option';
+  const assistantMessageText = getMessageText(assistantMessage?.content).trim();
+  const controlAccessibleLabel =
+    question || assistantMessageText || 'Choose an option';
   const labelId = `${formId}-get-user-choice-label`;
 
   React.useEffect(() => {
@@ -818,7 +906,10 @@ export function GetUserChoiceTool({
 
     const nextValues = [value];
     setSelectedValues(nextValues);
-    if (isInstantSubmitFlow && value !== GET_USER_CHOICE_OTHER_VALUE) {
+    if (
+      (isInstantSubmitFlow || isSingleAllowOtherFlow) &&
+      value !== GET_USER_CHOICE_OTHER_VALUE
+    ) {
       void submitWith(nextValues, otherAnswer);
     }
   };
@@ -887,7 +978,7 @@ export function GetUserChoiceTool({
           className={cn(
             'w-full cursor-text opacity-100',
             getUserChoiceLabelVariants({ size, invalid: showInvalid }),
-            isQuestionLabelHidden && 'sr-only',
+            !question && 'sr-only',
           )}
         >
           {question}
@@ -933,6 +1024,33 @@ export function GetUserChoiceTool({
                 onSelect={selectValue}
               />
             )}
+
+            {showInlineSubmitButton && (
+              <SendArrowButton
+                size={size}
+                label="Send"
+                text={parameters.submitButtonText}
+                disabled={isInteractionLocked || isInvalid}
+                onClick={handleSendClick}
+              />
+            )}
+
+            {showCardsSubmitButton && (
+              <div
+                className={cn(
+                  'flex justify-start',
+                  getUserChoiceCardsSubmitSpacing(size),
+                )}
+              >
+                <SendArrowButton
+                  size={size}
+                  label="Send"
+                  text={parameters.submitButtonText}
+                  disabled={isInteractionLocked || isInvalid}
+                  onClick={handleSendClick}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -944,27 +1062,34 @@ export function GetUserChoiceTool({
             isInvalid={showInvalid}
             isReadOnly={isReadOnly}
             size={size}
+            submitButtonText={parameters.submitButtonText}
+            showSubmitButton={showOtherSubmitButton}
+            isSubmitDisabled={isInteractionLocked || isInvalid}
             onChange={(value) => {
               if (!isInteractionLocked) {
                 setOtherAnswer(value);
               }
             }}
             onClear={clearOtherAnswer}
+            onSubmit={handleSendClick}
           />
         )}
       </Field>
 
-      {showSubmitButton && (
-        <div className={cn(getUserChoiceActionRowVariants({ size }))}>
-          <SendArrowButton
-            size={size}
-            label="Send"
-            text={parameters.submitButtonText}
-            disabled={isInteractionLocked || isInvalid}
-            onClick={handleSendClick}
-          />
-        </div>
-      )}
+      {showSubmitButton &&
+        !showInlineSubmitButton &&
+        !showOtherSubmitButton &&
+        !showCardsSubmitButton && (
+          <div className={cn(getUserChoiceActionRowVariants({ size }))}>
+            <SendArrowButton
+              size={size}
+              label="Send"
+              text={parameters.submitButtonText}
+              disabled={isInteractionLocked || isInvalid}
+              onClick={handleSendClick}
+            />
+          </div>
+        )}
     </FieldGroup>
   );
 }
@@ -985,12 +1110,10 @@ const parseGetUserChoiceToolResult = (
 export function GetUserChoiceToolResult({
   result,
   args,
-  hideQuestionLabel,
   respond,
 }: {
   result?: string;
   args: GetUserChoiceParametersRenderInput;
-  hideQuestionLabel?: boolean;
   respond?: (result: unknown) => Promise<void>;
 }) {
   const parsedResult = parseGetUserChoiceToolResult(result);
@@ -1001,19 +1124,13 @@ export function GetUserChoiceToolResult({
   }
 
   if (parsedResult?.status === 'skipped') {
-    return (
-      <GetUserChoiceSkipped
-        parameters={args}
-        hideQuestionLabel={hideQuestionLabel}
-      />
-    );
+    return <GetUserChoiceSkipped parameters={args} />;
   }
 
   return (
     <GetUserChoiceTool
       parameters={args}
       result={parsedResult}
-      hideQuestionLabel={hideQuestionLabel}
       respond={respond}
     />
   );

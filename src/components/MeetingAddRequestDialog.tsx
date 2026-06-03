@@ -332,10 +332,10 @@ export const MeetingAddRequestDialog = ({
   //   if ((e.target as HTMLElement).closest("input")) return;
   //   e.preventDefault();
   // };
-  const handleSelectSearchRowPointerDown = (
-    e: React.PointerEvent<HTMLDivElement>
+  const handleSelectSearchRowMouseDown = (
+    e: React.MouseEvent<HTMLDivElement>
   ) => {
-    if ((e.target as HTMLElement).closest("input")) return;
+    if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).closest("input")) return;
     e.preventDefault();
   };
 
@@ -440,7 +440,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectContent>
                     <div
                       className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowPointerDown}
+                      onMouseDown={handleSelectSearchRowMouseDown}
                     >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
@@ -449,6 +449,7 @@ export const MeetingAddRequestDialog = ({
                         value={requestTypeSearch}
                         onChange={(e) => setRequestTypeSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">
@@ -488,7 +489,7 @@ export const MeetingAddRequestDialog = ({
                   <SelectContent>
                     <div
                       className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowPointerDown}
+                      onMouseDown={handleSelectSearchRowMouseDown}
                     >
                       <Search className="size-4 text-muted-foreground flex-shrink-0" />
                       <input
@@ -497,6 +498,7 @@ export const MeetingAddRequestDialog = ({
                         value={providerSearch}
                         onChange={(e) => setProviderSearch(e.target.value)}
                         onKeyDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
                       />
                     </div>
                     <div className="max-h-[200px] overflow-y-auto">

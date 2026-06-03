@@ -15,15 +15,19 @@ import {
   Paperclip,
   X,
 } from 'lucide-react';
+import { motion, MotionProps } from 'motion/react';
 import * as React from 'react';
 import { Streamdown } from 'streamdown';
 import { z } from 'zod';
 
-import { ChatCodeComponent } from '@/components/ui/agent-chat-code-component';
-import { AgentChatLoadingDots } from '@/components/ui/agent-chat-loading-dots';
+import {
+  AgentChatProductTypesProvider,
+  ChatCodeComponent,
+} from '@/components/ui/agent-chat-code-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DeepAgentChatAssistantMessageContext } from '@/components/ui/deep-agent-chat-assistant-message-context';
 import {
   GET_USER_CHOICE_TOOL_DESCRIPTION,
   GET_USER_CHOICE_TOOL_NAME,
@@ -38,10 +42,6 @@ export const agentChatContentVariants = cva(
   'flex flex-col overflow-hidden h-full w-full',
   {
     variants: {
-      variant: {
-        bubble: '',
-        minimal: '',
-      },
       userPosition: {
         side: '',
         bottom: '',
@@ -53,7 +53,6 @@ export const agentChatContentVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'bubble',
       userPosition: 'side',
       size: 'md',
     },
@@ -67,14 +66,108 @@ export const agentChatMessagesVariants = cva('flex flex-col', {
       md: 'p-2',
       lg: 'p-3',
     },
-    variant: {
-      bubble: '',
-      minimal: '',
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+export const agentChatMessageVariants = cva(
+  'group relative flex transition-colors',
+  {
+    variants: {
+      size: {
+        sm: 'px-2 pb-3 gap-x-1',
+        md: 'px-2 pb-3 gap-x-1',
+        lg: 'px-3 pb-4 gap-x-1.5',
+      },
+      role: {
+        user: 'flex-row-reverse',
+        assistant: 'flex-row',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      role: 'assistant',
+    },
+  },
+);
+
+export const agentChatMessagePartVariants = cva('relative flex flex-col', {
+  variants: {
+    size: {
+      sm: 'py-1.5 px-2',
+      md: 'py-1.5 px-2',
+      lg: 'py-2 px-2',
+    },
+    role: {
+      user: 'bg-primary text-primary-foreground rounded-lg max-w-full',
+      assistant: 'max-w-full',
     },
   },
   defaultVariants: {
     size: 'md',
-    variant: 'bubble',
+    role: 'assistant',
+  },
+});
+
+export const agentChatLoadingDotsWrapperVariants = cva('flex items-center', {
+  variants: {
+    size: {
+      sm: 'h-5',
+      md: 'h-6',
+      lg: 'h-7',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+export const agentChatLoadingDotsVariants = cva(
+  "text-[2px] relative mx-[3.5em] inline-block size-[2.5em] animate-bubble-loader rounded-full text-muted-foreground/70 indent-[-9999em] transform-[translateZ(0)_translateY(-2.5em)] [animation-delay:-0.16s] [animation-fill-mode:both] before:absolute before:left-[-3.5em] before:top-0 before:size-[2.5em] before:animate-bubble-loader before:rounded-full before:content-[''] before:[animation-delay:-0.32s] before:[animation-fill-mode:both] after:absolute after:left-[3.5em] after:top-0 after:size-[2.5em] after:animate-bubble-loader after:rounded-full after:content-[''] after:[animation-fill-mode:both]",
+  {
+    variants: {
+      size: {
+        sm: '',
+        md: '',
+        lg: '',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+    },
+  },
+);
+
+export const agentChatMessageAvatarVariants = cva('shrink-0', {
+  variants: {
+    role: {
+      user: '',
+      assistant: '',
+    },
+    size: {
+      sm: 'h-6 w-6',
+      md: 'h-8 w-8',
+      lg: 'h-10 w-10',
+    },
+  },
+  defaultVariants: {
+    role: 'assistant',
+    size: 'md',
+  },
+});
+
+export const agentChatMessageAvatarFallbackVariants = cva('', {
+  variants: {
+    size: {
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'text-lg',
+    },
+  },
+  defaultVariants: {
+    size: 'md',
   },
 });
 
@@ -82,190 +175,22 @@ export const agentChatMessageTimestampVariants = cva(
   'flex items-center opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100',
   {
     variants: {
-      variant: {
-        bubble: '',
-        minimal: '',
-      },
       role: {
-        user: '',
-        assistant: '',
-      },
-      userPosition: {
-        side: '',
-        bottom: '',
+        user: 'flex-row-reverse',
+        assistant: 'flex-row',
       },
       size: {
-        sm: '',
-        md: '',
-        lg: '',
+        sm: 'px-2 py-1',
+        md: 'px-3 py-1.5',
+        lg: 'px-4 py-2',
       },
     },
-    compoundVariants: [
-      {
-        variant: 'bubble',
-        size: 'sm',
-        className: 'px-2 py-1',
-      },
-      {
-        variant: 'bubble',
-        size: 'md',
-        className: 'px-3 py-1.5',
-      },
-      {
-        variant: 'bubble',
-        size: 'lg',
-        className: 'px-4 py-2',
-      },
-      {
-        userPosition: 'bottom',
-        size: 'sm',
-        className: 'gap-2',
-      },
-      {
-        userPosition: 'bottom',
-        size: 'md',
-        className: 'gap-2',
-      },
-      {
-        userPosition: 'bottom',
-        size: 'lg',
-        className: 'gap-3',
-      },
-      {
-        variant: 'bubble',
-        role: 'assistant',
-        className: 'flex-row',
-      },
-      {
-        variant: 'bubble',
-        role: 'user',
-        className: 'flex-row-reverse',
-      },
-    ],
     defaultVariants: {
-      variant: 'bubble',
-      userPosition: 'side',
-      size: 'md',
       role: 'assistant',
+      size: 'md',
     },
   },
 );
-
-export const messageVariants = cva('group relative flex transition-colors', {
-  variants: {
-    variant: {
-      bubble: '',
-      minimal: '',
-    },
-    size: {
-      sm: '',
-      md: '',
-      lg: '',
-    },
-    role: {
-      user: '',
-      assistant: '',
-    },
-  },
-  compoundVariants: [
-    {
-      variant: 'bubble',
-      size: 'sm',
-      className: 'p-2 gap-2',
-    },
-    {
-      variant: 'bubble',
-      size: 'md',
-      className: 'p-2 gap-2',
-    },
-    {
-      variant: 'bubble',
-      size: 'lg',
-      className: 'p-3 gap-3',
-    },
-    {
-      variant: 'bubble',
-      role: 'assistant',
-      className: 'flex-row',
-    },
-    {
-      variant: 'bubble',
-      role: 'user',
-      className: 'flex-row-reverse',
-    },
-  ],
-  defaultVariants: {
-    variant: 'bubble',
-    size: 'md',
-    role: 'assistant',
-  },
-});
-
-export const messageContentVariants = cva('relative flex flex-col', {
-  variants: {
-    variant: {
-      bubble: '',
-      minimal: 'max-w-none',
-    },
-    size: {
-      sm: 'gap-y-2',
-      md: 'gap-y-3',
-      lg: 'gap-y-4',
-    },
-    role: {
-      user: '',
-      assistant: '',
-    },
-  },
-  compoundVariants: [
-    {
-      role: 'user',
-      variant: 'bubble',
-      className:
-        'bg-primary text-primary-foreground rounded-lg max-w-full md:max-w-[70%]',
-    },
-    {
-      role: 'assistant',
-      variant: 'bubble',
-      className: 'max-w-full',
-    },
-    {
-      variant: 'bubble',
-      size: 'sm',
-      className: 'px-2 py-1',
-    },
-    {
-      variant: 'bubble',
-      size: 'md',
-      className: 'px-3 py-1',
-    },
-    {
-      variant: 'bubble',
-      size: 'lg',
-      className: 'px-4 py-2',
-    },
-    {
-      variant: 'minimal',
-      className: '!px-0 !py-0 !ml-0 !mr-0',
-    },
-    {
-      size: 'sm',
-      className: 'min-h-8',
-    },
-    {
-      size: 'md',
-      className: 'min-h-9',
-    },
-    {
-      size: 'lg',
-      className: 'min-h-10',
-    },
-  ],
-  defaultVariants: {
-    size: 'md',
-    variant: 'bubble',
-  },
-});
 
 export const agentChatFooterVariants = cva('flex flex-col border-t shrink-0', {
   variants: {
@@ -296,132 +221,8 @@ export const agentChatFetchingContentVariants = cva(
   },
 );
 
-export const agentChatAvatarVariants = cva('shrink-0', {
-  variants: {
-    role: {
-      user: '',
-      assistant: '',
-    },
-    size: {
-      sm: '',
-      md: '',
-      lg: '',
-    },
-    userPosition: {
-      side: '',
-      bottom: 'h-7 w-7',
-    },
-  },
-  compoundVariants: [
-    {
-      userPosition: 'side',
-      size: 'sm',
-      className: 'h-6 w-6',
-    },
-    {
-      userPosition: 'side',
-      size: 'md',
-      className: 'h-8 w-8',
-    },
-    {
-      userPosition: 'side',
-      size: 'lg',
-      className: 'h-10 w-10',
-    },
-  ],
-  defaultVariants: {
-    role: 'assistant',
-    size: 'md',
-    userPosition: 'side',
-  },
-});
-
-export const agentChatAvatarFallbackVariants = cva('', {
-  variants: {
-    size: {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
-    },
-    userPosition: {
-      side: '',
-      bottom: 'text-sm',
-    },
-  },
-  defaultVariants: {
-    size: 'md',
-  },
-});
-
-export const agentChatMessageContentWrapperVariants = cva(
-  'flex flex-col flex-1',
-  {
-    variants: {
-      variant: {
-        bubble: '',
-        minimal: '',
-      },
-      size: {
-        sm: '',
-        md: '',
-        lg: '',
-      },
-      role: {
-        user: '',
-        assistant: '',
-      },
-    },
-    compoundVariants: [
-      {
-        variant: 'minimal',
-        size: 'md',
-        className: 'gap-1',
-      },
-      {
-        variant: 'minimal',
-        size: 'lg',
-        className: 'gap-1',
-      },
-      {
-        variant: 'bubble',
-        size: 'sm',
-        className: '',
-      },
-      {
-        variant: 'bubble',
-        size: 'md',
-        className: '',
-      },
-      {
-        variant: 'bubble',
-        size: 'lg',
-        className: '',
-      },
-      {
-        role: 'user',
-        variant: 'bubble',
-        className: 'items-end',
-      },
-      {
-        role: 'assistant',
-        variant: 'bubble',
-        className: 'items-start',
-      },
-    ],
-    defaultVariants: {
-      variant: 'bubble',
-      size: 'md',
-      role: 'assistant',
-    },
-  },
-);
-
 const agentChatMessageAttachmentsVariants = cva('flex flex-wrap', {
   variants: {
-    variant: {
-      bubble: '',
-      minimal: '',
-    },
     role: {
       user: '',
       assistant: '',
@@ -434,18 +235,15 @@ const agentChatMessageAttachmentsVariants = cva('flex flex-wrap', {
   },
   compoundVariants: [
     {
-      variant: 'bubble',
       role: 'assistant',
       className: 'flex-row',
     },
     {
-      variant: 'bubble',
       role: 'user',
       className: 'flex-row-reverse',
     },
   ],
   defaultVariants: {
-    variant: 'bubble',
     role: 'assistant',
     size: 'md',
   },
@@ -481,13 +279,13 @@ const agentChatAttachmentBadgeVariants = cva(
 );
 
 const agentChatInputVariants = cva(
-  'resize-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none [field-sizing:content] min-h-[auto]',
+  'resize-none border-none shadow-none hover:shadow-none focus:shadow-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[auto]',
   {
     variants: {
       size: {
         sm: 'p-2 text-sm md:text-sm leading-4',
         md: 'p-2 text-sm md:text-base leading-6',
-        lg: 'p-2 text-lg md:text-lg leading-6',
+        lg: 'p-4 text-lg md:text-lg leading-6',
       },
     },
     defaultVariants: {
@@ -508,6 +306,18 @@ export const getFileIcon = (fileType: string) => {
   return File;
 };
 
+function AttachmentFileIcon({ fileType }: { fileType: string }) {
+  if (fileType.startsWith('image/')) {
+    return <FileImage className="shrink-0" />;
+  }
+
+  if (fileType.includes('pdf') || fileType.includes('doc')) {
+    return <FileText className="shrink-0" />;
+  }
+
+  return <File className="shrink-0" />;
+}
+
 export type Message = AgentChatPrimitive.Message;
 export type Attachment = AgentChatPrimitive.Attachment;
 
@@ -525,8 +335,6 @@ function AgentChatAttachmentBadge({
   size = 'md',
   className,
 }: AgentChatAttachmentBadgeProps) {
-  const Icon = getFileIcon(attachment.fileType);
-
   return (
     <Badge
       variant="outline"
@@ -536,7 +344,7 @@ function AgentChatAttachmentBadge({
         className,
       )}
     >
-      <Icon className="shrink-0" />
+      <AttachmentFileIcon fileType={attachment.fileType} />
       <span className="font-normal truncate grow">{attachment.fileName}</span>
       {onRemove && (
         <button
@@ -552,22 +360,11 @@ function AgentChatAttachmentBadge({
   );
 }
 
-export interface AgentChatMessageProps {
-  message: Message;
-  index: number;
-  showTimestamp?: boolean;
-  dateFormat?: string;
-  userPosition?: 'side' | 'bottom';
-  hideAvatar?: boolean;
-  renderToolCall: ReturnType<typeof AgentChatPrimitive.useRenderToolCall>;
-}
-
 function AgentChatAvatar({
   role = 'assistant',
   size = 'md',
-  userPosition = 'side',
   className,
-}: VariantProps<typeof agentChatAvatarVariants> & {
+}: VariantProps<typeof agentChatMessageAvatarVariants> & {
   className?: string;
 }) {
   const client = useClient();
@@ -577,12 +374,11 @@ function AgentChatAvatar({
   const displayName = React.useMemo(() => {
     if (role === 'assistant') {
       if (agent?.title) {
-        const agentChatInitials = agent.title
+        return agent.title
           .split(' ')
           .map((word) => word[0])
           .join('')
           .toUpperCase();
-        return agentChatInitials;
       }
       return 'AI';
     }
@@ -593,31 +389,50 @@ function AgentChatAvatar({
 
     const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`;
     return initials || 'U';
-  }, [role, user.firstName, user.lastName, agent?.title]);
+  }, [role, user, agent?.title]);
 
   return (
     <Avatar
-      className={cn(
-        agentChatAvatarVariants({
-          role,
-          size,
-          userPosition,
-          className,
-        }),
-      )}
+      className={cn(agentChatMessageAvatarVariants({ role, size, className }))}
     >
       <AvatarImage
         src={role === 'user' ? user.profileImageUrl : agent?.photoUrl}
       />
       <AvatarFallback
-        className={agentChatAvatarFallbackVariants({
-          size,
-          userPosition,
-        })}
+        className={agentChatMessageAvatarFallbackVariants({ size })}
       >
         {displayName}
       </AvatarFallback>
     </Avatar>
+  );
+}
+
+export function AgentChatLoadingDots({
+  show,
+  size = 'md',
+  ...props
+}: MotionProps &
+  VariantProps<typeof agentChatLoadingDotsWrapperVariants> & {
+    show: boolean;
+  }) {
+  return (
+    <motion.div
+      className={cn(agentChatLoadingDotsWrapperVariants({ size }))}
+      initial={false}
+      animate={{ opacity: show ? 1 : 0 }}
+      exit={{ opacity: 0, transition: { duration: 0 } }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
+      {...props}
+    >
+      <span
+        aria-hidden={!show}
+        aria-label="Is agent thinking"
+        className={cn(
+          agentChatLoadingDotsVariants({ size }),
+          !show && 'paused before:paused after:paused',
+        )}
+      />
+    </motion.div>
   );
 }
 
@@ -635,34 +450,6 @@ const getMessageCreatedAt = (message: Message): string | undefined => {
   return (message as { createdAt?: string }).createdAt;
 };
 
-const extractMessageText = (content: unknown): string => {
-  if (!content) {
-    return '';
-  }
-  if (typeof content === 'string') {
-    return content;
-  }
-  if (!Array.isArray(content)) {
-    return '';
-  }
-  return content
-    .map((part) => {
-      if (!part || typeof part !== 'object') {
-        return '';
-      }
-      const typed = part as { type?: unknown; text?: unknown };
-      if (typed.type !== 'text') {
-        return '';
-      }
-      return typeof typed.text === 'string' ? typed.text : '';
-    })
-    .join('');
-};
-
-type ToolCallForDisplay = NonNullable<
-  Extract<AgentChatPrimitive.Message, { role: 'assistant' }>['toolCalls']
->[number];
-
 const dedupeMessagesById = (messages: AgentChatPrimitive.Message[]) => {
   // CopilotKit/AG-UI can briefly provide overlapping live + replayed messages
   // with the same id. Render one message per id and keep React keys stable.
@@ -673,60 +460,100 @@ const dedupeMessagesById = (messages: AgentChatPrimitive.Message[]) => {
   return Array.from(byId.values());
 };
 
-const chatComponentParametersSchema = z.object({}).loose();
-
 const GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME =
   'generate_dynamic_chat_component';
 
-type ChatComponentWithToolName = AgentChatComponent & { toolName?: string };
+const chatComponentParametersSchema = z.object({}).loose();
+type ChatComponentJsonSchemaInput = Parameters<typeof z.fromJSONSchema>[0];
 
-const HideChoiceQuestionLabelContext = React.createContext(false);
+const parseChatComponentInputSchema = (
+  input: AgentChatComponent['input'] | string | undefined,
+): ChatComponentJsonSchemaInput | undefined => {
+  if (!input) {
+    return undefined;
+  }
 
-const getChatComponentToolName = (component: ChatComponentWithToolName) => {
-  return (
-    component.toolName ??
-    component.name.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase()
-  );
+  if (typeof input !== 'string') {
+    return input as ChatComponentJsonSchemaInput;
+  }
+
+  const normalizedInput = input
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/, '')
+    .trim();
+
+  try {
+    const parsed = JSON.parse(normalizedInput) as unknown;
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? (parsed as ChatComponentJsonSchemaInput)
+      : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
-type GetUserChoiceToolResultProps = React.ComponentProps<
-  typeof GetUserChoiceToolResult
->;
+const getChatComponentParametersSchema = (component: AgentChatComponent) => {
+  const inputSchema = parseChatComponentInputSchema(component.input);
+  if (!inputSchema) {
+    return chatComponentParametersSchema;
+  }
 
-const GetUserChoiceToolCall = ({
-  result,
-  args,
-  respond,
-}: {
-  result?: string;
-  args: GetUserChoiceToolResultProps['args'];
-  respond?: (result: unknown) => Promise<void>;
-}) => {
-  const hideQuestionLabel = React.useContext(HideChoiceQuestionLabelContext);
-
-  return (
-    <GetUserChoiceToolResult
-      args={args}
-      result={result}
-      hideQuestionLabel={hideQuestionLabel}
-      respond={respond}
-    />
-  );
+  try {
+    return z.fromJSONSchema(
+      inputSchema,
+    ) as typeof chatComponentParametersSchema;
+  } catch {
+    return chatComponentParametersSchema;
+  }
 };
+
+interface AgentChatMessageProps {
+  message: Message;
+  index: number;
+  showTimestamp?: boolean;
+  dateFormat?: string;
+  hideAvatar?: boolean;
+  renderToolCall: ReturnType<typeof AgentChatPrimitive.useRenderToolCall>;
+}
 
 const GenerateDynamicChatComponentToolResult = ({
   status,
   result,
+  size = 'md',
 }: {
   toolCallId: string;
-  result?: string;
+  result: string;
   status: AgentChatPrimitive.ToolCallStatus;
   parameters: Record<string, unknown>;
+  size?: 'sm' | 'md' | 'lg';
 }) => {
-  const { code, props } = result
-    ? JSON.parse(result)
-    : { code: undefined, props: undefined };
-  return <ChatCodeComponent status={status} code={code} props={props} />;
+  let parsedResult: {
+    code?: string;
+    props?: Record<string, unknown>;
+  };
+
+  try {
+    parsedResult = JSON.parse(result) as typeof parsedResult;
+  } catch (error) {
+    const message =
+      result ||
+      (error instanceof Error ? error.message : 'Invalid component result');
+    return (
+      <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        {message}
+      </div>
+    );
+  }
+
+  return (
+    <ChatCodeComponent
+      status={status}
+      code={parsedResult.code}
+      props={parsedResult.props}
+      size={size}
+    />
+  );
 };
 
 const ChatComponentToolResult = ({
@@ -735,8 +562,7 @@ const ChatComponentToolResult = ({
   parameters,
 }: {
   status: AgentChatPrimitive.ToolCallStatus;
-  toolCallId: string;
-  component: ChatComponentWithToolName;
+  component: AgentChatComponent;
   parameters: Record<string, unknown>;
 }) => {
   return (
@@ -748,112 +574,84 @@ const ChatComponentToolResult = ({
   );
 };
 
-const isVisibleToolCall = (
-  toolCall: ToolCallForDisplay,
-  agentChat: AgentChatPrimitive.AgentChat | null,
-  components: AgentChatComponent[],
-) => {
-  const toolCallName = toolCall.function.name;
-  const isToolCallChatComponent = components.some(
-    (component) => getChatComponentToolName(component) === toolCallName,
-  );
-  if (isToolCallChatComponent) {
-    return true;
-  }
-
-  switch (toolCallName) {
-    case GET_USER_CHOICE_TOOL_NAME:
-    case GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME:
-      return true;
-    default: {
-      if (agentChat?.hideToolsUi === true) {
-        return false;
-      }
-
-      return true;
-    }
-  }
-};
-
 interface MessageTextContentProps {
-  /** Raw `message.content` — string, multi-modal array, or undefined. */
-  content: unknown;
-  /** True while the agent is actively producing this turn's tokens. */
+  text?: string;
   isStreaming: boolean;
-  className?: string;
 }
 
-function MessageTextContent({
-  content,
+function AgentChatMessageTextPart({
+  text,
   isStreaming,
-  className,
-}: MessageTextContentProps) {
-  const text = extractMessageText(content);
-
+  ...props
+}: VariantProps<typeof agentChatMessagePartVariants> &
+  MessageTextContentProps) {
   if (!text) {
     return null;
   }
 
   return (
-    <Streamdown
-      mode={isStreaming ? 'streaming' : 'static'}
-      animated={{ animation: 'fadeIn' }}
-      isAnimating={isStreaming}
-      className={className}
-    >
-      {text}
-    </Streamdown>
+    <AgentChatMessagePart {...props}>
+      <Streamdown
+        mode={isStreaming ? 'streaming' : 'static'}
+        animated={{ animation: 'fadeIn' }}
+        isAnimating={isStreaming}
+        className={
+          'text-inherit [&_[data-streamdown=link].text-primary]:!text-inherit [&_[data-streamdown=link]]:underline-offset-2 [&_code]:bg-primary/15 [&_code]:text-primary'
+        }
+      >
+        {text}
+      </Streamdown>
+    </AgentChatMessagePart>
   );
 }
 
-export type AgentChatMessageComponentProps = AgentChatMessageProps &
-  VariantProps<typeof messageVariants> &
-  React.ComponentProps<'div'>;
+function AgentChatMessagePart({
+  children,
+  className,
+  size,
+  role = 'assistant',
+}: {
+  children: React.ReactNode;
+  className?: string;
+} & VariantProps<typeof agentChatMessagePartVariants>) {
+  return (
+    <div
+      data-slot="agent-chat-message-part"
+      className={cn(agentChatMessagePartVariants({ size, role, className }))}
+    >
+      {children}
+    </div>
+  );
+}
 
 export function AgentChatMessage({
   message,
   index,
-  variant = 'bubble',
   size = 'md',
-  userPosition = 'side',
   hideAvatar = false,
   showTimestamp = true,
   dateFormat = 'HH:mm',
   renderToolCall,
   className,
   ...props
-}: AgentChatMessageComponentProps) {
-  const client = useClient();
-  const user = client.getUser();
-  const { messages, isThinking, agentChat, components } = useAgentChat();
+}: AgentChatMessageProps &
+  VariantProps<typeof agentChatMessageVariants> &
+  React.ComponentProps<'div'>) {
+  const { messages, isThinking } = useAgentChat();
 
   if (message.role !== 'user' && message.role !== 'assistant') {
     return null;
   }
 
-  const messageContent =
-    variant === 'minimal' && userPosition === 'side'
-      ? `**${message.role === 'user' ? user.firstName || 'You' : 'AI'}:** ${extractMessageText(message.content)}`
-      : message.content;
-  const latestAssistantMessage = [...messages]
-    .reverse()
-    .find((m) => m.role === 'assistant');
-  const toolMessages = messages.filter((m) => m.role === 'tool');
-  const visibleToolCalls =
-    message.role === 'assistant'
-      ? message.toolCalls?.filter((toolCall) =>
-          isVisibleToolCall(toolCall, agentChat, components ?? []),
-        )
-      : undefined;
-  const hasVisibleToolCalls = Boolean(visibleToolCalls?.length);
-  const messageText = extractMessageText(message.content).trim();
-  const hasMessageText = Boolean(messageText);
-  const hideChoiceQuestionLabel =
-    message.role === 'assistant' && hasMessageText;
+  const nextMessage = messages[index + 1];
+  const isLastAssistantMessageInGroup =
+    message.role === 'assistant' && nextMessage?.role !== 'assistant';
+  const assistantMessages = messages.filter((m) => m.role === 'assistant');
+  const isLastAssistantMessageOverall =
+    assistantMessages[assistantMessages.length - 1]?.id === message.id;
   const isCurrentAssistantTurn = Boolean(
-    isThinking && latestAssistantMessage?.id === message.id,
+    isThinking && isLastAssistantMessageOverall,
   );
-  const isStreamingMessage = Boolean(isCurrentAssistantTurn && hasMessageText);
   const messageAttachments = getMessageAttachments(message);
   const hasAttachments = messageAttachments.length > 0;
   const createdAtValue = getMessageCreatedAt(message);
@@ -863,23 +661,14 @@ export function AgentChatMessage({
   );
   const timestampText =
     hasValidCreatedAt && createdAt ? format(createdAt, dateFormat) : '';
-
-  if (
-    message.role === 'assistant' &&
-    !isStreamingMessage &&
-    !hasMessageText &&
-    !hasAttachments &&
-    !hasVisibleToolCalls
-  ) {
-    return null;
-  }
+  const toolMessages = messages.filter((m) => m.role === 'tool');
 
   return (
     <AgentChatPrimitive.AgentChatMessage
       message={message}
       index={index}
       className={cn(
-        messageVariants({ size, role: message.role }),
+        agentChatMessageVariants({ size, role: message.role }),
         // Tighten the bottom gap when the next message is in the same role
         // group (consecutive user / assistant turns sit closer together).
         '[&[data-message-role=user]:has(+[data-message-role=user])]:pb-0',
@@ -888,226 +677,126 @@ export function AgentChatMessage({
       )}
       {...props}
     >
-      {!hideAvatar &&
-        variant === 'bubble' &&
-        userPosition === 'side' &&
-        message.role === 'assistant' && (
+      <DeepAgentChatAssistantMessageContext.Provider
+        value={message.role === 'assistant' ? message : null}
+      >
+        {!hideAvatar && message.role === 'assistant' && (
           <AgentChatAvatar
             role={message.role}
             size={size}
-            userPosition={userPosition}
             className={cn(
               '[[data-message-role=assistant]+[data-message-role=assistant]_&]:invisible',
             )}
           />
         )}
-
-      <div
-        className={agentChatMessageContentWrapperVariants({
-          size,
-          variant,
-          role: message.role,
-        })}
-      >
-        <div
-          data-slot="agent-chat-message-content"
-          className={cn(
-            messageContentVariants({
-              size,
-              role: message.role,
-              variant,
-            }),
-          )}
-        >
-          <MessageTextContent
-            content={messageContent}
-            isStreaming={isStreamingMessage}
-            className={cn(
-              message.role === 'user' &&
-                variant === 'bubble' &&
-                'text-primary-foreground [&_[data-streamdown=link].text-primary]:!text-primary-foreground [&_[data-streamdown=link]]:underline-offset-2 [&_code]:bg-primary-foreground/15 [&_code]:text-primary-foreground',
-            )}
-          />
-          {visibleToolCalls?.map((toolCall) => {
-            const toolMessage = toolMessages.find(
-              (m) => m.toolCallId === toolCall.id,
-            );
-            const toolCallElement = renderToolCall({
-              toolCall,
-              toolMessage,
-            });
-
-            return (
-              <HideChoiceQuestionLabelContext.Provider
-                key={toolCall.id}
-                value={hideChoiceQuestionLabel}
-              >
-                {toolCallElement}
-              </HideChoiceQuestionLabelContext.Provider>
-            );
-          })}
-        </div>
-
-        {hasAttachments && (
-          <div
-            data-slot="agent-chat-message-attachments"
-            className={agentChatMessageAttachmentsVariants({
-              size,
-              variant,
-              role: message.role,
-            })}
-          >
-            {messageAttachments.map((attachment, i) => (
-              <AgentChatAttachmentBadge
-                key={i}
-                attachment={attachment}
+        <div className="flex flex-col">
+          {message.content ? (
+            typeof message.content === 'string' ? (
+              <AgentChatMessageTextPart
                 size={size}
+                role={message.role}
+                text={message.content}
+                isStreaming={isCurrentAssistantTurn}
               />
-            ))}
-          </div>
-        )}
-        {showTimestamp &&
-          hasValidCreatedAt &&
-          (hasMessageText || hasVisibleToolCalls || hasAttachments) && (
+            ) : (
+              message.content.map((part) => {
+                return (
+                  <React.Fragment
+                    key={`message-${message.id}-part-${part.type}-${index}`}
+                  >
+                    {part.type === 'text' && (
+                      <AgentChatMessageTextPart
+                        size={size}
+                        role={message.role}
+                        text={part.text}
+                        isStreaming={isCurrentAssistantTurn}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })
+            )
+          ) : null}
+          {message.role === 'assistant' &&
+            message.toolCalls?.map((toolCall) => {
+              const toolMessage = toolMessages.find(
+                (m) => m.toolCallId === toolCall.id,
+              );
+              const toolCallElement = renderToolCall({
+                toolCall,
+                toolMessage,
+              });
+
+              return (
+                <React.Fragment key={toolCall.id}>
+                  {toolCallElement}
+                </React.Fragment>
+              );
+            })}
+
+          {hasAttachments && (
             <div
-              data-slot="agent-chat-message-timestamp"
-              // Visible only on the last message of a same-role group — when
-              // the message has another same-role message immediately after,
-              // remove the timestamp from layout entirely; the group's tail
-              // surfaces its own.
-              className={cn(
-                agentChatMessageTimestampVariants({
-                  variant,
-                  userPosition,
-                  size,
-                  role: message.role,
-                }),
-                message.role === 'assistant' &&
-                  userPosition === 'side' &&
-                  'opacity-100',
-                '[[data-message-role=user]:has(+[data-message-role=user])_&]:hidden',
-                '[[data-message-role=assistant]:has(+[data-message-role=assistant])_&]:hidden',
-              )}
+              data-slot="agent-chat-message-attachments"
+              className={agentChatMessageAttachmentsVariants({
+                size,
+                role: message.role,
+              })}
             >
-              {!hideAvatar &&
-                userPosition === 'bottom' &&
-                message.role === 'assistant' && (
-                  <AgentChatAvatar
-                    role={message.role}
-                    size={size}
-                    userPosition={userPosition}
-                  />
-                )}
-              <span
-                className={cn(
-                  'text-xs text-muted-foreground',
-                  message.role === 'assistant' &&
-                    userPosition === 'side' &&
-                    'opacity-0 transition-opacity group-hover:opacity-100',
-                )}
-              >
-                {timestampText}
-              </span>
+              {messageAttachments.map((attachment, i) => (
+                <AgentChatAttachmentBadge
+                  key={i}
+                  attachment={attachment}
+                  size={size}
+                />
+              ))}
             </div>
           )}
-      </div>
+          {isLastAssistantMessageInGroup &&
+            showTimestamp &&
+            hasValidCreatedAt && (
+              <div
+                data-slot="agent-chat-message-timestamp"
+                className={cn(
+                  agentChatMessageTimestampVariants({
+                    size,
+                    role: message.role,
+                  }),
+                  message.role === 'assistant' && 'opacity-100',
+                  '[[data-message-role=user]:has(+[data-message-role=user])_&]:hidden',
+                  '[[data-message-role=assistant]:has(+[data-message-role=assistant])_&]:hidden',
+                )}
+              >
+                {!hideAvatar && message.role === 'assistant' && (
+                  <AgentChatAvatar role={message.role} size={size} />
+                )}
+                <span
+                  className={cn(
+                    'text-xs text-muted-foreground',
+                    message.role === 'assistant' &&
+                      'opacity-0 transition-opacity group-hover:opacity-100',
+                  )}
+                >
+                  {timestampText}
+                </span>
+              </div>
+            )}
+          {isLastAssistantMessageInGroup && (
+            <AgentChatMessagePart size={size} role={message.role}>
+              <AgentChatLoadingDots show={isCurrentAssistantTurn} size={size} />
+            </AgentChatMessagePart>
+          )}
+        </div>
+      </DeepAgentChatAssistantMessageContext.Provider>
     </AgentChatPrimitive.AgentChatMessage>
   );
 }
-
-export interface AgentChatThinkingProps {
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'bubble' | 'minimal';
-  userPosition?: 'side' | 'bottom';
-  hideAvatar?: boolean;
-}
-
-export type AgentChatThinkingComponentProps = AgentChatThinkingProps &
-  React.ComponentProps<'div'>;
-
-export function AgentChatThinking({
-  size = 'md',
-  variant = 'bubble',
-  userPosition = 'side',
-  hideAvatar = false,
-  className,
-  ...props
-}: AgentChatThinkingComponentProps) {
-  const { isThinking } = useAgentChat();
-  const thinkingRunRef = React.useRef({ isThinking: false, id: 0 });
-  if (thinkingRunRef.current.isThinking !== isThinking) {
-    if (isThinking) {
-      thinkingRunRef.current.id += 1;
-    }
-    thinkingRunRef.current.isThinking = isThinking;
-  }
-  const loadingDotsLayoutId = `agent-chat-loading-dots-${thinkingRunRef.current.id}`;
-
-  return (
-    <div
-      data-message-role={isThinking ? 'assistant' : undefined}
-      aria-hidden={!isThinking}
-      className={cn(
-        messageVariants({ size, role: 'assistant', variant }),
-        !isThinking && 'pointer-events-none',
-        className,
-      )}
-      {...props}
-    >
-      {!hideAvatar && variant === 'bubble' && userPosition === 'side' && (
-        <AgentChatAvatar
-          role="assistant"
-          size={size}
-          userPosition={userPosition}
-          className={cn(
-            !isThinking && 'invisible',
-            '[[data-message-role=assistant]+[data-message-role=assistant]_&]:invisible',
-          )}
-        />
-      )}
-
-      <div
-        className={agentChatMessageContentWrapperVariants({
-          size,
-          variant,
-          role: 'assistant',
-        })}
-      >
-        <div
-          data-slot="agent-chat-message-content"
-          className={cn(
-            messageContentVariants({ size, role: 'assistant', variant }),
-            'justify-center -translate-y-0.5',
-          )}
-        >
-          <AgentChatLoadingDots
-            layoutId={loadingDotsLayoutId}
-            initial={false}
-            animate={{ opacity: isThinking ? 1 : 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            aria-hidden={!isThinking}
-            className={cn(
-              'text-[2px]',
-              !isThinking &&
-                '[animation-play-state:paused] before:[animation-play-state:paused] after:[animation-play-state:paused]',
-            )}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export type AgentChatFetchingProps = VariantProps<
-  typeof agentChatFetchingContentVariants
-> &
-  React.ComponentProps<'div'>;
 
 export function AgentChatFetching({
   size = 'md',
   className,
   ...props
-}: AgentChatFetchingProps) {
+}: VariantProps<typeof agentChatFetchingContentVariants> &
+  React.ComponentProps<'div'>) {
   return (
     <AgentChatPrimitive.AgentChatFetching
       className={cn(
@@ -1178,22 +867,29 @@ export function AgentChat({
   );
 }
 
-const ToolCall = () => {
+const ToolCall = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   AgentChatPrimitive.useDefaultRenderTool({
     render: ({ name, parameters, status, result }) => (
-      <ToolCallFallback
-        name={name}
-        parameters={parameters}
-        status={status}
-        result={result}
-      />
+      <AgentChatMessagePart size={size}>
+        <ToolCallFallback
+          name={name}
+          parameters={parameters}
+          status={status}
+          result={result}
+          size={size}
+        />
+      </AgentChatMessagePart>
     ),
   });
 
   return null;
 };
 
-const GetUserChoiceToolRegistration = () => {
+const GetUserChoiceToolRegistration = ({
+  size = 'md',
+}: {
+  size?: 'sm' | 'md' | 'lg';
+}) => {
   AgentChatPrimitive.useHumanInTheLoop(
     {
       name: GET_USER_CHOICE_TOOL_NAME,
@@ -1201,11 +897,13 @@ const GetUserChoiceToolRegistration = () => {
       parameters: getUserChoiceParametersSchema,
       render: (renderProps) => {
         return (
-          <GetUserChoiceToolCall
-            args={renderProps.args as GetUserChoiceToolResultProps['args']}
-            result={renderProps.result}
-            respond={renderProps.respond}
-          />
+          <AgentChatMessagePart size={size} role="assistant">
+            <GetUserChoiceToolResult
+              args={renderProps.args}
+              result={renderProps.result}
+              respond={renderProps.respond}
+            />
+          </AgentChatMessagePart>
         );
       },
     },
@@ -1215,19 +913,30 @@ const GetUserChoiceToolRegistration = () => {
   return null;
 };
 
-const GenerateDynamicChatComponentToolCall = () => {
+const GenerateDynamicChatComponentToolCall = ({
+  size = 'md',
+}: {
+  size?: 'sm' | 'md' | 'lg';
+}) => {
   AgentChatPrimitive.useRenderTool(
     {
       name: GENERATE_DYNAMIC_CHAT_COMPONENT_TOOL_NAME,
       parameters: z.object({}).loose(),
       render: ({ toolCallId, status, result, parameters }) => {
+        if (status !== AgentChatPrimitive.ToolCallStatus.Complete || !result) {
+          return <></>;
+        }
+
         return (
-          <GenerateDynamicChatComponentToolResult
-            toolCallId={toolCallId}
-            status={status as AgentChatPrimitive.ToolCallStatus}
-            result={result}
-            parameters={parameters}
-          />
+          <AgentChatMessagePart size={size}>
+            <GenerateDynamicChatComponentToolResult
+              toolCallId={toolCallId}
+              status={status as AgentChatPrimitive.ToolCallStatus}
+              result={result}
+              parameters={parameters}
+              size={size}
+            />
+          </AgentChatMessagePart>
         );
       },
     },
@@ -1238,50 +947,55 @@ const GenerateDynamicChatComponentToolCall = () => {
 };
 
 const ChatComponentToolCall = ({
+  size = 'md',
   component,
 }: {
-  component: ChatComponentWithToolName;
+  size?: 'sm' | 'md' | 'lg';
+  component: AgentChatComponent;
 }) => {
-  AgentChatPrimitive.useRenderTool(
+  const parametersSchema = React.useMemo(
+    () => getChatComponentParametersSchema(component),
+    [component],
+  );
+  const toolName = `show-component-${AgentChatPrimitive.getAgentChatComponentToolName(
+    component.name,
+  )}`;
+
+  AgentChatPrimitive.useFrontendTool(
     {
-      name: getChatComponentToolName(component),
-      parameters: chatComponentParametersSchema,
-      render: ({ toolCallId, status, parameters }) => {
+      name: toolName,
+      description: component.description,
+      parameters: parametersSchema,
+      handler: async () =>
+        `<prebuilt_chat_component_rendered tool="${toolName}" component="${component.name}" status="success" />`,
+      render: ({ status, args }) => {
         return (
-          <ChatComponentToolResult
-            toolCallId={toolCallId}
-            status={status as AgentChatPrimitive.ToolCallStatus}
-            component={component}
-            parameters={parameters}
-          />
+          <AgentChatMessagePart size={size} role="assistant">
+            <ChatComponentToolResult
+              status={status as AgentChatPrimitive.ToolCallStatus}
+              component={component}
+              parameters={args as Record<string, unknown>}
+            />
+          </AgentChatMessagePart>
         );
       },
     },
-    [],
+    [component, parametersSchema, size],
   );
 
   return null;
 };
 
-export type AgentChatContentProps = VariantProps<
-  typeof agentChatContentVariants
-> &
-  React.ComponentProps<'div'>;
-
 export function AgentChatContent({
-  variant = 'bubble',
   size = 'md',
-  userPosition = 'side',
   className,
   ...props
-}: AgentChatContentProps) {
+}: VariantProps<typeof agentChatContentVariants> &
+  React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="agent-chat-content"
-      className={cn(
-        agentChatContentVariants({ variant, size, userPosition, className }),
-        'relative',
-      )}
+      className={cn(agentChatContentVariants({ size, className }), 'relative')}
       {...props}
     />
   );
@@ -1290,19 +1004,16 @@ export function AgentChatContent({
 export interface AgentChatMessagesProps {
   showTimestamps?: boolean;
   dateFormat?: string;
-  userPosition?: 'side' | 'bottom';
   hideAvatar?: boolean;
   messageClassName?: string;
 }
 
 export type AgentChatMessagesComponentProps = AgentChatMessagesProps &
-  VariantProps<typeof messageVariants> &
+  VariantProps<typeof agentChatMessagesVariants> &
   React.ComponentProps<'div'>;
 
 export function AgentChatMessages({
-  variant = 'bubble',
   size = 'md',
-  userPosition = 'side',
   hideAvatar = false,
   showTimestamps = true,
   dateFormat = 'HH:mm',
@@ -1313,12 +1024,22 @@ export function AgentChatMessages({
   const { messages, agentChat, components } = useAgentChat();
   const renderToolCall = AgentChatPrimitive.useRenderToolCall();
   const displayMessages = dedupeMessagesById(messages);
-  const chatComponents = components ?? [];
+  const chatComponents = (components ?? []).filter((component) =>
+    Boolean(
+      component.name?.trim() &&
+      component.description?.trim() &&
+      component.code?.trim(),
+    ),
+  );
+  const resolvedSize = size ?? 'md';
 
   return (
     <AgentChatPrimitive.AgentChatMessages
       scrollAreaClassName="flex-1 relative"
-      className={cn(agentChatMessagesVariants({ variant, size }), className)}
+      className={cn(
+        agentChatMessagesVariants({ size: resolvedSize }),
+        className,
+      )}
       {...props}
     >
       {displayMessages.map((message, index) => (
@@ -1326,9 +1047,7 @@ export function AgentChatMessages({
           key={message.id}
           message={message}
           index={index}
-          variant={variant}
-          size={size}
-          userPosition={userPosition}
+          size={resolvedSize}
           hideAvatar={hideAvatar}
           showTimestamp={showTimestamps}
           dateFormat={dateFormat}
@@ -1336,49 +1055,46 @@ export function AgentChatMessages({
           className={messageClassName}
         />
       ))}
-      <AgentChatThinking
-        variant={variant || undefined}
-        size={size || undefined}
-        userPosition={userPosition}
-        hideAvatar={hideAvatar}
-        className={messageClassName}
-      />
-      <GetUserChoiceToolRegistration />
-      {agentChat?.hideToolsUi === true ? null : <ToolCall />}
+      <GetUserChoiceToolRegistration size={resolvedSize} />
+      {agentChat?.hideToolsUi === true ? null : (
+        <ToolCall size={resolvedSize} />
+      )}
       {agentChat?.disableGeneratingDynamicChatComponent === true ? null : (
-        <GenerateDynamicChatComponentToolCall />
+        <GenerateDynamicChatComponentToolCall size={resolvedSize} />
       )}
       {chatComponents.map((component) => (
         <ChatComponentToolCall
-          key={`chat-component-tool-call-${component.id}`}
+          size={resolvedSize}
           component={component}
+          key={`chat-component-tool-call-${component.id}`}
         />
       ))}
     </AgentChatPrimitive.AgentChatMessages>
   );
 }
 
-export interface AgentChatInputProps {
+interface AgentChatInputProps {
   sendOnEnter?: boolean;
 }
-
-export type AgentChatInputComponentProps = AgentChatInputProps &
-  VariantProps<typeof agentChatInputVariants> &
-  React.ComponentProps<'textarea'>;
 
 export function AgentChatInput({
   className,
   onSubmit,
-  size = 'md',
   sendOnEnter = true,
   placeholder = 'Type a message...',
   ...props
-}: AgentChatInputComponentProps) {
+}: AgentChatInputProps &
+  VariantProps<typeof agentChatInputVariants> &
+  React.ComponentProps<'textarea'>) {
   return (
     <AgentChatPrimitive.AgentChatInput asChild>
       <Textarea
         placeholder={placeholder}
-        className={cn(agentChatInputVariants({ size }), className)}
+        className={cn(
+          agentChatInputVariants({ size: props.size }),
+          className,
+          'shadow-none hover:shadow-none focus:shadow-none focus-visible:shadow-none',
+        )}
         onSubmit={sendOnEnter ? undefined : onSubmit}
         {...props}
       />
@@ -1386,21 +1102,19 @@ export function AgentChatInput({
   );
 }
 
-export interface AgentChatFooterProps {
+interface AgentChatFooterProps {
   withVoice?: boolean;
   inputClassName?: string;
   sendButtonClassName?: string;
   attachmentButtonClassName?: string;
 }
 
-export type AgentChatFooterComponentProps = AgentChatFooterProps &
-  VariantProps<typeof agentChatFooterVariants> &
-  React.ComponentProps<'div'>;
-
 export function AgentChatFooter({
   withVoice = false,
   ...props
-}: AgentChatFooterComponentProps) {
+}: AgentChatFooterProps &
+  VariantProps<typeof agentChatFooterVariants> &
+  React.ComponentProps<'div'>) {
   if (withVoice) {
     return <AgentChatFooterInner withVoice {...props} />;
   }
@@ -1417,7 +1131,9 @@ export function AgentChatFooterInner({
   // withVoice = false,
   children,
   ...props
-}: AgentChatFooterComponentProps) {
+}: AgentChatFooterProps &
+  VariantProps<typeof agentChatFooterVariants> &
+  React.ComponentProps<'div'>) {
   const { attachments, removeAttachment, agentChat } = useAgentChat();
   const disableAttachments = agentChat
     ? agentChat.disableAttachments === true
@@ -1528,7 +1244,7 @@ export function AgentChatFooterInner({
                 <ArrowUp />
                 {/* {isThinking ? <Square className="fill-current" /> : <ArrowUp />} */}
                 <span className="sr-only">Send message</span>
-                {/* <span className="sr-only">{isThinking ? 'Stop run' : 'Send message'}</span> */}
+                {/* <span className="sr-only">{isThinking ? "Stop run" : "Send message"}</span> */}
               </Button>
             </AgentChatPrimitive.AgentChatSendTrigger>
           </div>
@@ -1568,9 +1284,7 @@ export function AgentChatSimple({
     >
       <AgentChatContent {...props}>
         <AgentChatMessages
-          variant={props.variant}
           size={props.size}
-          userPosition={props.userPosition || undefined}
           hideAvatar={hideAvatar}
           className={messagesContainerClassName}
           messageClassName={messageClassName}
