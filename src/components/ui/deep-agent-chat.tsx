@@ -279,7 +279,7 @@ const agentChatAttachmentBadgeVariants = cva(
 );
 
 const agentChatInputVariants = cva(
-  'resize-none border-none shadow-none hover:shadow-none focus:shadow-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 min-h-[auto]',
+  'field-sizing-content [field-sizing:content] min-h-[auto] bg-transparent resize-none border-none shadow-none hover:shadow-none focus:shadow-none focus-visible:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0',
   {
     variants: {
       size: {
@@ -1056,10 +1056,11 @@ export function AgentChatMessages({
         />
       ))}
       <GetUserChoiceToolRegistration size={resolvedSize} />
-      {agentChat?.hideToolsUi === true ? null : (
+      {!agentChat || agentChat.hideToolsUi === true ? null : (
         <ToolCall size={resolvedSize} />
       )}
-      {agentChat?.disableGeneratingDynamicChatComponent === true ? null : (
+      {!agentChat ||
+      agentChat.disableGeneratingDynamicChatComponent === true ? null : (
         <GenerateDynamicChatComponentToolCall size={resolvedSize} />
       )}
       {chatComponents.map((component) => (

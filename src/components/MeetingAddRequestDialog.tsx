@@ -22,7 +22,21 @@ import { FundCombobox } from "@/components/FundCombobox";
 import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
-import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
 
 interface MeetingAddRequestDialogProps {
   open: boolean;
@@ -93,8 +107,8 @@ export const MeetingAddRequestDialog = ({
   const [kerenName, setKerenName] = useState<string>("");
   const [transferAmount, setTransferAmount] = useState<string>("");
   const [isTotalTransfer, setIsTotalTransfer] = useState(true);
-  const [requestTypeSearch, setRequestTypeSearch] = useState("");
-  const [providerSearch, setProviderSearch] = useState("");
+  const [requestTypePopoverOpen, setRequestTypePopoverOpen] = useState(false);
+  const [providerPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [standing, setStanding] = useState("");
   const [accountType, setAccountType] = useState("");
   const [chargeDay, setChargeDay] = useState("");
@@ -121,17 +135,7 @@ export const MeetingAddRequestDialog = ({
     return getFieldLabel(key);
   };
 
-  const filteredRequestTypes = sortedRequestTypes.filter((rt) =>
-    (rt.requestTypeName || "סוג בקשה ללא שם")
-      .toLowerCase()
-      .includes(requestTypeSearch.toLowerCase())
-  );
 
-  const filteredProviders = sortedProviders.filter((p) =>
-    (p.provider_name || "יצרן ללא שם")
-      .toLowerCase()
-      .includes(providerSearch.toLowerCase())
-  );
 
   const tracksKeys = STATIC_TRACK_KEYS;
 
@@ -148,8 +152,8 @@ export const MeetingAddRequestDialog = ({
       setKerenName("");
       setTransferAmount("");
       setIsTotalTransfer(true);
-      setRequestTypeSearch("");
-      setProviderSearch("");
+      setRequestTypePopoverOpen(false);
+      setProviderPopoverOpen(false);
       setStanding("");
       setAccountType("");
       setChargeDay("");
@@ -326,18 +330,6 @@ export const MeetingAddRequestDialog = ({
     []
   );
 
-  // const handleSelectSearchRowMouseDown = (
-  //   e: React.MouseEvent<HTMLDivElement>
-  // ) => {
-  //   if ((e.target as HTMLElement).closest("input")) return;
-  //   e.preventDefault();
-  // };
-  const handleSelectSearchRowMouseDown = (
-    e: React.MouseEvent<HTMLDivElement>
-  ) => {
-    if ((e.target as HTMLElement).tagName === "INPUT" || (e.target as HTMLElement).closest("input")) return;
-    e.preventDefault();
-  };
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -429,42 +421,59 @@ export const MeetingAddRequestDialog = ({
               {isLoadingRequestTypes ? (
                 <Skeleton className="h-10 w-full" />
               ) : (
-                <Select
-                  value={selectedRequestTypeId}
-                  onValueChange={(v) => { setSelectedRequestTypeId(v); setRequestTypeSearch(""); }}
-                  dir="rtl"
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="בחר סוג בקשה" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <div
-                      className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowMouseDown}
-                    >
-                      <Search className="size-4 text-muted-foreground flex-shrink-0" />
-                      <input
-                        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                        placeholder="חפש..."
-                        value={requestTypeSearch}
-                        onChange={(e) => setRequestTypeSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="max-h-[200px] overflow-y-auto">
-                      {filteredRequestTypes.length === 0 ? (
-                        <div className="px-3 py-4 text-sm text-muted-foreground text-center">לא נמצאו תוצאות</div>
-                      ) : (
-                        filteredRequestTypes.map((rt) => (
-                          <SelectItem key={rt.id} value={rt.id}>
-                            {rt.requestTypeName || "סוג בקשה ללא שם"}
-                          </SelectItem>
-                        ))
+                <Popover open={requestTypePopoverOpen} onOpenChange={setRequestTypePopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={requestTypePopoverOpen}
+                      className={cn(
+                        "w-full justify-between font-normal h-10",
+                        !selectedRequestTypeId && "text-muted-foreground"
                       )}
-                    </div>
-                  </SelectContent>
-                </Select>
+                    >
+                      <span className="truncate">
+                        {selectedRequestTypeId
+                          ? sortedRequestTypes.find((rt) => rt.id === selectedRequestTypeId)?.requestTypeName || "סוג בקשה ללא שם"
+                          : "בחר סוג בקשה"}
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command dir="rtl" filter={(value, search) => {
+                      const rt = sortedRequestTypes.find((r) => r.id === value);
+                      if (!rt) return 0;
+                      const label = (rt.requestTypeName || "סוג בקשה ללא שם").toLowerCase();
+                      return label.includes(search.toLowerCase()) ? 1 : 0;
+                    }}>
+                      <CommandInput placeholder="חפש סוג בקשה..." className="text-right" dir="rtl" />
+                      <CommandList>
+                        <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
+                        <CommandGroup>
+                          {sortedRequestTypes.map((rt) => (
+                            <CommandItem
+                              key={rt.id}
+                              value={rt.id}
+                              onSelect={() => {
+                                setSelectedRequestTypeId(rt.id);
+                                setRequestTypePopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "h-4 w-4 shrink-0",
+                                  selectedRequestTypeId === rt.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <span>{rt.requestTypeName || "סוג בקשה ללא שם"}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               )}
               <MissingFieldHint fieldKey="requestTypeId" />
             </div>
@@ -478,42 +487,59 @@ export const MeetingAddRequestDialog = ({
               {isLoadingProviders ? (
                 <Skeleton className="h-10 w-full" />
               ) : (
-                <Select
-                  value={selectedProviderId}
-                  onValueChange={(v) => { setSelectedProviderId(v); setProviderSearch(""); }}
-                  dir="rtl"
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="בחר יצרן" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <div
-                      className="flex items-center gap-2 px-3 py-2 border-b border-border"
-                      onMouseDown={handleSelectSearchRowMouseDown}
-                    >
-                      <Search className="size-4 text-muted-foreground flex-shrink-0" />
-                      <input
-                        className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                        placeholder="חפש..."
-                        value={providerSearch}
-                        onChange={(e) => setProviderSearch(e.target.value)}
-                        onKeyDown={(e) => e.stopPropagation()}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
-                    <div className="max-h-[200px] overflow-y-auto">
-                      {filteredProviders.length === 0 ? (
-                        <div className="px-3 py-4 text-sm text-muted-foreground text-center">לא נמצאו תוצאות</div>
-                      ) : (
-                        filteredProviders.map((provider) => (
-                          <SelectItem key={provider.id} value={provider.id}>
-                            {provider.provider_name || "יצרן ללא שם"}
-                          </SelectItem>
-                        ))
+                <Popover open={providerPopoverOpen} onOpenChange={setProviderPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={providerPopoverOpen}
+                      className={cn(
+                        "w-full justify-between font-normal h-10",
+                        !selectedProviderId && "text-muted-foreground"
                       )}
-                    </div>
-                  </SelectContent>
-                </Select>
+                    >
+                      <span className="truncate">
+                        {selectedProviderId
+                          ? sortedProviders.find((p) => p.id === selectedProviderId)?.provider_name || "יצרן ללא שם"
+                          : "בחר יצרן"}
+                      </span>
+                      <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                    <Command dir="rtl" filter={(value, search) => {
+                      const provider = sortedProviders.find((p) => p.id === value);
+                      if (!provider) return 0;
+                      const label = (provider.provider_name || "יצרן ללא שם").toLowerCase();
+                      return label.includes(search.toLowerCase()) ? 1 : 0;
+                    }}>
+                      <CommandInput placeholder="חפש יצרן..." className="text-right" dir="rtl" />
+                      <CommandList>
+                        <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
+                        <CommandGroup>
+                          {sortedProviders.map((provider) => (
+                            <CommandItem
+                              key={provider.id}
+                              value={provider.id}
+                              onSelect={() => {
+                                setSelectedProviderId(provider.id);
+                                setProviderPopoverOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "h-4 w-4 shrink-0",
+                                  selectedProviderId === provider.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <span>{provider.provider_name || "יצרן ללא שם"}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               )}
               <MissingFieldHint fieldKey="providerId" />
             </div>

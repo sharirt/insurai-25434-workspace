@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 
 export const GET_USER_CHOICE_TOOL_NAME = 'get_user_choice';
 export const GET_USER_CHOICE_TOOL_DESCRIPTION =
-  'Ask one closed-ended choice question in chat. MUST use this for predefined answers, including yes/no, either/or, multiple-choice, suggested meanings, clarification options, inline choices, or bullet choices. If you would list answer choices in prose, call this tool instead. Ask only one choice question per turn; for sequences, wait for each result before asking the next. Do not invite freeform typing unless `allowOther` is enabled. Set `question` to the visible prompt. Put all choices in `options`. Use `single` for one choice, `multiple` for pick-many. Cards are for described choices; chips are for short labels.';
+  'Get one closed-ended choice selection in chat. MUST use this for predefined answers, including yes/no, either/or, multiple-choice, suggested meanings, clarification options, inline choices, or bullet choices. If you would list answer choices in prose, call this tool instead. Ask only one choice question per message; for sequences, wait for each result before asking the next. Do not invite freeform typing unless `allowOther` is enabled. You must ask a question before calling this tool to get the possible choices. Put all choices in `options`. Use `single` for one choice, `multiple` for pick-many. Cards are for described choices; chips are for short labels.';
 
 const GET_USER_CHOICE_OTHER_VALUE = '__other__';
 
@@ -32,12 +32,12 @@ const getUserChoiceOptionSchema = z.object({
 });
 
 export const getUserChoiceParametersSchema = z.object({
-  question: z
-    .string()
-    .min(1)
-    .describe(
-      'Visible prompt shown above the choice UI. Do not include answer choices here.',
-    ),
+  // question: z
+  //   .string()
+  //   .min(1)
+  //   .describe(
+  //     'Visible prompt shown above the choice UI. Do not include answer choices here.',
+  //   ),
   selectionMode: z.enum(['single', 'multiple']).default('single'),
   options: z
     .array(getUserChoiceOptionSchema)
@@ -88,7 +88,7 @@ export type GetUserChoiceParameters = z.infer<
   typeof getUserChoiceParametersSchema
 >;
 type GetUserChoiceParametersRenderInput = {
-  question?: GetUserChoiceParameters['question'];
+  // question?: GetUserChoiceParameters['question'];
   selectionMode?: GetUserChoiceParameters['selectionMode'];
   options?: unknown;
   allowOther?: GetUserChoiceParameters['allowOther'];
@@ -870,10 +870,10 @@ export function GetUserChoiceTool({
   const showInlineSubmitButton =
     showSubmitButton && !isCards && !showOtherSubmitButton;
   const showCardsSubmitButton = showSubmitButton && isCards && !isOtherSelected;
-  const question = parameters.question?.trim();
+  // const question = parameters.question?.trim();
   const assistantMessageText = getMessageText(assistantMessage?.content).trim();
-  const controlAccessibleLabel =
-    question || assistantMessageText || 'Choose an option';
+  // const controlAccessibleLabel =
+  //   question || assistantMessageText || 'Choose an option';
   const labelId = `${formId}-get-user-choice-label`;
 
   React.useEffect(() => {
@@ -886,7 +886,11 @@ export function GetUserChoiceTool({
     setIsSubmitting(false);
   }, [initialFormState, isSubmittedState]);
 
-  if (!question && options.length === 0) {
+  // if (!question && options.length === 0) {
+  //   return null;
+  // }
+
+  if (options.length === 0) {
     return null;
   }
 
@@ -973,7 +977,7 @@ export function GetUserChoiceTool({
         data-invalid={showInvalid || undefined}
         className={cn(getUserChoiceFieldVariants({ size }))}
       >
-        <FieldLabel
+        {/* <FieldLabel
           id={labelId}
           className={cn(
             'w-full cursor-text opacity-100',
@@ -983,7 +987,7 @@ export function GetUserChoiceTool({
         >
           {question}
           {!question ? controlAccessibleLabel : null}
-        </FieldLabel>
+        </FieldLabel> */}
 
         {options.length > 0 && (
           <div
@@ -1119,7 +1123,11 @@ export function GetUserChoiceToolResult({
   const parsedResult = parseGetUserChoiceToolResult(result);
   const hasOptions = Array.isArray(args?.options) && args.options.length > 0;
 
-  if (!args?.question && !hasOptions) {
+  // if (!args?.question && !hasOptions) {
+  //   return null;
+  // }
+
+  if (!hasOptions) {
     return null;
   }
 
