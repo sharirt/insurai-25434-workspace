@@ -1,5 +1,5 @@
-import { useMemo, useEffect, useRef } from "react";
-import { useEntityGetAll, useEntityGetOne, useEntityUpdate } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useEntityGetAll, useEntityGetOne, useEntityUpdate, useEntityDelete } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { SignatureRequestsEntity, SignedDocumentsEntity, RequestsEntity } from "@/product-types";
 import { toast } from "sonner";
 import {
@@ -10,7 +10,18 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PenLine, FileText, ExternalLink } from "lucide-react";
+import { PenLine, FileText, ExternalLink, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/utils/FormatUtils";
 
@@ -48,6 +59,8 @@ export const SignatureRequestsSection = ({
   );
 
   const { data: signedDocuments } = useEntityGetAll(SignedDocumentsEntity, { requestId });
+  const { deleteFunction } = useEntityDelete(SignedDocumentsEntity);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const { data: currentRequest } = useEntityGetOne(RequestsEntity, { id: requestId });
   const { updateFunction } = useEntityUpdate(RequestsEntity);
   const hasUpdatedRef = useRef(false);
@@ -118,6 +131,9 @@ export const SignatureRequestsSection = ({
                 (sig.status === "pending" || sig.status === "agent_signed");
               const showAgentLink =
                 sig.agentEmbedSrc && sig.status === "agent_signed";
+              const matchedDoc = signedDocuments?.find(
+                (d) => d.signatureRequestId === sig.id
+              );
 
               return (
                 <div
@@ -166,6 +182,47 @@ export const SignatureRequestsSection = ({
                         <ExternalLink data-icon="inline-start" />
                         קישור חתימת סוכן
                       </Button>
+                    )}
+                    {matchedDoc && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            type="button"
+                            className="p-1 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                            title="מחק מסמך"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent style={{ direction: "rtl" }}>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>מחיקת מסמך חתום</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              האם אתה בטוח שברצונך למחוק מסמך זה? פעולה זו אינה ניתנת לביטול.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>ביטול</AlertDialogCancel>
+                            <AlertDialogAction
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              onClick={async () => {
+                                setDeletingDocId((matchedDoc as any).id);
+                                try {
+                                  await deleteFunction({ id: (matchedDoc as any).id });
+                                  toast.success("המסמך נמחק בהצלחה");
+                                  onStatusUpdated?.();
+                                } catch {
+                                  toast.error("שגיאה במחיקת המסמך");
+                                } finally {
+                                  setDeletingDocId(null);
+                                }
+                              }}
+                            >
+                              מחק
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>

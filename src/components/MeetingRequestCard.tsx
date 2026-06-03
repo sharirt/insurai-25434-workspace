@@ -1,10 +1,22 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, FileCheck, Download, Eye } from "lucide-react";
+import { FileText, FileCheck, Download, Eye, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { BlocksFilePreviewContent } from "@/components/BlocksFilePreviewContent";
 import { SendToProviderSection } from "@/components/SendToProviderSection";
 import { Link } from "react-router";
@@ -20,7 +32,7 @@ import {
   SignedDocumentsEntity,
   RequestsManagerPage,
 } from "@/product-types";
-import { useEntityGetOne, useEntityGetAll } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { useEntityGetOne, useEntityGetAll, useEntityDelete } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getStatusLabel, getStatusVariant } from "@/utils/StatusConfig";
 
 // Explicit user override: raw palette classes for status-specific color coding
@@ -56,6 +68,8 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
     { enabled: !!requestId }
   );
 
+  const { deleteFunction } = useEntityDelete(SignedDocumentsEntity);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
   if (isLoading) return <MeetingRequestCardSkeleton />;
@@ -183,7 +197,85 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
                           >
                             <Download className="size-4" />
                           </a>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                type="button"
+                                className="p-1 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                title="מחק מסמך"
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent style={{ direction: "rtl" }}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>מחיקת מסמך חתום</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  האם אתה בטוח שברצונך למחוק מסמך זה? פעולה זו אינה ניתנת לביטול.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>ביטול</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={async () => {
+                                    setDeletingDocId((doc as any).id);
+                                    try {
+                                      await deleteFunction({ id: (doc as any).id });
+                                      toast.success("המסמך נמחק בהצלחה");
+                                    } catch {
+                                      toast.error("שגיאה במחיקת המסמך");
+                                    } finally {
+                                      setDeletingDocId(null);
+                                    }
+                                  }}
+                                >
+                                  מחק
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
+                      )}
+                      {!doc.documentUrl && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              type="button"
+                              className="p-1 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+                              title="מחק מסמך"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent style={{ direction: "rtl" }}>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>מחיקת מסמך חתום</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                האם אתה בטוח שברצונך למחוק מסמך זה? פעולה זו אינה ניתנת לביטול.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>ביטול</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={async () => {
+                                  setDeletingDocId((doc as any).id);
+                                  try {
+                                    await deleteFunction({ id: (doc as any).id });
+                                    toast.success("המסמך נמחק בהצלחה");
+                                  } catch {
+                                    toast.error("שגיאה במחיקת המסמך");
+                                  } finally {
+                                    setDeletingDocId(null);
+                                  }
+                                }}
+                              >
+                                מחק
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       )}
                     </div>
                   );
