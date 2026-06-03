@@ -59,10 +59,19 @@ export const FundCard = ({ fund, tracks }: FundCardProps) => {
               <DetailItem label="תאריך נכונות נתונים" value={fund.dataValidityDate} />
             </div>
 
-            {tracks.length > 0 && (
+            {tracks.length > 0 ? (
               <div>
                 <h4 className="text-sm font-semibold mb-1">מסלולי השקעה</h4>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tracks.map((t) => (
+                    <Badge key={t.id} variant="secondary">{t.trackName ?? "ללא שם מסלול"}</Badge>
+                  ))}
+                </div>
                 <InvestmentTracksTable tracks={tracks} />
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
+                אין מסלולי השקעה זמינים למוצר זה. רמת הסיכון תוערך לפי סוג המוצר ושם התוכנית.
               </div>
             )}
           </CardContent>

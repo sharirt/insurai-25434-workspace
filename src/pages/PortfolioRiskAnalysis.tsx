@@ -14,8 +14,51 @@ import { toast } from "sonner";
 import { ClientSelector } from "@/components/ClientSelector";
 import { RiskResults } from "@/components/RiskResults";
 import { FundsList } from "@/components/FundsList";
+import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
 
-const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים. לפניך נתוני תיק השקעות פנסיוני מלאים. ספק ניתוח מפורט בטקסט חופשי בעברית. התייחס לנקודות הבאות: 1) חשיפה למניות (equityExposure) - ממוצע משוקלל לפי יתרה. 2) חשיפה לחו"ל (foreignExposure) - ממוצע משוקלל. 3) פיזור בין מסלולים וסוגי מוצרים. 4) תשואות היסטוריות (12 חודשים, 3 שנים, 5 שנים). 5) יחס בין מוצרים פעילים ולא פעילים. 6) השוואת דמי ניהול בין המוצרים. 7) המלצות ספציפיות לשיפור התיק.`;
+function parseRiskResult(raw: unknown): IAnalyzePortfolioRiskActionOutput | null {
+  if (!raw) return null;
+  const obj = raw as Record<string, unknown>;
+
+  // Case 1: result has riskScore directly
+  if (typeof obj.riskScore === "number") {
+    return obj as unknown as IAnalyzePortfolioRiskActionOutput;
+  }
+
+  // Case 2: nested in structuredOutput
+  if (obj.structuredOutput && typeof obj.structuredOutput === "object") {
+    const so = obj.structuredOutput as Record<string, unknown>;
+    if (typeof so.riskScore === "number") {
+      return so as unknown as IAnalyzePortfolioRiskActionOutput;
+    }
+  }
+
+  // Case 3: result is a JSON string
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.riskScore === "number") {
+        return parsed as IAnalyzePortfolioRiskActionOutput;
+      }
+    } catch { /* not JSON */ }
+  }
+
+  // Case 4: result.text is a JSON string
+  if (typeof obj.text === "string") {
+    try {
+      const parsed = JSON.parse(obj.text);
+      if (parsed && typeof parsed.riskScore === "number") {
+        return parsed as IAnalyzePortfolioRiskActionOutput;
+      }
+    } catch { /* not JSON */ }
+  }
+
+  return null;
+}
+
+const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים. לפניך נתוני תיק השקעות פנסיוני מלאים. ספק ניתוח מפורט בטקסט חופשי בעברית. התייחס לנקודות הבאות: 1) חשיפה למניות (equityExposure) - ממוצע משוקלל לפי יתרה. 2) חשיפה לחו"ל (foreignExposure) - ממוצע משוקלל. 3) פיזור בין מסלולים וסוגי מוצרים. 4) תשואות היסטוריות (12 חודשים, 3 שנים, 5 שנים). 5) יחס בין מוצרים פעילים ולא פעילים. 6) השוואת דמי ניהול בין המוצרים. 7) המלצות ספציפיות לשיפור התיק.
+
+חשוב: אם אין מסלולי השקעה זמינים עבור מוצר מסוים, נתח את רמת הסיכון לפי סוג המוצר ושם התוכנית. לדוגמה: קרן השתלמות או פנסיה עם שם תוכנית המכיל "מניות" הוא סיכון גבוה, "כללי" הוא סיכון בינוני, "אג״ח" או "כספי" הוא סיכון נמוך. השתמש בנתוני המוצר עצמו (סוג מוצר, שם תוכנית, יצרן, סטטוס, יתרה כוללת, דמי ניהול) כדי להעריך את רמת הסיכון.`;
 
 export default function PortfolioRiskAnalysis() {
   const [selectedClientId, setSelectedClientId] = useState("");
@@ -26,7 +69,8 @@ export default function PortfolioRiskAnalysis() {
     AnalyzePortfolioRiskAction
   );
 
-  const displayResult = result ?? streamResult;
+  const rawResult = result ?? streamResult;
+  const parsedResult = parseRiskResult(rawResult);
 
   const handleAnalyze = async () => {
     try {
@@ -107,7 +151,7 @@ export default function PortfolioRiskAnalysis() {
             </CardContent>
           </Card>
 
-          {displayResult && <RiskResults result={displayResult} />}
+          {parsedResult && <RiskResults result={parsedResult} />}
         </>
       )}
     </div>
