@@ -140,7 +140,7 @@ export const agentChatLoadingDotsVariants = cva(
   },
 );
 
-export const agentChatMessageAvatarVariants = cva('shrink-0', {
+export const agentChatMessageAvatarVariants = cva('shrink-0 hidden md:flex', {
   variants: {
     role: {
       user: '',
@@ -283,8 +283,8 @@ const agentChatInputVariants = cva(
   {
     variants: {
       size: {
-        sm: 'p-2 text-sm md:text-sm leading-4',
-        md: 'p-2 text-sm md:text-base leading-6',
+        sm: 'p-2 text-base md:text-sm leading-4',
+        md: 'p-2 text-base md:text-base leading-6',
         lg: 'p-4 text-lg md:text-lg leading-6',
       },
     },
@@ -560,16 +560,19 @@ const ChatComponentToolResult = ({
   status,
   component,
   parameters,
+  respond,
 }: {
   status: AgentChatPrimitive.ToolCallStatus;
   component: AgentChatComponent;
   parameters: Record<string, unknown>;
+  respond?: (result: unknown) => Promise<void>;
 }) => {
   return (
     <ChatCodeComponent
       status={status}
       code={component.code}
       props={parameters}
+      respond={respond}
     />
   );
 };
@@ -940,13 +943,13 @@ const GenerateDynamicChatComponentToolCall = ({
         );
       },
     },
-    [],
+    [size],
   );
 
   return null;
 };
 
-const ChatComponentToolCall = ({
+const ChatComponentRenderToolCall = ({
   size = 'md',
   component,
 }: {
@@ -980,10 +983,73 @@ const ChatComponentToolCall = ({
         );
       },
     },
-    [component, parametersSchema, size],
+    [component, parametersSchema, size, toolName],
   );
 
   return null;
+};
+
+// HITL chat_component (`userInterrupt`): a FRONTEND-ONLY tool, like
+// `get_user_choice`. CopilotKit registers it with the agent and pauses the run
+// entirely client-side — no backend `interrupt()` / checkpointer involved. The
+// rendered code calls `respond(payload)` (exposed in the live scope) to resume,
+// which CopilotKit forwards as `Command(resume=payload)`.
+const ChatComponentInterruptToolCall = ({
+  size = 'md',
+  component,
+}: {
+  size?: 'sm' | 'md' | 'lg';
+  component: AgentChatComponent;
+}) => {
+  const parametersSchema = React.useMemo(
+    () => getChatComponentParametersSchema(component),
+    [component],
+  );
+  const toolName = `show-component-${AgentChatPrimitive.getAgentChatComponentToolName(
+    component.name,
+  )}`;
+
+  AgentChatPrimitive.useHumanInTheLoop(
+    {
+      name: toolName,
+      description: component.description,
+      parameters: parametersSchema,
+      render: (renderProps) => {
+        const { status, args, respond } = renderProps;
+        return (
+          <AgentChatMessagePart size={size} role="assistant">
+            <ChatComponentToolResult
+              status={status as AgentChatPrimitive.ToolCallStatus}
+              component={component}
+              parameters={args as Record<string, unknown>}
+              respond={respond}
+            />
+          </AgentChatMessagePart>
+        );
+      },
+    },
+    [component, parametersSchema, size, toolName],
+  );
+
+  return null;
+};
+
+export type AgentChatContentProps = VariantProps<
+  typeof agentChatContentVariants
+> &
+  React.ComponentProps<'div'>;
+
+const ChatComponentToolCall = ({
+  size = 'md',
+  component,
+}: {
+  size?: 'sm' | 'md' | 'lg';
+  component: AgentChatComponent;
+}) => {
+  if (component.userInterrupt) {
+    return <ChatComponentInterruptToolCall size={size} component={component} />;
+  }
+  return <ChatComponentRenderToolCall size={size} component={component} />;
 };
 
 export function AgentChatContent({

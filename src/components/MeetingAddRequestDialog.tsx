@@ -259,7 +259,10 @@ export const MeetingAddRequestDialog = ({
         ? { fundPolicyNumber: fund.policyNumber }
         : {}),
       ...(fund?.totalBalance != null ? { fundTotalBalance: fund.totalBalance } : {}),
-      tracks: tracksValues,
+      tracks: STATIC_TRACK_KEYS.reduce((acc, key) => {
+        acc[key] = tracksValues[key] ?? '';
+        return acc;
+      }, {} as Record<string, string>),
       tracksCount: tracksKeys.length,
       managementFee,
       managementFeeAccumulation,

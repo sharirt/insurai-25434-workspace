@@ -472,8 +472,6 @@ export interface IFundsEntity {
   providerName?: string;
   /** Agent number (מספר סוכן) as imported from Excel - stored as string to support formats like '2-5000'  */
   agentNumber?: string;
-  /** שם מסלול ההשקעה של הקרן (למשל: מניות, כללי, אג"ח, כספי, הלכתי וכו'). נתון קריטי לניתוח רמת הסיכון של תיק הלקוח.  */
-  investmentTrack?: string;
 }
 
 export const FundsEntity = {
@@ -1643,24 +1641,24 @@ export interface IFetchIGemelFundsActionInput {
  * undefined
  */
 export interface IFetchIGemelFundsActionOutputFetchIGemelFundsActionOutputCategorySummaryItemObject {
-  category?: string;
   url?: string;
-  inserted?: number;
   error?: string;
+  category?: string;
+  inserted?: number;
 }
 
 /**
  * FetchIGemelFunds output payload
  */
 export interface IFetchIGemelFundsActionOutput {
+  errors?: string[];
   /** success or error  */
   status?: string;
-  /** Total number of fund records inserted  */
-  totalInserted?: number;
   /** ISO timestamp of when data was fetched  */
   fetchedAt?: string;
+  /** Total number of fund records inserted  */
+  totalInserted?: number;
   categorySummary?: IFetchIGemelFundsActionOutputFetchIGemelFundsActionOutputCategorySummaryItemObject[];
-  errors?: string[];
 }
 
 /**
@@ -1707,26 +1705,26 @@ export interface IFetchMyGemelDataActionOutputAverageObject {
  * undefined
  */
 export interface IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject {
+  funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
+  average?: IFetchMyGemelDataActionOutputAverageObject;
   /** Category name from h2.title  */
   category?: string;
   /** The URL this category was fetched from  */
   sourceUrl?: string;
-  funds?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputFundsItemObject[];
-  average?: IFetchMyGemelDataActionOutputAverageObject;
 }
 
 /**
  * FetchMyGemelData output payload
  */
 export interface IFetchMyGemelDataActionOutput {
+  errors?: string[];
   /** success or error  */
   status?: string;
   /** ISO timestamp of when data was fetched  */
   fetchedAt?: string;
+  categories?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject[];
   /** Total number of categories parsed across all pages  */
   totalCategories?: number;
-  categories?: IFetchMyGemelDataActionOutputFetchMyGemelDataActionOutputCategoriesItemObject[];
-  errors?: string[];
 }
 
 /**
@@ -2409,30 +2407,30 @@ export const SendAllFormsForSignatureDocuSealAction = {
 export interface ISendClientIntakeFormActionInput {
   /** Optional existing client ID. If provided, the form will be pre-filled with client data.  */
   clientId?: string;
-  /** Phone number of the recipient in E.164 format (e.g. +972501234567)  */
-  recipientPhone: string;
-  /** Email address of the recipient  */
-  recipientEmail: string;
-  /** Display name of the recipient for personalization  */
-  recipientName: string;
   /** Email of the agent sending the form  */
   agentEmail: string;
+  /** Display name of the recipient for personalization  */
+  recipientName: string;
+  /** Email address of the recipient  */
+  recipientEmail: string;
+  /** Phone number of the recipient in E.164 format (e.g. +972501234567)  */
+  recipientPhone: string;
 }
 
 /**
  * SendClientIntakeForm output payload
  */
 export interface ISendClientIntakeFormActionOutput {
-  /** Whether the form was sent successfully  */
-  success?: boolean;
-  /** The ID of the created token record  */
-  tokenId?: string;
   /** The unique token value  */
   token?: string;
   /** The full URL of the form sent to the client  */
   formUrl?: string;
   /** Status message  */
   message?: string;
+  /** Whether the form was sent successfully  */
+  success?: boolean;
+  /** The ID of the created token record  */
+  tokenId?: string;
 }
 
 /**
@@ -2779,10 +2777,10 @@ export interface ISubmitClientIntakeFormActionInput {
   token: string;
   /** All form fields submitted by the client  */
   formData: ISubmitClientIntakeFormActionInputFormDataObject;
-  /** URL of the uploaded front side of the ID card  */
-  idFrontUrl?: string;
   /** URL of the uploaded back side of the ID card  */
   idBackUrl?: string;
+  /** URL of the uploaded front side of the ID card  */
+  idFrontUrl?: string;
   /** URL of the uploaded ID appendix (ספח)  */
   idAppendixUrl?: string;
 }
@@ -2791,16 +2789,16 @@ export interface ISubmitClientIntakeFormActionInput {
  * SubmitClientIntakeForm output payload
  */
 export interface ISubmitClientIntakeFormActionOutput {
+  /** Error message if submission failed  */
+  error?: string;
+  /** Status message  */
+  message?: string;
   /** Whether the submission was successful  */
   success?: boolean;
   /** The ID of the created or updated client  */
   clientId?: string;
   /** True if a new client was created, false if existing client was updated  */
   isNewClient?: boolean;
-  /** Status message  */
-  message?: string;
-  /** Error message if submission failed  */
-  error?: string;
 }
 
 /**

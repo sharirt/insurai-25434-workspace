@@ -40,7 +40,6 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="text-right">שם תוכנית</TableHead>
-              <TableHead className="text-right">מסלול השקעה</TableHead>
               <TableHead className="text-right">סוג מוצר</TableHead>
               <TableHead className="text-right">מספר פוליסה</TableHead>
               <TableHead className="text-right">שם יצרן</TableHead>
@@ -71,7 +70,6 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
                   <TableCell className="font-medium">
                     {fund.planName || "—"}
                   </TableCell>
-                  <TableCell>{fund.investmentTrack || "—"}</TableCell>
                   <TableCell>{fund.productType || "—"}</TableCell>
                   <TableCell className="font-mono">
                     {fund.policyNumber || "—"}
@@ -175,7 +173,6 @@ export const FundsTableSkeleton = ({ rows = 5 }: FundsTableSkeletonProps) => {
           {[...Array(rows)].map((_, i) => (
             <TableRow key={i}>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
