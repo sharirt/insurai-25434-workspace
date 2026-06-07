@@ -930,6 +930,11 @@ export const ClientsManagerPage = {
   pageName: "ClientsManager",
 } as const;
 
+export const ClientVerificationPage = {
+  pageBlockId: "6a2597bc17cb7ee55d3ca903",
+  pageName: "ClientVerification",
+} as const;
+
 export const FormDetailsPage = {
   pageBlockId: "69db99aa7d23f0bc9a294f85",
   pageName: "FormDetails",

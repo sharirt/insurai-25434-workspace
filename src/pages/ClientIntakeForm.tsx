@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router'
 import {
   useEntityGetAll,
   useEntityGetOne,
+  useEntityUpdate,
   useExecuteAction,
 } from '@blocksdiy/blocks-client-sdk/reactSdk'
 import {
@@ -103,6 +104,16 @@ const EMPLOYMENT_OPTIONS: ClientsEntityEmploymentEnum[] = [
 export default function ClientIntakeForm() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token') || ''
+  const clientRoleMode = searchParams.get('clientRole') === 'true'
+  const clientIdParam = searchParams.get('clientId') || ''
+
+  const { data: directClient, isLoading: directClientLoading } = useEntityGetOne(
+    ClientsEntity,
+    { id: clientIdParam },
+    { enabled: clientRoleMode && !!clientIdParam },
+  )
+
+  const { updateFunction, isLoading: updating } = useEntityUpdate(ClientsEntity)
 
   const { data: tokens, isLoading: tokensLoading } = useEntityGetAll(
     ClientFormTokensEntity,
@@ -126,31 +137,32 @@ export default function ClientIntakeForm() {
   const [prefilled, setPrefilled] = useState(false)
 
   useEffect(() => {
-    if (existingClient && !prefilled) {
+    const client = clientRoleMode ? directClient : existingClient
+    if (client && !prefilled) {
       setForm({
-        gender: existingClient.gender || '',
-        first_name: existingClient.first_name || '',
-        last_name: existingClient.last_name || '',
-        dateOfBirth: existingClient.dateOfBirth || '',
-        national_id: existingClient.national_id || '',
-        idIssueDate: existingClient.idIssueDate || '',
-        relationship: existingClient.relationship || '',
-        phone_number: existingClient.phone_number || '',
-        email: existingClient.email || '',
-        cityOfResidence: existingClient.cityOfResidence || '',
-        address: existingClient.address || '',
-        apartmentNumber: existingClient.apartmentNumber || '',
-        zipCode: existingClient.zipCode || '',
-        employment: existingClient.employment || '',
-        employer: existingClient.employer || '',
-        companyId: existingClient.companyId || '',
-        occupation: existingClient.occupation || '',
-        american: existingClient.american || false,
-        smoker: existingClient.smoker || false,
+        gender: client.gender || '',
+        first_name: client.first_name || '',
+        last_name: client.last_name || '',
+        dateOfBirth: client.dateOfBirth || '',
+        national_id: client.national_id || '',
+        idIssueDate: client.idIssueDate || '',
+        relationship: client.relationship || '',
+        phone_number: client.phone_number || '',
+        email: client.email || '',
+        cityOfResidence: client.cityOfResidence || '',
+        address: client.address || '',
+        apartmentNumber: client.apartmentNumber || '',
+        zipCode: client.zipCode || '',
+        employment: client.employment || '',
+        employer: client.employer || '',
+        companyId: client.companyId || '',
+        occupation: client.occupation || '',
+        american: client.american || false,
+        smoker: client.smoker || false,
       })
       setPrefilled(true)
     }
-  }, [existingClient, prefilled])
+  }, [existingClient, directClient, prefilled, clientRoleMode])
 
   const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -172,6 +184,21 @@ export default function ClientIntakeForm() {
       toast.error('יש למלא שם פרטי ושם משפחה')
       return
     }
+    if (clientRoleMode) {
+      try {
+        await updateFunction({
+          id: clientIdParam,
+          data: {
+            ...form,
+            idDocumentationUrl: idFrontUrl || undefined,
+          },
+        })
+        setSubmitted(true)
+      } catch {
+        toast.error('שגיאה בשליחת הטופס')
+      }
+      return
+    }
     try {
       const result = await executeFunction({
         token,
@@ -190,35 +217,60 @@ export default function ClientIntakeForm() {
     }
   }
 
-  if (tokensLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Skeleton className="h-12 w-48" />
-      </div>
-    )
-  }
-
-  if (!token || !tokenRecord) {
-    return <IntakeFormError message="הקישור אינו תקין" />
-  }
-
-  if (tokenRecord.status === 'expired' || (tokenRecord.expiresAt && new Date(tokenRecord.expiresAt) < new Date())) {
-    return <IntakeFormError message="הקישור פג תוקף. אנא פנה לסוכן שלך" />
-  }
-
-  if (tokenRecord.status === 'submitted') {
-    return (
-      <div className="flex min-h-screen items-center justify-center p-4" style={{ direction: 'rtl' }}>
-        <div className="flex flex-col items-center gap-4 text-center">
-          <FileCheck className="size-16 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">הטופס כבר הוגש בהצלחה. תודה!</h1>
+  if (clientRoleMode) {
+    if (directClientLoading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Skeleton className="h-12 w-48" />
         </div>
-      </div>
-    )
+      )
+    }
+    if (!directClient) {
+      return <IntakeFormError message="לקוח לא נמצא" />
+    }
+    if (submitted) {
+      return (
+        <div className="flex min-h-screen items-center justify-center p-4" style={{ direction: 'rtl' }}>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <FileCheck className="size-16 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">תודה! הפרטים שלך נשמרו בהצלחה.</h1>
+          </div>
+        </div>
+      )
+    }
   }
 
-  if (submitted) {
-    return <IntakeFormSuccess name={form.first_name} />
+  if (!clientRoleMode) {
+    if (tokensLoading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Skeleton className="h-12 w-48" />
+        </div>
+      )
+    }
+
+    if (!token || !tokenRecord) {
+      return <IntakeFormError message="הקישור אינו תקין" />
+    }
+
+    if (tokenRecord.status === 'expired' || (tokenRecord.expiresAt && new Date(tokenRecord.expiresAt) < new Date())) {
+      return <IntakeFormError message="הקישור פג תוקף. אנא פנה לסוכן שלך" />
+    }
+
+    if (tokenRecord.status === 'submitted') {
+      return (
+        <div className="flex min-h-screen items-center justify-center p-4" style={{ direction: 'rtl' }}>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <FileCheck className="size-16 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">הטופס כבר הוגש בהצלחה. תודה!</h1>
+          </div>
+        </div>
+      )
+    }
+
+    if (submitted) {
+      return <IntakeFormSuccess name={form.first_name} />
+    }
   }
 
   return (
@@ -471,7 +523,7 @@ export default function ClientIntakeForm() {
 
         {/* Submit - sticky on mobile */}
         <div className="fixed bottom-0 left-0 right-0 border-t bg-background p-4 sm:static sm:border-0 sm:bg-transparent sm:p-0">
-          <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+          <Button type="submit" className="w-full" size="lg" disabled={submitting || updating}>
             {submitting ? (
               <>
                 <Loader2 className="animate-spin" data-icon="inline-start" />

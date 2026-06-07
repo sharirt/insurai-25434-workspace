@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 import {
   Sidebar,
   SidebarContent,
@@ -17,9 +17,9 @@ import {
 import { Users, FileText, Building2, Building, UserCog, ClipboardList, User, LogOut, LogIn, LayoutDashboard, Mail, Briefcase, Sparkles, Send, BarChart2, TrendingUp, ShieldAlert } from "lucide-react";
 import { useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getPageUrl, logOut } from "@/lib/utils";
-import { LoginPage, AgentDashboard2Page, AgentProfilePage, PortfolioRiskAnalysisPage } from "@/product-types";
+import { LoginPage, AgentDashboard2Page, AgentProfilePage, PortfolioRiskAnalysisPage, ClientVerificationPage } from "@/product-types";
 import { Button } from "@/components/ui/button";
-import { isAdminRole, isOfficeRole, ADMIN_ONLY_NAV_TITLES, OFFICE_HIDDEN_NAV_TITLES, canAccessPage } from "@/utils/AccessControl";
+import { isAdminRole, isOfficeRole, isClientRole, ADMIN_ONLY_NAV_TITLES, OFFICE_HIDDEN_NAV_TITLES, canAccessPage } from "@/utils/AccessControl";
 import { AccessDenied } from "@/components/AccessDenied";
 
 const navigationItems = [
@@ -48,8 +48,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const userRole = user.isAuthenticated ? (user as any).role : undefined;
   const isAdmin = isAdminRole(userRole);
 
-  if (location.pathname.startsWith("/ClientIntakeForm")) {
+  if (location.pathname.startsWith("/ClientIntakeForm") || location.pathname.startsWith("/ClientVerification")) {
     return <>{children}</>;
+  }
+
+  if (isClientRole(userRole)) {
+    const isAllowedClientPage = location.pathname.startsWith("/ClientVerification") || location.pathname.startsWith("/ClientIntakeForm");
+    if (!isAllowedClientPage) {
+      return <Navigate to={getPageUrl(ClientVerificationPage)} replace />;
+    }
+    return <div style={{ direction: 'rtl' } as React.CSSProperties} className="min-h-screen">{children}</div>;
   }
 
   const filteredNavItems = isAdmin

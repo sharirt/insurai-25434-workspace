@@ -23,11 +23,20 @@ export function isOfficeRole(role: string | undefined | null): boolean {
   return role === "office";
 }
 
+export function isClientRole(role: string | undefined | null): boolean {
+  return role === "client";
+}
+
+const CLIENT_ALLOWED_PAGES = ["/ClientVerification", "/ClientIntakeForm"];
+
 export function canAccessPage(
   role: string | undefined | null,
   pathname: string
 ): boolean {
   if (isAdminRole(role)) return true;
+  if (isClientRole(role)) {
+    return CLIENT_ALLOWED_PAGES.some((page) => pathname.startsWith(page));
+  }
   if (isOfficeRole(role)) {
     return !OFFICE_RESTRICTED_PAGES.some((page) => pathname.startsWith(page));
   }
