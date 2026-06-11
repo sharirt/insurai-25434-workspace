@@ -188,15 +188,30 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
                           >
                             <Eye className="size-4" />
                           </button>
-                          <a
-                            href={doc.documentUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            type="button"
                             title="הורד מסמך"
                             className="p-1 rounded text-primary hover:bg-muted transition-colors"
+                            onClick={async () => {
+                              try {
+                                const response = await fetch(doc.documentUrl!);
+                                if (!response.ok) throw new Error("Failed to fetch");
+                                const blob = await response.blob();
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `${doc.documentName || "מסמך"}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                              } catch {
+                                toast.error("שגיאה בהורדת הקובץ");
+                              }
+                            }}
                           >
                             <Download className="size-4" />
-                          </a>
+                          </button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <button
