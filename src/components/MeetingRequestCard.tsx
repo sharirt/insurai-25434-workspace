@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { resolvePdfFileUrl } from "@/utils/PdfFileUrl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -194,7 +195,8 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
                             className="p-1 rounded text-primary hover:bg-muted transition-colors"
                             onClick={async () => {
                               try {
-                                const response = await fetch(doc.documentUrl!);
+                                const resolvedUrl = resolvePdfFileUrl(doc.documentUrl!);
+                                const response = await fetch(resolvedUrl);
                                 if (!response.ok) throw new Error("Failed to fetch");
                                 const blob = await response.blob();
                                 const url = URL.createObjectURL(blob);
