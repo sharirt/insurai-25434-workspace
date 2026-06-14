@@ -383,7 +383,7 @@ const FormRow = ({ formId, url, onPreview, forms, requestId, updateRequest }: {
                   onClick={async () => {
                     try {
                       const updatedForms = (forms || []).filter((f: any) => f.formId !== formId);
-                      await updateRequest({ id: requestId, forms: updatedForms });
+                      await updateRequest({ id: requestId, data: { forms: updatedForms } });
                       toast.success("הטופס נמחק בהצלחה");
                     } catch {
                       toast.error("שגיאה במחיקת הטופס");
