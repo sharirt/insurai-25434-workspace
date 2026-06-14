@@ -33,7 +33,7 @@ import {
   SignedDocumentsEntity,
   RequestsManagerPage,
 } from "@/product-types";
-import { useEntityGetOne, useEntityGetAll, useEntityDelete } from "@blocksdiy/blocks-client-sdk/reactSdk";
+import { useEntityGetOne, useEntityGetAll, useEntityDelete, useEntityUpdate } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { getStatusLabel, getStatusVariant } from "@/utils/StatusConfig";
 
 // Explicit user override: raw palette classes for status-specific color coding
@@ -70,6 +70,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
   );
 
   const { deleteFunction } = useEntityDelete(SignedDocumentsEntity);
+  const { updateFunction: updateRequest } = useEntityUpdate(RequestsEntity);
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<{ name: string; url: string } | null>(null);
 
@@ -125,7 +126,7 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
               <p className="text-xs text-muted-foreground">אין טפסים מעובדים עדיין</p>
             ) : (
               forms.map((form, idx) => (
-                <FormRow key={form.formId || idx} formId={form.formId} url={form.url} onPreview={(name, previewUrl) => setPreviewDoc({ name, url: previewUrl })} />
+                <FormRow key={form.formId || idx} formId={form.formId} url={form.url} onPreview={(name, previewUrl) => setPreviewDoc({ name, url: previewUrl })} forms={forms} requestId={requestId} updateRequest={updateRequest} />
               ))
             )}
           </div>
@@ -325,7 +326,14 @@ export const MeetingRequestCard = ({ requestId, meetingId }: { requestId: string
   );
 };
 
-const FormRow = ({ formId, url, onPreview }: { formId?: string; url?: string; onPreview?: (name: string, url: string) => void }) => {
+const FormRow = ({ formId, url, onPreview, forms, requestId, updateRequest }: {
+  formId?: string;
+  url?: string;
+  onPreview?: (name: string, url: string) => void;
+  forms?: any[];
+  requestId?: string;
+  updateRequest?: (data: any) => Promise<any>;
+}) => {
   const { data: form } = useEntityGetOne(FormsEntity, { id: formId || "" }, { enabled: !!formId });
   const title = form?.formTitleHebrew || form?.formTitle || "טופס";
 
@@ -339,16 +347,56 @@ const FormRow = ({ formId, url, onPreview }: { formId?: string; url?: string; on
       ) : (
         <span className="truncate">{title}</span>
       )}
-      {url && onPreview && (
-        <button
-          type="button"
-          onClick={() => onPreview(title, url)}
-          title="תצוגה מקדימה"
-          className="p-1 rounded text-primary hover:bg-muted transition-colors shrink-0"
-        >
-          <Eye className="size-4" />
-        </button>
-      )}
+      <div className="flex items-center gap-1 shrink-0 mr-auto">
+        {url && onPreview && (
+          <button
+            type="button"
+            onClick={() => onPreview(title, url)}
+            title="תצוגה מקדימה"
+            className="p-1 rounded text-primary hover:bg-muted transition-colors"
+          >
+            <Eye className="size-4" />
+          </button>
+        )}
+        {requestId && updateRequest && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                type="button"
+                className="p-1 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                title="מחק טופס"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent style={{ direction: "rtl" }}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>מחיקת טופס</AlertDialogTitle>
+                <AlertDialogDescription>
+                  האם אתה בטוח שברצונך למחוק טופס זה מהבקשה? פעולה זו אינה ניתנת לביטול.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>ביטול</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={async () => {
+                    try {
+                      const updatedForms = (forms || []).filter((f: any) => f.formId !== formId);
+                      await updateRequest({ id: requestId, forms: updatedForms });
+                      toast.success("הטופס נמחק בהצלחה");
+                    } catch {
+                      toast.error("שגיאה במחיקת הטופס");
+                    }
+                  }}
+                >
+                  מחק
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
     </div>
   );
 };
