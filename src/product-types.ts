@@ -1132,13 +1132,18 @@ export interface IAnalyzePortfolioRiskActionInput {
   prompt: string;
 }
 
+export type AnalyzePortfolioRiskActionOutputRiskLevelEnum =
+  | "סיכון גבוה"
+  | "סיכון ממוצע"
+  | "סיכון נמוך";
+
 /**
  * undefined
  */
 export interface IAnalyzePortfolioRiskActionOutputBreakdownObject {
-  /** ניתוח חשיפה למניות  */
+  /** ממוצע חשיפה למניות  */
   equityExposure?: string;
-  /** ניתוח חשיפה לחו"ל  */
+  /** ממוצע חשיפה לחו"ל  */
   foreignExposure?: string;
   /** ניתוח פיזור  */
   diversification?: string;
@@ -1150,11 +1155,9 @@ export interface IAnalyzePortfolioRiskActionOutputBreakdownObject {
  * AnalyzePortfolioRisk output payload
  */
 export interface IAnalyzePortfolioRiskActionOutput {
-  /** ציון סיכון על סקאלה של 1-10 (1=שמרני מאוד, 10=אגרסיבי מאוד)  */
-  riskScore: number;
-  /** תווית רמת הסיכון בעברית (למשל: שמרני, מאוזן, אגרסיבי)  */
-  riskLabel: string;
-  /** סיכום קצר של ניתוח הסיכון  */
+  /** רמת הסיכון של התיק — אחת מ-3 אפשרויות בלבד  */
+  riskLevel: AnalyzePortfolioRiskActionOutputRiskLevelEnum;
+  /** סיכום קצר של ניתוח הסיכון — מה מוביל לסיווג זה  */
   summary: string;
   /** נקודות חוזק של התיק  */
   strengths: string[];
