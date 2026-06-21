@@ -2932,6 +2932,37 @@ export const TestRoetoConnectionAction = {
   outputInstanceType: {} as ITestRoetoConnectionActionOutput,
 } as const;
 
+/**
+ * TranscribeAudioWithWhisper input payload
+ */
+export interface ITranscribeAudioWithWhisperActionInput {
+  /** URL of the uploaded audio file to transcribe  */
+  audioFileUrl: string;
+}
+
+/**
+ * TranscribeAudioWithWhisper output payload
+ */
+export interface ITranscribeAudioWithWhisperActionOutput {
+  /** The transcribed text in Hebrew  */
+  text?: string;
+  /** Whether transcription was successful  */
+  success?: boolean;
+  /** Error message if transcription failed  */
+  error?: string;
+}
+
+/**
+ * TranscribeAudioWithWhisperAction
+ * Execute code action
+ */
+export const TranscribeAudioWithWhisperAction = {
+  actionBlockId: "6a3835f710e19a1ab822510e",
+
+  inputInstanceType: {} as ITranscribeAudioWithWhisperActionInput,
+  outputInstanceType: {} as ITranscribeAudioWithWhisperActionOutput,
+} as const;
+
 export const NicoAgent = {
   id: "69db99a87d23f0bc9a294e93",
   name: "Nico",

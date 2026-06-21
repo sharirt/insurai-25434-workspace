@@ -19,6 +19,8 @@ export function AgentChatMessage(
   return <Chat.AgentChatMessage {...props} />;
 }
 
+export const AgentChatMessageGroup = DeepAgentChat.AgentChatMessageGroup;
+
 export function AgentChatThinking(
   props: ReactAgentChat.AgentChatThinkingComponentProps,
 ) {
@@ -74,6 +76,14 @@ export function AgentChatFooter(
   const Chat = useAgentChatImplementation() as any;
 
   return <Chat.AgentChatFooter {...props} />;
+}
+
+export function AgentChatFooterInner(
+  props: ReactAgentChat.AgentChatFooterComponentProps,
+) {
+  const Chat = useAgentChatImplementation() as any;
+
+  return <Chat.AgentChatFooterInner {...props} />;
 }
 
 export function AgentChatSimple(props: ReactAgentChat.AgentChatSimpleProps) {

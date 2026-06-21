@@ -98,11 +98,26 @@ const sanitizeLiveScope = (scope: Record<string, unknown>) =>
     ),
   );
 
+// CopilotKit delivers a completed HITL tool `result` as a JSON string. Parse
+// it back into the structured payload the component originally passed to
+// `respond(...)`; fall back to the raw value if it isn't JSON (or is absent).
+const parseResult = (result: unknown): unknown => {
+  if (typeof result !== 'string') {
+    return result;
+  }
+  try {
+    return JSON.parse(result);
+  } catch {
+    return result;
+  }
+};
+
 const buildLiveScope = (
   componentProps: Record<string, unknown>,
   sendMessage: AgentChatPrimitive.AgentChatContextValue['sendMessage'],
   productTypes: Record<string, unknown>,
   respond?: (result: unknown) => Promise<void>,
+  result?: unknown,
 ) =>
   sanitizeLiveScope({
     props: componentProps,
@@ -113,6 +128,13 @@ const buildLiveScope = (
     // The component calls `respond(payload)` to resume the paused BE
     // `interrupt(...)`; CopilotKit forwards it as `Command(resume=payload)`.
     respond,
+    // The payload the user previously sent via `respond(...)`, if any. On
+    // reload the HITL tool call is replayed WITH its result, so this is
+    // populated and the component can rehydrate its post-response state
+    // (e.g. `useState(result ?? null)`) instead of starting fresh. Always
+    // present in scope (even as `undefined`) so component code can reference
+    // `result` without a ReferenceError.
+    result,
     cn,
     BlocksClientReactSdk,
     ProductTypes: productTypes,
@@ -185,25 +207,26 @@ interface ChatCodeComponentProps {
   status: AgentChatPrimitive.ToolCallStatus;
   size?: ChatComponentSize;
   respond?: (result: unknown) => Promise<void>;
+  result?: unknown;
 }
 
 export function ChatCodeComponent({
   code,
   props,
-  status,
+  status: _status,
   size = 'md',
-  respond: copilotkitRespond,
+  respond,
+  result,
 }: ChatCodeComponentProps) {
-  const { sendMessage: sendMessageToAgent } = AgentChatPrimitive.useAgentChat();
-  const sendMessageRef =
-    React.useRef<typeof sendMessageToAgent>(sendMessageToAgent);
+  const { sendMessage } = AgentChatPrimitive.useAgentChat();
+  const sendMessageRef = React.useRef(sendMessage);
 
   React.useEffect(() => {
-    sendMessageRef.current = sendMessageToAgent;
-  }, [sendMessageToAgent]);
+    sendMessageRef.current = sendMessage;
+  }, [sendMessage]);
 
-  const sendMessage = React.useCallback(
-    (props: Parameters<typeof sendMessageToAgent>[0]) => {
+  const scopeSendMessage = React.useCallback(
+    (props: Parameters<typeof sendMessage>[0]) => {
       return sendMessageRef.current(props);
     },
     [],
@@ -219,15 +242,22 @@ export function ChatCodeComponent({
   // `stableResp-ond` stays referentially constant; the `hasRespondRef` latch
   // keeps a stable function even after `respond` goes undefined on Complete, so
   // the component never remounts across the Executing→Complete transition.
-  const respondRef = React.useRef(copilotkitRespond);
-
+  const respondRef = React.useRef(respond);
   React.useEffect(() => {
-    respondRef.current = copilotkitRespond;
-  }, [copilotkitRespond]);
+    respondRef.current = respond;
+  }, [respond]);
 
-  const respond = React.useCallback(async (result: unknown) => {
+  const scopeRespond = React.useCallback(async (result: unknown) => {
     await respondRef.current?.(result);
   }, []);
+
+  // Freeze the prior result at first mount. CopilotKit flips `result` from
+  // undefined to the resume payload the moment `respond(...)` is called; if
+  // that flowed into `scope`, it would rebuild the memo and REMOUNT the live
+  // component on the very click that answered it — wiping the local state we
+  // just set (same hazard the `scopeRespond` ref guards against). On reload it
+  // is already populated so the component can rehydrate.
+  const initialResultRef = React.useRef(parseResult(result));
 
   const productTypes = React.useContext(ProductTypesContext);
   const rawCode = code ?? '';
@@ -235,8 +265,15 @@ export function ChatCodeComponent({
   // Memoised so `?? {}` doesn't break the `scope` memo's stable deps.
   const liveProps = React.useMemo(() => props ?? {}, [props]);
   const scope = React.useMemo(
-    () => buildLiveScope(liveProps, sendMessage, productTypes, respond),
-    [liveProps, productTypes, sendMessage, respond],
+    () =>
+      buildLiveScope(
+        liveProps,
+        scopeSendMessage,
+        productTypes,
+        scopeRespond,
+        initialResultRef.current,
+      ),
+    [liveProps, productTypes, scopeSendMessage, scopeRespond],
   );
 
   // `Executing` is the HITL-paused state — the tool's args are parsed and
@@ -250,13 +287,11 @@ export function ChatCodeComponent({
   //   return null;
   // }
 
-  // const isCodeReady = true;
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: 'easeInOut' }}
     >
       <LiveProvider code={displayCode} scope={scope} noInline>
         <LivePreview />

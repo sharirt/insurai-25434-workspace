@@ -21,7 +21,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Streamdown } from 'streamdown';
 
-import { AgentChatLiveComponentPart } from '@/components/ui/agent-chat-live-component-part';
 import {
   AgentChatToolCard,
   type AgentChatToolCardSize,
@@ -1034,15 +1033,6 @@ function AgentChatToolCallsContent({
           variant={variant}
         />
       ))}
-      {generatedToolCalls.map((toolCall, index) => (
-        <AgentChatLiveComponentPart
-          key={toolCall.toolCallId || `${toolCall.type}-${index}`}
-          part={toolCall}
-          size={size}
-          variant={variant}
-          scopeExtras={liveComponentScopeExtras}
-        />
-      ))}
     </div>
   );
 }
@@ -1548,7 +1538,7 @@ export function AgentChatFooter({
   return <AgentChatFooterInner {...props} />;
 }
 
-function AgentChatFooterInner({
+export function AgentChatFooterInner({
   size = 'md',
   className,
   hideAttachmentButton = false,

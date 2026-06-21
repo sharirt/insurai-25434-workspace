@@ -6,7 +6,6 @@ import * as React from 'react';
 import z from 'zod';
 
 import { Button } from '@/components/ui/button';
-import { useDeepAgentChatAssistantMessage } from '@/components/ui/deep-agent-chat-assistant-message-context';
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -84,23 +83,15 @@ export const getUserChoiceParametersSchema = z.object({
   submitButtonText: z.string().optional(),
 });
 
-export type GetUserChoiceParameters = z.infer<
-  typeof getUserChoiceParametersSchema
+export type GetUserChoiceParameters = Partial<
+  z.infer<typeof getUserChoiceParametersSchema>
 >;
-type GetUserChoiceParametersRenderInput = {
-  // question?: GetUserChoiceParameters['question'];
-  selectionMode?: GetUserChoiceParameters['selectionMode'];
-  options?: unknown;
-  allowOther?: GetUserChoiceParameters['allowOther'];
-  otherLabel?: GetUserChoiceParameters['otherLabel'];
-  presentation?: GetUserChoiceParameters['presentation'];
-  submitButtonText?: GetUserChoiceParameters['submitButtonText'];
-};
-type GetUserChoiceRenderableOption = {
-  value: string;
-  label: string;
-  description?: string;
-};
+
+export type GetUserChoiceOptions = NonNullable<
+  GetUserChoiceParameters['options']
+>;
+
+export type GetUserChoiceOption = GetUserChoiceOptions[number];
 
 export type GetUserChoiceResult =
   | { status: 'skipped' }
@@ -125,78 +116,12 @@ export type GetUserChoiceSize = 'sm' | 'md' | 'lg';
 
 // ─── Payload helpers ────────────────────────────────────────────────────────
 
-const getMessageText = (content: unknown): string => {
-  if (!content) {
-    return '';
-  }
-  if (typeof content === 'string') {
-    return content;
-  }
-  if (!Array.isArray(content)) {
-    return '';
-  }
-  return content
-    .map((part) => {
-      if (!part || typeof part !== 'object' || !('text' in part)) {
-        return '';
-      }
-      const text = (part as { text?: unknown }).text;
-      return typeof text === 'string' ? text : '';
-    })
-    .join('');
-};
-
-const getSelectionMode = (parameters: GetUserChoiceParametersRenderInput) =>
+const getSelectionMode = (parameters: GetUserChoiceParameters) =>
   parameters.selectionMode === 'multiple' ? 'multiple' : 'single';
 
-const getValidatedChoiceOptions = (
-  options: unknown,
-): GetUserChoiceRenderableOption[] => {
-  if (!Array.isArray(options) || !options.length) {
-    return [];
-  }
-
-  const seen = new Set<string>();
-  const validatedOptions: GetUserChoiceRenderableOption[] = [];
-  for (const option of options) {
-    if (!option || typeof option !== 'object') {
-      continue;
-    }
-    const typedOption = option as {
-      value?: unknown;
-      label?: unknown;
-      description?: unknown;
-    };
-    const value =
-      typeof typedOption.value === 'string' ? typedOption.value.trim() : '';
-    const label =
-      typeof typedOption.label === 'string' ? typedOption.label : '';
-    const description =
-      typeof typedOption.description === 'string'
-        ? typedOption.description
-        : undefined;
-    if (
-      !value ||
-      !label ||
-      value === GET_USER_CHOICE_OTHER_VALUE ||
-      seen.has(value)
-    ) {
-      continue;
-    }
-    seen.add(value);
-    validatedOptions.push({
-      value,
-      label,
-      ...(description ? { description } : {}),
-    });
-  }
-
-  return validatedOptions;
-};
-
 const shouldRenderAsCards = (
-  parameters: GetUserChoiceParametersRenderInput,
-  options: GetUserChoiceRenderableOption[],
+  parameters: GetUserChoiceParameters,
+  options: GetUserChoiceOptions,
 ) => {
   if (parameters.presentation === 'cards') {
     return true;
@@ -204,18 +129,14 @@ const shouldRenderAsCards = (
   if (parameters.presentation === 'chips') {
     return false;
   }
-  return options.some((option) => Boolean(option.description));
+  return options.some((option) => Boolean(option.description)) ?? false;
 };
 
-const getChoiceOptionLabel = (
-  options: GetUserChoiceRenderableOption[],
-  value: string,
-) => options.find((option) => option.value === value)?.label ?? value;
+const getChoiceOptionLabel = (options: GetUserChoiceOptions, value: string) =>
+  options?.find((option) => option.value === value)?.label ?? value;
 
-const getChoiceOption = (
-  options: GetUserChoiceRenderableOption[],
-  value: string,
-) => options.find((option) => option.value === value);
+const getChoiceOption = (options: GetUserChoiceOptions, value: string) =>
+  options?.find((option) => option.value === value);
 
 const getResultFormState = (
   result: GetUserChoiceResult | undefined,
@@ -243,8 +164,8 @@ const getResultFormState = (
 };
 
 const buildChoiceResult = (
-  parameters: GetUserChoiceParametersRenderInput,
-  options: GetUserChoiceRenderableOption[],
+  parameters: GetUserChoiceParameters,
+  options: GetUserChoiceOptions,
   selectedValues: string[],
   otherAnswer: string,
 ): GetUserChoiceResult => {
@@ -294,7 +215,7 @@ const buildChoiceResult = (
 };
 
 const isChoiceInvalid = (
-  parameters: GetUserChoiceParametersRenderInput,
+  parameters: GetUserChoiceParameters,
   selectedValues: string[],
   otherAnswer: string,
 ) => {
@@ -336,24 +257,6 @@ const getUserChoiceFieldVariants = cva('', {
   defaultVariants: { size: 'md' },
 });
 
-const getUserChoiceLabelVariants = cva(
-  'prose-p:my-0 text-base font-normal leading-normal',
-  {
-    variants: {
-      size: {
-        sm: '',
-        md: '',
-        lg: '',
-      },
-      invalid: {
-        true: 'text-destructive/80',
-        false: '',
-      },
-    },
-    defaultVariants: { size: 'md', invalid: false },
-  },
-);
-
 const getUserChoiceChipItemVariants = cva(
   cn(
     'inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full border border-input bg-transparent text-base font-normal leading-normal text-foreground transition-colors disabled:cursor-default',
@@ -393,7 +296,7 @@ const getUserChoiceOtherChipItemVariants = cva(
 );
 
 const getUserChoiceOtherInputVariants = cva(
-  'w-1/2 rounded-full text-base font-normal leading-normal',
+  'w-1/2 rounded-full bg-transparent text-base font-normal leading-normal shadow-none',
   {
     variants: {
       size: {
@@ -582,7 +485,7 @@ function CardOptionContent({
   size,
   selected,
 }: {
-  option: Pick<GetUserChoiceRenderableOption, 'label' | 'description'>;
+  option: GetUserChoiceOption;
   selectionMode: 'single' | 'multiple';
   size: GetUserChoiceSize;
   selected: boolean;
@@ -639,7 +542,7 @@ function ChoiceOptionButton({
   size,
   onSelect,
 }: {
-  option: GetUserChoiceRenderableOption;
+  option: GetUserChoiceOption;
   selectionMode: 'single' | 'multiple';
   isCards: boolean;
   isSelected: boolean;
@@ -650,7 +553,7 @@ function ChoiceOptionButton({
   return (
     <Button
       type="button"
-      variant="primary-ghost"
+      variant="ghost"
       size="sm"
       role={selectionMode === 'single' ? 'radio' : 'checkbox'}
       aria-checked={isSelected}
@@ -703,8 +606,8 @@ function OtherOptionButton({
   return (
     <Button
       type="button"
-      variant="primary-ghost"
-      size={isCards ? 'sm' : 'icon-sm'}
+      variant="ghost"
+      size={isCards ? 'sm' : 'icon'}
       role={selectionMode === 'single' ? 'radio' : 'checkbox'}
       aria-checked={isSelected}
       aria-label={label}
@@ -714,12 +617,17 @@ function OtherOptionButton({
         isCards
           ? getUserChoiceCardItemVariants({ size })
           : getUserChoiceOtherChipItemVariants({ size }),
+        !isCards && 'h-auto w-auto',
       )}
       onClick={() => onSelect(GET_USER_CHOICE_OTHER_VALUE)}
     >
       {isCards ? (
         <CardOptionContent
-          option={{ label, description: undefined }}
+          option={{
+            value: GET_USER_CHOICE_OTHER_VALUE,
+            label,
+            description: undefined,
+          }}
           selectionMode={selectionMode}
           size={size}
           selected={isSelected}
@@ -771,8 +679,8 @@ function OtherAnswerInput({
       />
       <Button
         type="button"
-        variant="primary-ghost"
-        size="icon-sm"
+        variant="ghost"
+        size="icon"
         disabled={isReadOnly}
         aria-label="Clear other answer"
         className={cn(getUserChoiceClearButtonVariants({ size }))}
@@ -796,7 +704,7 @@ function OtherAnswerInput({
 // ─── Main component ─────────────────────────────────────────────────────────
 
 interface GetUserChoiceToolProps {
-  parameters: GetUserChoiceParametersRenderInput;
+  parameters: GetUserChoiceParameters;
   result?: GetUserChoiceResult;
   respond?: (result: unknown) => Promise<void>;
   size?: GetUserChoiceSize;
@@ -806,7 +714,7 @@ export function GetUserChoiceSkipped({
   parameters,
   size = 'md',
 }: {
-  parameters: GetUserChoiceParametersRenderInput;
+  parameters: GetUserChoiceParameters;
   size?: GetUserChoiceSize;
 }) {
   return (
@@ -825,11 +733,7 @@ export function GetUserChoiceTool({
   size = 'md',
 }: GetUserChoiceToolProps) {
   const formId = React.useId();
-  const assistantMessage = useDeepAgentChatAssistantMessage();
-  const options = React.useMemo(
-    () => getValidatedChoiceOptions(parameters.options),
-    [parameters.options],
-  );
+  const options = parameters.options ?? [];
   const [submittedResult, setSubmittedResult] = React.useState<
     GetUserChoiceResult | undefined
   >();
@@ -871,9 +775,7 @@ export function GetUserChoiceTool({
     showSubmitButton && !isCards && !showOtherSubmitButton;
   const showCardsSubmitButton = showSubmitButton && isCards && !isOtherSelected;
   // const question = parameters.question?.trim();
-  const assistantMessageText = getMessageText(assistantMessage?.content).trim();
-  // const controlAccessibleLabel =
-  //   question || assistantMessageText || 'Choose an option';
+  // const controlAccessibleLabel = question || 'Choose an option';
   const labelId = `${formId}-get-user-choice-label`;
 
   React.useEffect(() => {
@@ -1117,7 +1019,7 @@ export function GetUserChoiceToolResult({
   respond,
 }: {
   result?: string;
-  args: GetUserChoiceParametersRenderInput;
+  args: GetUserChoiceParameters;
   respond?: (result: unknown) => Promise<void>;
 }) {
   const parsedResult = parseGetUserChoiceToolResult(result);

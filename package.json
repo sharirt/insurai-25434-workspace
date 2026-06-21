@@ -60,7 +60,9 @@
     "@radix-ui/react-toggle": "1.1.2",
     "@radix-ui/react-toggle-group": "1.1.2",
     "@radix-ui/react-tooltip": "1.1.8",
+    "streamdown": "2.4.0",
     "@streamdown/code": "1.1.1",
+    "@streamdown/mermaid": "1.0.2",
     "@stripe/react-stripe-js": "5.6.1",
     "@stripe/stripe-js": "8.11.0",
     "@tailwindcss/typography": "0.5.16",
@@ -110,7 +112,6 @@
     "resize-observer-polyfill": "1.5.1",
     "sass": "1.86.3",
     "sonner": "2.0.7",
-    "streamdown": "2.4.0",
     "tailwind-merge": "3.5.0",
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "1.0.7",
@@ -119,7 +120,7 @@
     "vaul": "1.1.2",
     "whatwg-fetch": "3.6.20",
     "xlsx": "0.18.5",
-    "zod": "4.3.6"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@blocksdiy/eslint-plugin-auto-import": "latest",

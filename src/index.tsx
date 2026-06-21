@@ -1,7 +1,8 @@
 import './index.css';
+import type { ReactNode } from 'react';
 import Layout from "./layout";
 import { Toaster} from '@/components/ui/sonner';
-const LayoutComponent = ({ children }: { children: React.ReactNode }) => (<><Layout children={children} /><Toaster /></>);
+const LayoutComponent = ({ children }: { children: ReactNode }) => (<><Layout children={children} /><Toaster /></>);
 const AppLayout = { id: "69db99a87d23f0bc9a294e99", name: "AppLayout", component: LayoutComponent };
 export { AppLayout };
 import AgencyManagerComponent from "./pages/AgencyManager";

@@ -92,7 +92,7 @@ const { data: tasks } = useEntityGetAll(
   },
 );
 
-// Returns: { data, isLoading, error, refetch, isError, isFetched, isFetching, isSuccess, status }
+// Returns: { data, isLoading, error, isError, isFetched, isFetching, isSuccess, status }
 ```
 
 ### useEntityGetOne - Fetch Single
@@ -165,6 +165,8 @@ const handleUpdate = async () => {
 };
 ```
 
+Updates are **optimistic**: every cached copy of the row (`useEntityGetAll` lists and `useEntityGetOne`) is patched the moment `updateFunction` is called, so the UI updates instantly. The server response then confirms the change — and on error the patch is rolled back automatically. (Whether a row belongs in a server-side _filtered_ list is settled by an automatic background refetch — see "Instant UI Updates & Real-Time Sync" below.)
+
 **WARNING**: NEVER use `useEntityUpdate(UserEntity)` - UserEntity is IMMUTABLE.
 
 ### useEntityDelete - Delete One
@@ -180,21 +182,7 @@ const handleDelete = async () => {
 };
 ```
 
-> **Note:** `isLoading` from `useEntityDelete` is a single shared boolean — it's `true` while any delete is in-flight, not per-row. For per-row loading state in a list, track the deleting ID with local state:
->
-> ```tsx
-> const [deletingId, setDeletingId] = useState<string | null>(null);
-> const handleDelete = async (id: string) => {
->   setDeletingId(id);
->   try {
->     await deleteFunction({ id });
->   } finally {
->     setDeletingId(null);
->   }
-> };
-> ```
-
-> **Auto-refetch:** All CRUD hooks (`useEntityCreate`, `useEntityUpdate`, `useEntityDelete`) automatically invalidate and refetch `useEntityGetAll` for the same entity. No manual `refetch()` needed after mutations.
+> **Note:** Deletes are **optimistic** — the row disappears from `useEntityGetAll`/`useEntityGetOne` data the moment `deleteFunction` is called, and is restored automatically if the server rejects. Don't build per-row "deleting…" spinners and don't remove the row from local state — it's already gone from `data` while the request runs.
 
 ### useEntityDeleteMany - Delete Multiple
 
@@ -208,6 +196,33 @@ const handleBulkDelete = async () => {
   toast.success(`Deleted ${selectedIds.length} items`);
 };
 ```
+
+---
+
+## Instant UI Updates & Real-Time Sync
+
+The SDK keeps all `useEntityGetAll` / `useEntityGetOne` data in sync automatically — mutations never need a manual refresh:
+
+- **Updates and deletes are optimistic** — cached data is patched the moment the mutate function is called, so the UI updates instantly; on server error the change rolls back automatically.
+- **Creates update the cache on success** — when `createFunction`/`createManyFunction` resolves, the new row(s) are written into unfiltered lists, and `useEntityGetOne(Entity, { id: newRow.id })` is pre-seeded, so navigating to the new row's detail page renders instantly.
+- **External changes are pushed in real-time** — rows created/updated/deleted by workflows, agents, or other users arrive over websockets and are merged into cached data automatically.
+
+### What's instant vs. what still refetches
+
+Unfiltered `useEntityGetAll(Entity)` and `useEntityGetOne(Entity, { id })` are maintained purely by these cache writes — they don't refetch after mutations. **Server-side filtered lists** (e.g. `useEntityGetAll(TaskEntity, { status: 'todo' })`) and non-id one-queries can't be fully reconciled client-side — which rows match a filter is decided by the server — so the SDK automatically refetches them in the background after each write:
+
+- An update patches the row's fields in filtered lists instantly, but the row joins/leaves a filtered list (e.g. its `status` no longer matches the filter) only when that background refetch lands.
+- A created row appears in matching filtered lists only after the refetch (unfiltered lists show it as soon as the create resolves).
+- A deleted row vanishes from every list instantly — removal is exact regardless of filters.
+
+This is still fully automatic — the refetch is never your job. But for views that need instant cross-group moves over a small dataset (kanban columns, status tabs), fetch one unfiltered list and filter client-side: that path is entirely optimistic, with no round-trip delay between groups.
+
+Because of this:
+
+- **Never call `refetch()`** — it is never needed after mutations.
+- **Never poll** (`setInterval` + fetch) to keep data fresh — live updates are automatic.
+- **Never mirror `data` into `useState`** to hand-roll optimistic add/remove/update of rows — render from `data` directly; local copies go stale and break real-time sync. (Copying individual field values into form state is fine.)
+- **Debounce rapid writes** — mutations are client-rate-limited (bursts of repeated writes to the same row throw an error). Save on blur/submit or debounce; never call `updateFunction` on every keystroke.
 
 ---
 
@@ -576,14 +591,17 @@ The fallback initials ensure the avatar always renders something specific to the
 
 ## Data Filtering Best Practices
 
-| Scenario                      | Approach                                      |
-| ----------------------------- | --------------------------------------------- |
-| User-specific data            | Server-side filter: `{ assignedTo: user.id }` |
-| Large datasets                | Server-side filter                            |
-| Security-sensitive data       | Server-side filter                            |
-| Small public datasets         | Client-side filter OK                         |
-| Instant search UX             | Client-side filter OK                         |
-| Complex multi-faceted filters | Client-side filter OK                         |
+| Scenario                                 | Approach                                      |
+| ---------------------------------------- | --------------------------------------------- |
+| User-specific data                       | Server-side filter: `{ assignedTo: user.id }` |
+| Large datasets                           | Server-side filter                            |
+| Security-sensitive data                  | Server-side filter                            |
+| Small public datasets                    | Client-side filter OK                         |
+| Instant search UX                        | Client-side filter OK                         |
+| Complex multi-faceted filters            | Client-side filter OK                         |
+| Instant cross-group moves (kanban, tabs) | Client-side filter (fully optimistic)         |
+
+Server-side filtered lists still update automatically after every write, but membership changes wait on a background refetch — see "Instant UI Updates & Real-Time Sync".
 
 ---
 

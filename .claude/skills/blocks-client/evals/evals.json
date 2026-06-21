@@ -3,14 +3,15 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Show a list of all products from the ProductEntity with their name and price. Add a delete button on each row that removes the product. Show a per-row loading indicator while a specific product is being deleted.",
-      "expected_output": "A list rendering useEntityGetAll, delete using useEntityDelete, with per-row loading state tracked via local useState — not a single shared isLoading.",
+      "prompt": "Show a list of all products from the ProductEntity with their name and price. Add a delete button on each row that removes the product immediately when clicked.",
+      "expected_output": "A list rendering useEntityGetAll, deleting via useEntityDelete, rendering rows directly from data and relying on the SDK's optimistic removal — no manual list state, no refetch, no per-row spinners.",
       "files": [],
       "expectations": [
         "Uses useEntityGetAll(ProductEntity) to fetch data",
         "Uses useEntityDelete for deletion",
-        "Tracks per-row loading state with local useState<string | null>, not shared isLoading",
+        "Renders rows directly from data — does not copy the list into useState or manually filter out deleted rows",
         "Does not call refetch() manually after delete",
+        "Does not add per-row deleting spinners or loading state (the SDK removes the row optimistically)",
         "Imports entity from @/product-types"
       ]
     },

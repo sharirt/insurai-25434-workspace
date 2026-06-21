@@ -41,7 +41,7 @@ When the user messages a contact with no existing Conversations row:
 1. Show a phone number input.
 2. After entering the number, immediately show the chat panel in a local "pending" state — do not wait for a DB row. Use a synthetic object: `{ senderPhone: enteredNumber, senderName: '', lastMessageAt: null }`.
 3. Since no 24h window is open, disable free-form input and show the template picker.
-4. After sending the template, the backend workflow creates the Conversations row. Refetch conversations to pick it up.
+4. After sending the template, the backend workflow creates the Conversations row — it appears in `useEntityGetAll` automatically via the SDK's real-time sync (no manual refetch). Swap the synthetic pending object for the real row once it arrives.
 
 ### Template Picker (for live chat UI only)
 

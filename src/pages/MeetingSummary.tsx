@@ -26,6 +26,7 @@ import {
 } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { ClientSelectionSection } from "@/components/ClientSelectionSection";
+import { AudioRecorder } from "@/components/AudioRecorder";
 
 export default function MeetingSummary() {
   const navigate = useNavigate();
@@ -44,6 +45,10 @@ export default function MeetingSummary() {
   const { executeFunction, isLoading } = useExecuteAction(
     ParseMeetingSummaryActionAction
   );
+
+  const handleTranscription = (text: string) => {
+    setSummary(prev => prev ? prev + "\n" + text : text);
+  };
 
   const navigateToWizard = (result: any, navClientId: string | null, createNew?: boolean) => {
     sessionStorage.setItem("meetingSummaryData", JSON.stringify({ ...result, clientId: navClientId }));
@@ -130,6 +135,10 @@ export default function MeetingSummary() {
                 </span>
               </div>
             )}
+            <AudioRecorder
+              onTranscriptionComplete={handleTranscription}
+              disabled={isLoading || !!processedResult}
+            />
             <Textarea
               placeholder="הדבק כאן את סיכום הפגישה..."
               value={summary}
