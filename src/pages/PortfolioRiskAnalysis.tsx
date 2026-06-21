@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { ClientSelector } from "@/components/ClientSelector";
 import { RiskResults } from "@/components/RiskResults";
 import { FundsList } from "@/components/FundsList";
-import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
+import type { IAnalyzePortfolioRiskActionOutput, IAnalyzePortfolioRiskActionOutputBreakdownObject } from "@/product-types";
 
 function parseRiskResult(raw: unknown): IAnalyzePortfolioRiskActionOutput | null {
   if (!raw) return null;
@@ -51,6 +51,59 @@ function parseRiskResult(raw: unknown): IAnalyzePortfolioRiskActionOutput | null
         return parsed as IAnalyzePortfolioRiskActionOutput;
       }
     } catch { /* not JSON */ }
+  }
+
+  // Case 5-8: Try nested in common wrapper fields
+  for (const key of ["result", "output", "data", "analysis"] as const) {
+    const nested = obj[key];
+    if (nested && typeof nested === "object") {
+      const n = nested as Record<string, unknown>;
+      if (typeof n.riskScore === "number") {
+        return n as unknown as IAnalyzePortfolioRiskActionOutput;
+      }
+    }
+  }
+
+  // Case 9: Try parsing any top-level string values as JSON
+  for (const key of Object.keys(obj)) {
+    const val = obj[key];
+    if (typeof val === "string" && val.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(val);
+        if (parsed && typeof parsed.riskScore === "number") {
+          return parsed as IAnalyzePortfolioRiskActionOutput;
+        }
+      } catch { /* not JSON */ }
+    }
+  }
+
+  // Case 10: Deep search — recursively find any nested object with riskScore
+  function deepFind(value: unknown, depth: number): IAnalyzePortfolioRiskActionOutput | null {
+    if (depth > 10 || !value || typeof value !== "object") return null;
+    const record = value as Record<string, unknown>;
+    if (typeof record.riskScore === "number") {
+      return record as unknown as IAnalyzePortfolioRiskActionOutput;
+    }
+    for (const k of Object.keys(record)) {
+      const found = deepFind(record[k], depth + 1);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  const deepResult = deepFind(obj, 0);
+  if (deepResult) return deepResult;
+
+  // Case 11: Fallback — if there's a summary string, return with default riskScore
+  if (typeof obj.summary === "string" && obj.summary.length > 0) {
+    return {
+      riskScore: 5,
+      riskLabel: "לא זמין",
+      summary: obj.summary,
+      strengths: Array.isArray(obj.strengths) ? (obj.strengths as string[]) : [],
+      improvements: Array.isArray(obj.improvements) ? (obj.improvements as string[]) : [],
+      breakdown: (obj.breakdown as IAnalyzePortfolioRiskActionOutputBreakdownObject) ?? {},
+    } as IAnalyzePortfolioRiskActionOutput;
   }
 
   return null;
