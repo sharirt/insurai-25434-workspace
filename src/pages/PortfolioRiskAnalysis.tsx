@@ -1,113 +1,30 @@
-import { useState } from "react";
-import { ShieldAlert, ChevronDown, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShieldAlert, ChevronDown, Loader2, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useExecuteAction } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { AnalyzePortfolioRiskAction } from "@/product-types";
+import {
+  useExecuteAction,
+  useEntityGetOne,
+  useEntityUpdate,
+} from "@blocksdiy/blocks-client-sdk/reactSdk";
+import {
+  AnalyzePortfolioRiskAction,
+  ClientsEntity,
+} from "@/product-types";
 import { toast } from "sonner";
 import { ClientSelector } from "@/components/ClientSelector";
 import { RiskResults } from "@/components/RiskResults";
 import { FundsList } from "@/components/FundsList";
-import type { IAnalyzePortfolioRiskActionOutput, IAnalyzePortfolioRiskActionOutputBreakdownObject } from "@/product-types";
-
-function parseRiskResult(raw: unknown): IAnalyzePortfolioRiskActionOutput | null {
-  if (!raw) return null;
-  const obj = raw as Record<string, unknown>;
-
-  // Case 1: result has riskScore directly
-  if (typeof obj.riskScore === "number") {
-    return obj as unknown as IAnalyzePortfolioRiskActionOutput;
-  }
-
-  // Case 2: nested in structuredOutput
-  if (obj.structuredOutput && typeof obj.structuredOutput === "object") {
-    const so = obj.structuredOutput as Record<string, unknown>;
-    if (typeof so.riskScore === "number") {
-      return so as unknown as IAnalyzePortfolioRiskActionOutput;
-    }
-  }
-
-  // Case 3: result is a JSON string
-  if (typeof raw === "string") {
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed.riskScore === "number") {
-        return parsed as IAnalyzePortfolioRiskActionOutput;
-      }
-    } catch { /* not JSON */ }
-  }
-
-  // Case 4: result.text is a JSON string
-  if (typeof obj.text === "string") {
-    try {
-      const parsed = JSON.parse(obj.text);
-      if (parsed && typeof parsed.riskScore === "number") {
-        return parsed as IAnalyzePortfolioRiskActionOutput;
-      }
-    } catch { /* not JSON */ }
-  }
-
-  // Case 5-8: Try nested in common wrapper fields
-  for (const key of ["result", "output", "data", "analysis"] as const) {
-    const nested = obj[key];
-    if (nested && typeof nested === "object") {
-      const n = nested as Record<string, unknown>;
-      if (typeof n.riskScore === "number") {
-        return n as unknown as IAnalyzePortfolioRiskActionOutput;
-      }
-    }
-  }
-
-  // Case 9: Try parsing any top-level string values as JSON
-  for (const key of Object.keys(obj)) {
-    const val = obj[key];
-    if (typeof val === "string" && val.trim().startsWith("{")) {
-      try {
-        const parsed = JSON.parse(val);
-        if (parsed && typeof parsed.riskScore === "number") {
-          return parsed as IAnalyzePortfolioRiskActionOutput;
-        }
-      } catch { /* not JSON */ }
-    }
-  }
-
-  // Case 10: Deep search — recursively find any nested object with riskScore
-  function deepFind(value: unknown, depth: number): IAnalyzePortfolioRiskActionOutput | null {
-    if (depth > 10 || !value || typeof value !== "object") return null;
-    const record = value as Record<string, unknown>;
-    if (typeof record.riskScore === "number") {
-      return record as unknown as IAnalyzePortfolioRiskActionOutput;
-    }
-    for (const k of Object.keys(record)) {
-      const found = deepFind(record[k], depth + 1);
-      if (found) return found;
-    }
-    return null;
-  }
-
-  const deepResult = deepFind(obj, 0);
-  if (deepResult) return deepResult;
-
-  // Case 11: Fallback — if there's a summary string, return with default riskScore
-  if (typeof obj.summary === "string" && obj.summary.length > 0) {
-    return {
-      riskScore: 5,
-      riskLabel: "לא זמין",
-      summary: obj.summary,
-      strengths: Array.isArray(obj.strengths) ? (obj.strengths as string[]) : [],
-      improvements: Array.isArray(obj.improvements) ? (obj.improvements as string[]) : [],
-      breakdown: (obj.breakdown as IAnalyzePortfolioRiskActionOutputBreakdownObject) ?? {},
-    } as IAnalyzePortfolioRiskActionOutput;
-  }
-
-  return null;
-}
+import { format } from "date-fns";
+import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
 
 const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים. לפניך נתוני תיק השקעות פנסיוני מלאים. ספק ניתוח מפורט בטקסט חופשי בעברית. התייחס לנקודות הבאות: 1) חשיפה למניות (equityExposure) - ממוצע משוקלל לפי יתרה. 2) חשיפה לחו"ל (foreignExposure) - ממוצע משוקלל. 3) פיזור בין מסלולים וסוגי מוצרים. 4) תשואות היסטוריות (12 חודשים, 3 שנים, 5 שנים). 5) יחס בין מוצרים פעילים ולא פעילים. 6) השוואת דמי ניהול בין המוצרים. 7) המלצות ספציפיות לשיפור התיק.
 
@@ -117,22 +34,62 @@ export default function PortfolioRiskAnalysis() {
   const [selectedClientId, setSelectedClientId] = useState("");
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
   const [promptOpen, setPromptOpen] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<IAnalyzePortfolioRiskActionOutput | null>(null);
+  const [isNewAnalysis, setIsNewAnalysis] = useState(false);
 
-  const { executeFunction, result, streamResult, isLoading } = useExecuteAction(
-    AnalyzePortfolioRiskAction
+  const { executeFunction, isLoading } = useExecuteAction(AnalyzePortfolioRiskAction);
+
+  const { data: clientData, isLoading: isLoadingClient } = useEntityGetOne(
+    ClientsEntity,
+    { id: selectedClientId },
+    { enabled: !!selectedClientId }
   );
 
-  const rawResult = result ?? streamResult;
-  const parsedResult = parseRiskResult(rawResult);
+  const { updateFunction, isLoading: isSaving } = useEntityUpdate(ClientsEntity);
+
+  // Reset when client changes
+  useEffect(() => {
+    setAnalysisResult(null);
+    setIsNewAnalysis(false);
+  }, [selectedClientId]);
+
+  // Load saved analysis when client data arrives
+  useEffect(() => {
+    if (clientData?.riskAnalysis?.riskScore) {
+      setAnalysisResult(clientData.riskAnalysis as IAnalyzePortfolioRiskActionOutput);
+      setIsNewAnalysis(false);
+    }
+  }, [clientData]);
 
   const handleAnalyze = async () => {
     try {
-      await executeFunction({
+      const response = await executeFunction({
         clientId: selectedClientId,
         prompt,
       });
+      setAnalysisResult(response as IAnalyzePortfolioRiskActionOutput);
+      setIsNewAnalysis(true);
     } catch {
       toast.error("שגיאה בניתוח התיק. נסה שוב.");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!selectedClientId || !analysisResult) return;
+    try {
+      await updateFunction({
+        id: selectedClientId,
+        data: {
+          riskAnalysis: {
+            ...analysisResult,
+            analyzedAt: new Date().toISOString(),
+          },
+        },
+      });
+      toast.success("הניתוח נשמר בהצלחה");
+      setIsNewAnalysis(false);
+    } catch {
+      toast.error("שגיאה בשמירת הניתוח");
     }
   };
 
@@ -204,7 +161,45 @@ export default function PortfolioRiskAnalysis() {
             </CardContent>
           </Card>
 
-          {parsedResult && <RiskResults result={parsedResult} />}
+          {isLoadingClient && !analysisResult && (
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+          )}
+
+          {analysisResult && (
+            <>
+              <RiskResults result={analysisResult} />
+
+              <div className="flex items-center justify-center">
+                {isNewAnalysis ? (
+                  <Badge variant="outline" className="border-chart-4 text-chart-4 bg-chart-4/10">
+                    ניתוח חדש
+                  </Badge>
+                ) : clientData?.riskAnalysis?.analyzedAt ? (
+                  <Badge variant="secondary" className="flex items-center gap-1.5">
+                    <Calendar className="size-3" />
+                    ניתוח אחרון: {format(new Date(clientData.riskAnalysis.analyzedAt), "dd/MM/yyyy")}
+                  </Badge>
+                ) : null}
+              </div>
+
+              {isNewAnalysis && (
+                <Button onClick={handleSave} disabled={isSaving} className="w-full">
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="animate-spin" data-icon="inline-start" />
+                      שומר...
+                    </>
+                  ) : (
+                    "שמור ניתוח"
+                  )}
+                </Button>
+              )}
+            </>
+          )}
         </>
       )}
     </div>

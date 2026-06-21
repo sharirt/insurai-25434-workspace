@@ -199,6 +199,35 @@ export type ClientsEntityBeneficiariesDivideEnum =
   | "אחר";
 
 /**
+ * undefined
+ */
+export interface IClientsEntityBreakdownObject {
+  equityExposure?: string;
+  foreignExposure?: string;
+  diversification?: string;
+  returns?: string;
+}
+
+/**
+ * Stores the last saved portfolio risk analysis result for this client, including riskScore, riskLabel, summary, strengths, improvements, and breakdown. Saved when the agent clicks 'שמור ניתוח' on the PortfolioRiskAnalysis page.
+ */
+export interface IClientsEntityRiskAnalysisObject {
+  /** Risk score from 1 to 10  */
+  riskScore?: number;
+  /** Hebrew label for the risk level  */
+  riskLabel?: string;
+  /** Hebrew summary of the risk analysis  */
+  summary?: string;
+  /** List of portfolio strengths  */
+  strengths?: string[];
+  /** List of improvement suggestions  */
+  improvements?: string[];
+  breakdown?: IClientsEntityBreakdownObject;
+  /** ISO timestamp of when the analysis was performed  */
+  analyzedAt?: string;
+}
+
+/**
  * Stores client personal details including national identification number, contact information for insurance form processing
  */
 export interface IClientsEntity {
@@ -322,6 +351,8 @@ export interface IClientsEntity {
   beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
   beneficiariesDivideFree?: string;
+  /** Stores the last saved portfolio risk analysis result for this client, including riskScore, riskLabel, summary, strengths, improvements, and breakdown. Saved when the agent clicks 'שמור ניתוח' on the PortfolioRiskAnalysis page.  */
+  riskAnalysis?: IClientsEntityRiskAnalysisObject;
 }
 
 export const ClientsEntity = {
