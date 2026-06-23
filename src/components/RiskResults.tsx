@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Markdown } from "@/components/ui/markdown";
 import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
@@ -55,17 +54,6 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
           <p className={cn("text-2xl font-bold", config.text)}>{riskLevel}</p>
         </CardContent>
       </Card>
-
-      {result?.summary && (
-        <Card>
-          <CardHeader>
-            <CardTitle>סיכום ניתוח</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Markdown>{result.summary}</Markdown>
-          </CardContent>
-        </Card>
-      )}
 
       {result?.breakdown && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

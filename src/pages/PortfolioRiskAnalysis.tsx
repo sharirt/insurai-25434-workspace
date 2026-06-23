@@ -13,7 +13,7 @@ import { AnalyzePortfolioRiskAction, FundsEntity, InvestmentTracksEntity } from 
 import { toast } from "sonner";
 import { ClientSelector } from "@/components/ClientSelector";
 import { RiskResults } from "@/components/RiskResults";
-import { FundsList } from "@/components/FundsList";
+import { TracksBreakdown } from "@/components/TracksBreakdown";
 import type { IAnalyzePortfolioRiskActionOutput, IInvestmentTracksEntity } from "@/product-types";
 
 const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים. לפניך נתוני תיק השקעות פנסיוני מלאים, כולל ממוצעים משוקללים מחושבים מראש. ספק ניתוח מפורט בטקסט חופשי בעברית. התייחס לנקודות הבאות:
@@ -138,8 +138,6 @@ ${trackDetails}`;
 
       {selectedClientId && (
         <>
-          <FundsList clientId={selectedClientId} />
-
           <Card>
             <CardContent className="flex flex-col gap-4 pt-6">
               <Collapsible open={promptOpen} onOpenChange={setPromptOpen}>
@@ -182,7 +180,10 @@ ${trackDetails}`;
           </Card>
 
           {analysisResult && (
-            <RiskResults result={analysisResult} />
+            <>
+              <RiskResults result={analysisResult} />
+              <TracksBreakdown funds={funds ?? []} allTracks={allTracks ?? []} />
+            </>
           )}
         </>
       )}
