@@ -1157,6 +1157,14 @@ export interface IAnalyzePortfolioRiskActionOutputBreakdownObject {
 export interface IAnalyzePortfolioRiskActionOutputAnalyzePortfolioRiskActionOutputProductAnalysisItemObject {
   /** שם המוצר/קופה  */
   productName: string;
+  /** שם היצרן/חברה המנהלת  */
+  providerName?: string;
+  /** שם המסלול הראשי (או 'מסלולים מרובים' אם יש כמה)  */
+  trackName?: string;
+  /** סכום הכסף המושקע במוצר זה (בשקלים)  */
+  amount?: number;
+  /** אחוז מכלל התיק (0-100)  */
+  portfolioPercentage?: number;
   /** רמת סיכון של המוצר הספציפי  */
   riskLevel: AnalyzePortfolioRiskActionOutputRiskLevelEnum;
   /** ניתוח קצר של המוצר  */

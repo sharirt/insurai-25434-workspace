@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck } from "lucide-react";
+import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck, Building2, Banknote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
 
@@ -90,6 +90,29 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
                   </div>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
+                  {(() => {
+                    const ext = product as typeof product & { providerName?: string; trackName?: string; amount?: number; portfolioPercentage?: number };
+                    const chips: { icon: typeof Building2; label: string; value: string }[] = [];
+                    if (ext.providerName) chips.push({ icon: Building2, label: "יצרן", value: ext.providerName });
+                    if (ext.trackName) chips.push({ icon: TrendingUp, label: "שם מסלול", value: ext.trackName });
+                    if (ext.amount != null) chips.push({ icon: Banknote, label: "סכום מושקע", value: `₪${ext.amount.toLocaleString("he-IL")}` });
+                    if (ext.portfolioPercentage != null) chips.push({ icon: PieChart, label: "אחוז מהתיק", value: `${ext.portfolioPercentage.toFixed(2)}%` });
+                    if (chips.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-2">
+                        {chips.map((chip, ci) => {
+                          const ChipIcon = chip.icon;
+                          return (
+                            <span key={ci} className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                              <ChipIcon className="size-3.5 shrink-0" />
+                              <span className="font-medium">{chip.label}:</span>
+                              <span>{chip.value}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                   <p className="text-sm text-muted-foreground leading-relaxed">{product.analysis}</p>
 
                   {product.strengths && product.strengths.length > 0 && (
