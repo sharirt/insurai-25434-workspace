@@ -50,7 +50,7 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
   const config = getRiskConfig(riskLevel);
   const RiskIcon = config.Icon;
 
-  const productAnalysis = result?.productAnalysis;
+  const productAnalysis = result?.productAnalysis?.filter((p: any) => p.amount != null && p.amount > 0);
 
   return (
     <div className="flex flex-col gap-6" style={{ direction: "rtl" }}>
@@ -115,25 +115,26 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
                   })()}
                   <p className="text-sm text-muted-foreground leading-relaxed">{product.analysis}</p>
 
-                  {product.strengths && product.strengths.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      {product.strengths.map((s, i) => (
-                        <div key={i} className="flex items-start gap-2 bg-chart-3/10 rounded-lg p-3">
-                          <CheckCircle2 className="text-chart-3 shrink-0 mt-0.5" />
-                          <p className="text-sm">{s}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {product.issues && product.issues.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      {product.issues.map((issue, i) => (
-                        <div key={i} className="flex items-start gap-2 bg-chart-4/10 rounded-lg p-3">
-                          <AlertTriangle className="text-chart-4 shrink-0 mt-0.5" />
-                          <p className="text-sm">{issue}</p>
-                        </div>
-                      ))}
+                  {((product.strengths && product.strengths.length > 0) || (product.issues && product.issues.length > 0)) && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold text-chart-3">✓ נקודות חוזקה</p>
+                        {product.strengths?.map((s, i) => (
+                          <div key={i} className="flex items-start gap-2 bg-chart-3/10 rounded-lg p-3">
+                            <CheckCircle2 className="text-chart-3 shrink-0 mt-0.5" />
+                            <p className="text-sm">{s}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-xs font-semibold text-chart-4">⚠ נקודות חולשה</p>
+                        {product.issues?.map((issue, i) => (
+                          <div key={i} className="flex items-start gap-2 bg-chart-4/10 rounded-lg p-3">
+                            <AlertTriangle className="text-chart-4 shrink-0 mt-0.5" />
+                            <p className="text-sm">{issue}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </CardContent>

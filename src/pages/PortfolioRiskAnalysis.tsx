@@ -61,7 +61,12 @@ export default function PortfolioRiskAnalysis() {
       (t: any) => t.trackAccumulationAmount != null && t.trackAccumulationAmount > 0
     );
 
-    const clientFunds = funds ?? [];
+    const allClientFunds = funds ?? [];
+    // Only include funds that have at least one track with positive accumulation
+    const clientFunds = allClientFunds.filter((f: any) => {
+      const fundTracks = positiveTracks.filter((t: any) => t.policyNumber === f.policyNumber);
+      return fundTracks.length > 0;
+    });
     if (clientFunds.length === 0) return prompt;
 
     // Group tracks by fund policyNumber
