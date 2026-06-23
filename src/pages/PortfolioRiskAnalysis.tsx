@@ -12,7 +12,7 @@ import { useExecuteAction, useEntityGetAll } from "@blocksdiy/blocks-client-sdk/
 import { AnalyzePortfolioRiskAction, FundsEntity, InvestmentTracksEntity } from "@/product-types";
 import { toast } from "sonner";
 import { ClientSelector } from "@/components/ClientSelector";
-import { RiskResults } from "@/components/RiskResults";
+import { RiskResults, FundBaseData } from "@/components/RiskResults";
 import { TracksBreakdown } from "@/components/TracksBreakdown";
 import type { IAnalyzePortfolioRiskActionOutput, IInvestmentTracksEntity } from "@/product-types";
 
@@ -54,6 +54,49 @@ export default function PortfolioRiskAnalysis() {
     const policyNumbers = new Set(funds.map((f: any) => f.policyNumber).filter(Boolean));
     return allTracks.filter((t: any) => policyNumbers.has(t.policyNumber));
   };
+
+  const buildFundBaseDataMap = (): Record<string, FundBaseData> => {
+    if (!funds?.length || !allTracks?.length) return {};
+    const clientTracks = getClientTracks();
+    const positiveTracks = clientTracks.filter(
+      (t: any) => t.trackAccumulationAmount != null && t.trackAccumulationAmount > 0
+    );
+    const allClientFunds = funds ?? [];
+    const tracksByPolicy: Record<string, any[]> = {};
+    for (const t of positiveTracks) {
+      const pn = t.policyNumber ?? "__none__";
+      if (!tracksByPolicy[pn]) tracksByPolicy[pn] = [];
+      tracksByPolicy[pn].push(t);
+    }
+    const wAvg = (tracks: any[], field: string) => {
+      const total = tracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
+      if (total === 0) return 0;
+      return tracks.reduce(
+        (s: number, t: any) => s + ((t[field] as number) ?? 0) * (t.trackAccumulationAmount ?? 0),
+        0
+      ) / total;
+    };
+    const map: Record<string, FundBaseData> = {};
+    for (const f of allClientFunds) {
+      const fundTracks = tracksByPolicy[f.policyNumber ?? ""] ?? [];
+      if (fundTracks.length === 0) continue;
+      const fundTotal = fundTracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
+      map[f.planName ?? ""] = {
+        equityExposure: wAvg(fundTracks, "equityExposure"),
+        foreignExposure: wAvg(fundTracks, "foreignExposure"),
+        return12Months: wAvg(fundTracks, "return12Months"),
+        return3Years: wAvg(fundTracks, "return3Years"),
+        return5Years: wAvg(fundTracks, "return5Years"),
+        managementFeeDeposits: f.managementFeeDeposits ?? null,
+        managementFeeAccumulation: f.managementFeeAccumulation ?? null,
+        fundTotal,
+        trackCount: fundTracks.length,
+      };
+    }
+    return map;
+  };
+
+  const fundBaseDataMap = buildFundBaseDataMap();
 
   const buildEnrichedPrompt = () => {
     const clientTracks = getClientTracks();
@@ -215,7 +258,7 @@ export default function PortfolioRiskAnalysis() {
 
           {analysisResult && (
             <>
-              <RiskResults result={analysisResult} />
+              <RiskResults result={analysisResult} fundBaseDataMap={fundBaseDataMap} />
               <TracksBreakdown funds={funds ?? []} allTracks={allTracks ?? []} />
             </>
           )}

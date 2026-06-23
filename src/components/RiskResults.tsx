@@ -1,11 +1,27 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck, Building2, Banknote } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck, Building2, Banknote, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
 
+export interface FundBaseData {
+  equityExposure: number;
+  foreignExposure: number;
+  return12Months: number;
+  return3Years: number;
+  return5Years: number;
+  managementFeeDeposits: number | null;
+  managementFeeAccumulation: number | null;
+  fundTotal: number;
+  trackCount: number;
+}
+
 interface RiskResultsProps {
   result: IAnalyzePortfolioRiskActionOutput;
+  fundBaseDataMap?: Record<string, FundBaseData>;
 }
 
 function getRiskConfig(level: string) {
@@ -43,7 +59,24 @@ const breakdownItems = [
   { key: "returns" as const, label: "תשואות", icon: BarChart3 },
 ];
 
-export const RiskResults = ({ result }: RiskResultsProps) => {
+const fmtPct = (val: number | null | undefined, decimals: number) => {
+  if (val == null || val === 0) return "—";
+  return `${(val * 100).toFixed(decimals)}%`;
+};
+
+const fmtFee = (val: number | null | undefined) => {
+  if (val == null || val === 0) return null;
+  return `${val}%`;
+};
+
+const BaseDataItem = ({ label, value }: { label: string; value: string }) => (
+  <div className="flex flex-col gap-0.5">
+    <span className="text-xs text-muted-foreground">{label}</span>
+    <span className="text-sm font-medium text-foreground">{value}</span>
+  </div>
+);
+
+export const RiskResults = ({ result, fundBaseDataMap }: RiskResultsProps) => {
   if (!result) return null;
 
   const riskLevel = result?.riskLevel ?? "סיכון ממוצע";
@@ -111,6 +144,37 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
                           );
                         })}
                       </div>
+                    );
+                  })()}
+                  {(() => {
+                    const baseData = fundBaseDataMap?.[product.productName];
+                    if (!baseData) return null;
+                    const feeDeposits = fmtFee(baseData.managementFeeDeposits);
+                    const feeAccumulation = fmtFee(baseData.managementFeeAccumulation);
+                    return (
+                      <Collapsible>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" className="text-muted-foreground text-xs px-0 h-auto py-1 gap-1">
+                            נתוני בסיס
+                            <ChevronDown className="transition-transform [[data-state=open]>&]:rotate-180" />
+                          </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="bg-muted/50 rounded-lg p-3 mt-1">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                              <BaseDataItem label="חשיפה למניות" value={fmtPct(baseData.equityExposure, 1)} />
+                              <BaseDataItem label='חשיפה לחו"ל' value={fmtPct(baseData.foreignExposure, 1)} />
+                              <BaseDataItem label="תשואה 12 חודשים" value={fmtPct(baseData.return12Months, 2)} />
+                              <BaseDataItem label="תשואה 3 שנים" value={fmtPct(baseData.return3Years, 2)} />
+                              <BaseDataItem label="תשואה 5 שנים" value={fmtPct(baseData.return5Years, 2)} />
+                              {feeDeposits && <BaseDataItem label="דמי ניהול מהפקדה" value={feeDeposits} />}
+                              {feeAccumulation && <BaseDataItem label="דמי ניהול מצבירה" value={feeAccumulation} />}
+                              <BaseDataItem label="סה״כ צבירה" value={`₪${baseData.fundTotal.toLocaleString("he-IL")}`} />
+                              <BaseDataItem label="מספר מסלולים" value={String(baseData.trackCount)} />
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     );
                   })()}
                   <p className="text-sm text-muted-foreground leading-relaxed">{product.analysis}</p>
