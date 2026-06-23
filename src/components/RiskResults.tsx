@@ -77,6 +77,8 @@ const BaseDataItem = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const RiskResults = ({ result, fundBaseDataMap }: RiskResultsProps) => {
+  const [openBaseData, setOpenBaseData] = useState<Record<number, boolean>>({});
+
   if (!result) return null;
 
   const riskLevel = result?.riskLevel ?? "סיכון ממוצע";
@@ -152,11 +154,11 @@ export const RiskResults = ({ result, fundBaseDataMap }: RiskResultsProps) => {
                     const feeDeposits = fmtFee(baseData.managementFeeDeposits);
                     const feeAccumulation = fmtFee(baseData.managementFeeAccumulation);
                     return (
-                      <Collapsible>
+                      <Collapsible open={!!openBaseData[idx]} onOpenChange={(val) => setOpenBaseData(prev => ({ ...prev, [idx]: val }))}>
                         <CollapsibleTrigger asChild>
                           <Button variant="ghost" className="text-muted-foreground text-xs px-0 h-auto py-1 gap-1">
                             נתוני בסיס
-                            <ChevronDown className="transition-transform [[data-state=open]>&]:rotate-180" />
+                            <ChevronDown className={cn("size-4 transition-transform", openBaseData[idx] && "rotate-180")} />
                           </Button>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
