@@ -51,8 +51,8 @@ export default function PortfolioRiskAnalysis() {
 
   const getClientTracks = () => {
     if (!funds?.length || !allTracks?.length) return [];
-    const policyNumbers = new Set(funds.map((f: any) => f.policyNumber).filter(Boolean));
-    return allTracks.filter((t: any) => policyNumbers.has(t.policyNumber));
+    const fundIds = new Set(funds.map((f: any) => f.id).filter(Boolean));
+    return allTracks.filter((t: any) => fundIds.has(t.policyNumber));
   };
 
   const buildFundBaseDataMap = (): Record<string, FundBaseData> => {
@@ -62,11 +62,11 @@ export default function PortfolioRiskAnalysis() {
       (t: any) => t.trackAccumulationAmount != null && t.trackAccumulationAmount > 0
     );
     const allClientFunds = funds ?? [];
-    const tracksByPolicy: Record<string, any[]> = {};
+    const tracksByFundId: Record<string, any[]> = {};
     for (const t of positiveTracks) {
       const pn = t.policyNumber ?? "__none__";
-      if (!tracksByPolicy[pn]) tracksByPolicy[pn] = [];
-      tracksByPolicy[pn].push(t);
+      if (!tracksByFundId[pn]) tracksByFundId[pn] = [];
+      tracksByFundId[pn].push(t);
     }
     const wAvg = (tracks: any[], field: string) => {
       const total = tracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
@@ -78,7 +78,7 @@ export default function PortfolioRiskAnalysis() {
     };
     const map: Record<string, FundBaseData> = {};
     for (const f of allClientFunds) {
-      const fundTracks = tracksByPolicy[f.policyNumber ?? ""] ?? [];
+      const fundTracks = tracksByFundId[f.id ?? ""] ?? [];
       if (fundTracks.length === 0) continue;
       const fundTotal = fundTracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
       map[f.planName ?? ""] = {
@@ -107,17 +107,17 @@ export default function PortfolioRiskAnalysis() {
     const allClientFunds = funds ?? [];
     // Only include funds that have at least one track with positive accumulation
     const clientFunds = allClientFunds.filter((f: any) => {
-      const fundTracks = positiveTracks.filter((t: any) => t.policyNumber === f.policyNumber);
+      const fundTracks = positiveTracks.filter((t: any) => t.policyNumber === f.id);
       return fundTracks.length > 0;
     });
     if (clientFunds.length === 0) return prompt;
 
-    // Group tracks by fund policyNumber
-    const tracksByPolicy: Record<string, any[]> = {};
+    // Group tracks by fund ID (track.policyNumber stores fund ID)
+    const tracksByFundId: Record<string, any[]> = {};
     for (const t of positiveTracks) {
       const pn = t.policyNumber ?? "__none__";
-      if (!tracksByPolicy[pn]) tracksByPolicy[pn] = [];
-      tracksByPolicy[pn].push(t);
+      if (!tracksByFundId[pn]) tracksByFundId[pn] = [];
+      tracksByFundId[pn].push(t);
     }
 
     // Overall portfolio totals
@@ -145,7 +145,7 @@ export default function PortfolioRiskAnalysis() {
 דמי ניהול מהפקדה: ${f.managementFeeDeposits ?? "לא ידוע"}
 דמי ניהול מצבירה: ${f.managementFeeAccumulation ?? "לא ידוע"}`;
 
-      const fundTracks = tracksByPolicy[f.policyNumber ?? ""] ?? [];
+      const fundTracks = tracksByFundId[f.id ?? ""] ?? [];
       if (fundTracks.length === 0) {
         return header + "\nמסלולי השקעה: אין מסלולים זמינים";
       }
