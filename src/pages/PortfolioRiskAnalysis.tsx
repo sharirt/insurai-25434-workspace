@@ -16,22 +16,23 @@ import { RiskResults } from "@/components/RiskResults";
 import { TracksBreakdown } from "@/components/TracksBreakdown";
 import type { IAnalyzePortfolioRiskActionOutput, IInvestmentTracksEntity } from "@/product-types";
 
-const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים. לפניך נתוני תיק השקעות פנסיוני מלאים, כולל ממוצעים משוקללים מחושבים מראש. ספק ניתוח מפורט בטקסט חופשי בעברית. התייחס לנקודות הבאות:
+const DEFAULT_PROMPT = `אתה מנתח פיננסי מומחה המתמחה בתיקי פנסיה וחיסכון ישראליים.
 
-1) חשיפה למניות (equityExposure) - השתמש בממוצע המשוקלל המחושב מראש שסופק בנתונים. אל תחשב מחדש.
-2) חשיפה לחו"ל (foreignExposure) - השתמש בממוצע המשוקלל המחושב מראש שסופק בנתונים. אל תחשב מחדש.
-3) פיזור בין מסלולים וסוגי מוצרים - השתמש במשקל של כל מסלול בתיק כדי להעריך את רמת הפיזור.
-4) תשואות היסטוריות (12 חודשים, 3 שנים, 5 שנים) - השתמש בממוצעים המשוקללים המחושבים מראש.
+הנתונים הבאים הוכנו עבורך ומכילים שתי רמות מידע:
+(א) נתוני מוצר/קופה — סוג מוצר, שם תוכנית, יצרן, סטטוס (פעיל/לא פעיל), יתרה כוללת, דמי ניהול מהפקדה ומצבירה.
+(ב) מסלולי השקעה לכל מוצר — שם מסלול, סכום צבירה, משקל בתוך המוצר ובתיק הכולל, חשיפה למניות, חשיפה לחו"ל, תשואות (12 חודשים, 3 שנים, 5 שנים).
+
+נתח כל מוצר/קופה בנפרד עם סעיף ייעודי משלו, ולאחר מכן ספק ניתוח כולל של התיק.
+
+התייחס לנושאים הבאים:
+1) רמת סיכון כוללת של התיק.
+2) ניתוח לפי מוצר — לכל מוצר ציין רמת סיכון, נקודות חוזק ונקודות לשיפור.
+3) הערכת פיזור — בין מוצרים, מסלולים וסוגי חשיפה.
+4) השוואת דמי ניהול בין המוצרים.
 5) יחס בין מוצרים פעילים ולא פעילים.
-6) השוואת דמי ניהול בין המוצרים.
-7) המלצות ספציפיות לשיפור התיק.
+6) המלצות ספציפיות לשיפור התיק.
 
-הערות חשובות:
-- הנתונים כוללים רק מסלולים עם יתרה חיובית (כבר מסוננים).
-- משקל כל מסלול בתיק הכולל מסופק - השתמש בו להקשר.
-- הממוצעים המשוקללים כבר מחושבים - אין צורך לחשב אותם מחדש, פשוט השתמש בהם בניתוח.
-
-חשוב: אם אין מסלולי השקעה זמינים עבור מוצר מסוים, נתח את רמת הסיכון לפי סוג המוצר ושם התוכנית. לדוגמה: קרן השתלמות או פנסיה עם שם תוכנית המכיל "מניות" הוא סיכון גבוה, "כללי" הוא סיכון בינוני, "אג״ח" או "כספי" הוא סיכון נמוך. השתמש בנתוני המוצר עצמו (סוג מוצר, שם תוכנית, יצרן, סטטוס, יתרה כוללת, דמי ניהול) כדי להעריך את רמת הסיכון.`;
+הערה חשובה: אם למוצר מסוים אין מסלולי השקעה, הסק את רמת הסיכון מסוג המוצר ושם התוכנית — שם המכיל "מניות" = סיכון גבוה, "כללי" = סיכון ממוצע, "אג״ח" או "כספי" = סיכון נמוך.`;
 
 export default function PortfolioRiskAnalysis() {
   const [selectedClientId, setSelectedClientId] = useState("");
@@ -60,44 +61,72 @@ export default function PortfolioRiskAnalysis() {
       (t: any) => t.trackAccumulationAmount != null && t.trackAccumulationAmount > 0
     );
 
-    if (positiveTracks.length === 0) return prompt;
+    const clientFunds = funds ?? [];
+    if (clientFunds.length === 0) return prompt;
 
+    // Group tracks by fund policyNumber
+    const tracksByPolicy: Record<string, any[]> = {};
+    for (const t of positiveTracks) {
+      const pn = t.policyNumber ?? "__none__";
+      if (!tracksByPolicy[pn]) tracksByPolicy[pn] = [];
+      tracksByPolicy[pn].push(t);
+    }
+
+    // Overall portfolio totals
     const totalPortfolioValue = positiveTracks.reduce(
       (sum: number, t: any) => sum + (t.trackAccumulationAmount ?? 0),
       0
     );
 
-    const weightedAvg = (field: keyof IInvestmentTracksEntity) =>
-      positiveTracks.reduce(
-        (sum: number, t: any) => sum + ((t[field] as number) ?? 0) * (t.trackAccumulationAmount ?? 0),
+    const weightedAvg = (tracks: any[], field: keyof IInvestmentTracksEntity) => {
+      const total = tracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
+      if (total === 0) return 0;
+      return tracks.reduce(
+        (s: number, t: any) => s + ((t[field] as number) ?? 0) * (t.trackAccumulationAmount ?? 0),
         0
-      ) / totalPortfolioValue;
+      ) / total;
+    };
 
-    const weightedEquityExposure = weightedAvg("equityExposure");
-    const weightedForeignExposure = weightedAvg("foreignExposure");
-    const weightedReturn12 = weightedAvg("return12Months");
-    const weightedReturn3Y = weightedAvg("return3Years");
-    const weightedReturn5Y = weightedAvg("return5Years");
+    // Build per-fund sections
+    const fundSections = clientFunds.map((f: any) => {
+      const header = `\n--- מוצר: ${f.planName ?? "לא ידוע"} ---
+סוג מוצר: ${f.productType ?? "לא ידוע"}
+יצרן: ${f.providerName ?? "לא ידוע"}
+סטטוס: ${f.status ?? "לא ידוע"}
+יתרה כוללת: ${(f.totalBalance ?? 0).toLocaleString()}
+דמי ניהול מהפקדה: ${f.managementFeeDeposits ?? "לא ידוע"}
+דמי ניהול מצבירה: ${f.managementFeeAccumulation ?? "לא ידוע"}`;
 
-    const trackDetails = positiveTracks
-      .map((t: any) => {
-        const weight = ((t.trackAccumulationAmount ?? 0) / totalPortfolioValue) * 100;
-        return `- ${t.trackName ?? "לא ידוע"} | צבירה: ${(t.trackAccumulationAmount ?? 0).toLocaleString()} | משקל: ${weight.toFixed(1)}% | חשיפה למניות: ${((t.equityExposure ?? 0) * 100).toFixed(1)}% | חשיפה לחו"ל: ${((t.foreignExposure ?? 0) * 100).toFixed(1)}% | תשואה 12 חודשים: ${((t.return12Months ?? 0) * 100).toFixed(2)}% | תשואה 3 שנים: ${((t.return3Years ?? 0) * 100).toFixed(2)}% | תשואה 5 שנים: ${((t.return5Years ?? 0) * 100).toFixed(2)}%`;
-      })
-      .join("\n");
+      const fundTracks = tracksByPolicy[f.policyNumber ?? ""] ?? [];
+      if (fundTracks.length === 0) {
+        return header + "\nמסלולי השקעה: אין מסלולים זמינים";
+      }
 
-    const dataSuffix = `\n\n--- נתוני סיכום משוקללים מחושבים מראש ---
+      const fundTotal = fundTracks.reduce((s: number, t: any) => s + (t.trackAccumulationAmount ?? 0), 0);
+      const trackLines = fundTracks.map((t: any) => {
+        const fundWeight = fundTotal > 0 ? ((t.trackAccumulationAmount ?? 0) / fundTotal) * 100 : 0;
+        const portfolioWeight = totalPortfolioValue > 0 ? ((t.trackAccumulationAmount ?? 0) / totalPortfolioValue) * 100 : 0;
+        return `  - ${t.trackName ?? "לא ידוע"} | צבירה: ${(t.trackAccumulationAmount ?? 0).toLocaleString()} | משקל במוצר: ${fundWeight.toFixed(1)}% | משקל בתיק: ${portfolioWeight.toFixed(1)}% | חשיפה למניות: ${((t.equityExposure ?? 0) * 100).toFixed(1)}% | חשיפה לחו"ל: ${((t.foreignExposure ?? 0) * 100).toFixed(1)}% | תשואה 12 חודשים: ${((t.return12Months ?? 0) * 100).toFixed(2)}% | תשואה 3 שנים: ${((t.return3Years ?? 0) * 100).toFixed(2)}% | תשואה 5 שנים: ${((t.return5Years ?? 0) * 100).toFixed(2)}%`;
+      }).join("\n");
+
+      const fundAvg = `ממוצעים משוקללים למוצר: חשיפה למניות ${(weightedAvg(fundTracks, "equityExposure") * 100).toFixed(1)}% | חשיפה לחו"ל ${(weightedAvg(fundTracks, "foreignExposure") * 100).toFixed(1)}% | תשואה 12 חודשים ${(weightedAvg(fundTracks, "return12Months") * 100).toFixed(2)}% | תשואה 3 שנים ${(weightedAvg(fundTracks, "return3Years") * 100).toFixed(2)}% | תשואה 5 שנים ${(weightedAvg(fundTracks, "return5Years") * 100).toFixed(2)}%`;
+
+      return header + "\nמסלולי השקעה:\n" + trackLines + "\n" + fundAvg;
+    }).join("\n");
+
+    // Overall weighted averages
+    let overallSection = "";
+    if (totalPortfolioValue > 0) {
+      overallSection = `\n\n--- סיכום כולל של התיק ---
 שווי תיק כולל: ${totalPortfolioValue.toLocaleString()}
-חשיפה ממוצעת משוקללת למניות: ${(weightedEquityExposure * 100).toFixed(1)}%
-חשיפה ממוצעת משוקללת לחו"ל: ${(weightedForeignExposure * 100).toFixed(1)}%
-תשואה ממוצעת משוקללת 12 חודשים: ${(weightedReturn12 * 100).toFixed(2)}%
-תשואה ממוצעת משוקללת 3 שנים: ${(weightedReturn3Y * 100).toFixed(2)}%
-תשואה ממוצעת משוקללת 5 שנים: ${(weightedReturn5Y * 100).toFixed(2)}%
+חשיפה ממוצעת משוקללת למניות: ${(weightedAvg(positiveTracks, "equityExposure") * 100).toFixed(1)}%
+חשיפה ממוצעת משוקללת לחו"ל: ${(weightedAvg(positiveTracks, "foreignExposure") * 100).toFixed(1)}%
+תשואה ממוצעת משוקללת 12 חודשים: ${(weightedAvg(positiveTracks, "return12Months") * 100).toFixed(2)}%
+תשואה ממוצעת משוקללת 3 שנים: ${(weightedAvg(positiveTracks, "return3Years") * 100).toFixed(2)}%
+תשואה ממוצעת משוקללת 5 שנים: ${(weightedAvg(positiveTracks, "return5Years") * 100).toFixed(2)}%`;
+    }
 
-פירוט מסלולים (רק מסלולים עם יתרה חיובית):
-${trackDetails}`;
-
-    return prompt + dataSuffix;
+    return prompt + "\n\n--- נתוני התיק ---" + fundSections + overallSection;
   };
 
   const handleAnalyze = async () => {

@@ -1,7 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
+
+interface ProductAnalysisItem {
+  productName: string;
+  riskLevel: string;
+  analysis: string;
+  strengths?: string[];
+  issues?: string[];
+}
 
 interface RiskResultsProps {
   result: IAnalyzePortfolioRiskActionOutput;
@@ -13,6 +22,7 @@ function getRiskConfig(level: string) {
       bg: "bg-destructive/15",
       text: "text-destructive",
       border: "border-destructive/30",
+      badgeBg: "bg-destructive/15 text-destructive border-destructive/30",
       Icon: AlertTriangle,
     };
   }
@@ -21,6 +31,7 @@ function getRiskConfig(level: string) {
       bg: "bg-chart-4/15",
       text: "text-chart-4",
       border: "border-chart-4/30",
+      badgeBg: "bg-chart-4/15 text-chart-4 border-chart-4/30",
       Icon: BarChart3,
     };
   }
@@ -28,6 +39,7 @@ function getRiskConfig(level: string) {
     bg: "bg-chart-3/15",
     text: "text-chart-3",
     border: "border-chart-3/30",
+    badgeBg: "bg-chart-3/15 text-chart-3 border-chart-3/30",
     Icon: ShieldCheck,
   };
 }
@@ -46,6 +58,8 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
   const config = getRiskConfig(riskLevel);
   const RiskIcon = config.Icon;
 
+  const productAnalysis = (result as any)?.productAnalysis as ProductAnalysisItem[] | undefined;
+
   return (
     <div className="flex flex-col gap-6" style={{ direction: "rtl" }}>
       <Card className={cn("border-2", config.border, config.bg)}>
@@ -54,6 +68,52 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
           <p className={cn("text-2xl font-bold", config.text)}>{riskLevel}</p>
         </CardContent>
       </Card>
+
+      {productAnalysis && productAnalysis.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">ניתוח לפי מוצר</h2>
+          {productAnalysis.map((product, idx) => {
+            const prodConfig = getRiskConfig(product.riskLevel);
+            return (
+              <Card key={idx}>
+                <CardHeader>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <CardTitle className="text-base">{product.productName}</CardTitle>
+                    <Badge variant="outline" className={cn("text-xs", prodConfig.badgeBg)}>
+                      {product.riskLevel}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{product.analysis}</p>
+
+                  {product.strengths && product.strengths.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      {product.strengths.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <CheckCircle2 className="text-chart-3 shrink-0 mt-0.5" />
+                          <p className="text-sm">{s}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {product.issues && product.issues.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      {product.issues.map((issue, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <AlertTriangle className="text-chart-4 shrink-0 mt-0.5" />
+                          <p className="text-sm">{issue}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
 
       {result?.breakdown && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
