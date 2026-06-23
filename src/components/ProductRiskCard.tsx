@@ -24,13 +24,13 @@ export const ProductRiskCard = ({ product, fundBaseDataMap }: ProductRiskCardPro
       : "border-r-chart-3";
 
   const ext = product as typeof product & { providerName?: string; trackName?: string; amount?: number; portfolioPercentage?: number };
+  const baseData = findBaseData(fundBaseDataMap, product.productName, ext.providerName, (product as any).fundId);
   const chips: { icon: typeof Building2; label: string; value: string }[] = [];
   if (ext.providerName) chips.push({ icon: Building2, label: "יצרן", value: ext.providerName });
   if (ext.trackName) chips.push({ icon: TrendingUp, label: "שם מסלול", value: ext.trackName });
-  if (ext.amount != null) chips.push({ icon: Banknote, label: "סכום מושקע", value: `₪${ext.amount.toLocaleString("he-IL")}` });
+  const displayAmount = baseData?.fundTotal ?? ext.amount;
+  if (displayAmount != null) chips.push({ icon: Banknote, label: "סכום מושקע", value: `₪${displayAmount.toLocaleString("he-IL")}` });
   if (ext.portfolioPercentage != null) chips.push({ icon: PieChart, label: "אחוז מהתיק", value: `${ext.portfolioPercentage.toFixed(2)}%` });
-
-  const baseData = findBaseData(fundBaseDataMap, product.productName, ext.providerName);
 
   return (
     <Card className={cn("border-r-4", borderColor)}>

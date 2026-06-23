@@ -69,9 +69,12 @@ export const fmtFee = (val: number | null | undefined) => {
 export function findBaseData(
   map: Record<string, FundBaseData> | undefined,
   productName: string | undefined,
-  providerName: string | undefined
+  providerName: string | undefined,
+  fundId?: string
 ): FundBaseData | undefined {
-  if (!map || !productName) return undefined;
+  if (!map) return undefined;
+  if (fundId && map[fundId]) return map[fundId];
+  if (!productName) return undefined;
   if (map[productName]) return map[productName];
   const pName = productName.trim().toLowerCase();
   const keys = Object.keys(map);
