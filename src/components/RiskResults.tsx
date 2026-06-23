@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck, Building2, Banknote, ChevronDown } from "lucide-react";
+import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, ShieldCheck, Building2, Banknote, ChevronDown, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
@@ -68,6 +68,31 @@ const fmtFee = (val: number | null | undefined) => {
   if (val == null || val === 0) return null;
   return `${val}%`;
 };
+
+function findBaseData(
+  map: Record<string, FundBaseData> | undefined,
+  productName: string | undefined,
+  providerName: string | undefined
+): FundBaseData | undefined {
+  if (!map || !productName) return undefined;
+  // 1. Exact match
+  if (map[productName]) return map[productName];
+  const pName = productName.trim().toLowerCase();
+  const keys = Object.keys(map);
+  // 2. Case-insensitive partial match
+  for (const key of keys) {
+    const k = key.trim().toLowerCase();
+    if (k.includes(pName) || pName.includes(k)) return map[key];
+  }
+  // 3. Match by provider name
+  if (providerName) {
+    const prov = providerName.trim().toLowerCase();
+    for (const key of keys) {
+      if (pName.includes(prov) || key.trim().toLowerCase().includes(prov)) return map[key];
+    }
+  }
+  return undefined;
+}
 
 const BaseDataItem = ({ label, value }: { label: string; value: string }) => (
   <div className="flex flex-col gap-0.5">
@@ -149,32 +174,35 @@ export const RiskResults = ({ result, fundBaseDataMap }: RiskResultsProps) => {
                     );
                   })()}
                   {(() => {
-                    const baseData = fundBaseDataMap?.[product.productName];
-                    if (!baseData) return null;
-                    const feeDeposits = fmtFee(baseData.managementFeeDeposits);
-                    const feeAccumulation = fmtFee(baseData.managementFeeAccumulation);
+                    const ext = product as typeof product & { providerName?: string };
+                    const baseData = findBaseData(fundBaseDataMap, product.productName, ext.providerName);
                     return (
                       <Collapsible open={!!openBaseData[idx]} onOpenChange={(val) => setOpenBaseData(prev => ({ ...prev, [idx]: val }))}>
                         <CollapsibleTrigger asChild>
-                          <Button variant="ghost" className="text-muted-foreground text-xs px-0 h-auto py-1 gap-1">
+                          <Button variant="outline" size="sm" className="text-xs gap-1.5 h-7">
+                            <Database className="size-3.5" />
                             נתוני בסיס
-                            <ChevronDown className={cn("size-4 transition-transform", openBaseData[idx] && "rotate-180")} />
+                            <ChevronDown className={cn("size-3.5 transition-transform", openBaseData[idx] && "rotate-180")} />
                           </Button>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          <div className="bg-muted/50 rounded-lg p-3 mt-1">
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              <BaseDataItem label="חשיפה למניות" value={fmtPct(baseData.equityExposure, 1)} />
-                              <BaseDataItem label='חשיפה לחו"ל' value={fmtPct(baseData.foreignExposure, 1)} />
-                              <BaseDataItem label="תשואה 12 חודשים" value={fmtPct(baseData.return12Months, 2)} />
-                              <BaseDataItem label="תשואה 3 שנים" value={fmtPct(baseData.return3Years, 2)} />
-                              <BaseDataItem label="תשואה 5 שנים" value={fmtPct(baseData.return5Years, 2)} />
-                              {feeDeposits && <BaseDataItem label="דמי ניהול מהפקדה" value={feeDeposits} />}
-                              {feeAccumulation && <BaseDataItem label="דמי ניהול מצבירה" value={feeAccumulation} />}
-                              <BaseDataItem label="סה״כ צבירה" value={`₪${baseData.fundTotal.toLocaleString("he-IL")}`} />
-                              <BaseDataItem label="מספר מסלולים" value={String(baseData.trackCount)} />
+                          {baseData ? (
+                            <div className="bg-muted/50 rounded-lg p-3 mt-2">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                <BaseDataItem label="חשיפה למניות" value={fmtPct(baseData.equityExposure, 1)} />
+                                <BaseDataItem label='חשיפה לחו"ל' value={fmtPct(baseData.foreignExposure, 1)} />
+                                <BaseDataItem label="תשואה 12 חודשים" value={fmtPct(baseData.return12Months, 2)} />
+                                <BaseDataItem label="תשואה 3 שנים" value={fmtPct(baseData.return3Years, 2)} />
+                                <BaseDataItem label="תשואה 5 שנים" value={fmtPct(baseData.return5Years, 2)} />
+                                {fmtFee(baseData.managementFeeDeposits) && <BaseDataItem label="דמי ניהול מהפקדה" value={fmtFee(baseData.managementFeeDeposits)!} />}
+                                {fmtFee(baseData.managementFeeAccumulation) && <BaseDataItem label="דמי ניהול מצבירה" value={fmtFee(baseData.managementFeeAccumulation)!} />}
+                                <BaseDataItem label="סה״כ צבירה" value={`₪${baseData.fundTotal?.toLocaleString("he-IL") ?? "—"}`} />
+                                <BaseDataItem label="מספר מסלולים" value={String(baseData.trackCount ?? 0)} />
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground mt-2">אין נתוני בסיס זמינים למוצר זה</p>
+                          )}
                         </CollapsibleContent>
                       </Collapsible>
                     );
