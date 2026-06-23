@@ -4,14 +4,6 @@ import { CheckCircle2, AlertTriangle, TrendingUp, Globe, PieChart, BarChart3, Sh
 import { cn } from "@/lib/utils";
 import type { IAnalyzePortfolioRiskActionOutput } from "@/product-types";
 
-interface ProductAnalysisItem {
-  productName: string;
-  riskLevel: string;
-  analysis: string;
-  strengths?: string[];
-  issues?: string[];
-}
-
 interface RiskResultsProps {
   result: IAnalyzePortfolioRiskActionOutput;
 }
@@ -58,7 +50,7 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
   const config = getRiskConfig(riskLevel);
   const RiskIcon = config.Icon;
 
-  const productAnalysis = (result as any)?.productAnalysis as ProductAnalysisItem[] | undefined;
+  const productAnalysis = result?.productAnalysis;
 
   return (
     <div className="flex flex-col gap-6" style={{ direction: "rtl" }}>
@@ -69,16 +61,29 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
         </CardContent>
       </Card>
 
+      {result?.summary && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground leading-relaxed">{result.summary}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {productAnalysis && productAnalysis.length > 0 && (
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">ניתוח לפי מוצר</h2>
           {productAnalysis.map((product, idx) => {
             const prodConfig = getRiskConfig(product.riskLevel);
+            const borderColor = product.riskLevel === "סיכון גבוה"
+              ? "border-r-destructive"
+              : product.riskLevel === "סיכון ממוצע"
+                ? "border-r-chart-4"
+                : "border-r-chart-3";
             return (
-              <Card key={idx}>
+              <Card key={idx} className={cn("border-r-4", borderColor)}>
                 <CardHeader>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <CardTitle className="text-base">{product.productName}</CardTitle>
+                    <CardTitle className="text-base font-bold">{product.productName}</CardTitle>
                     <Badge variant="outline" className={cn("text-xs", prodConfig.badgeBg)}>
                       {product.riskLevel}
                     </Badge>
@@ -90,7 +95,7 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
                   {product.strengths && product.strengths.length > 0 && (
                     <div className="flex flex-col gap-2">
                       {product.strengths.map((s, i) => (
-                        <div key={i} className="flex items-start gap-2">
+                        <div key={i} className="flex items-start gap-2 bg-chart-3/10 rounded-lg p-3">
                           <CheckCircle2 className="text-chart-3 shrink-0 mt-0.5" />
                           <p className="text-sm">{s}</p>
                         </div>
@@ -101,7 +106,7 @@ export const RiskResults = ({ result }: RiskResultsProps) => {
                   {product.issues && product.issues.length > 0 && (
                     <div className="flex flex-col gap-2">
                       {product.issues.map((issue, i) => (
-                        <div key={i} className="flex items-start gap-2">
+                        <div key={i} className="flex items-start gap-2 bg-chart-4/10 rounded-lg p-3">
                           <AlertTriangle className="text-chart-4 shrink-0 mt-0.5" />
                           <p className="text-sm">{issue}</p>
                         </div>

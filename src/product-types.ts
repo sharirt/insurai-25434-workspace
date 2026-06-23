@@ -1152,6 +1152,22 @@ export interface IAnalyzePortfolioRiskActionOutputBreakdownObject {
 }
 
 /**
+ * undefined
+ */
+export interface IAnalyzePortfolioRiskActionOutputAnalyzePortfolioRiskActionOutputProductAnalysisItemObject {
+  /** שם המוצר/קופה  */
+  productName: string;
+  /** רמת סיכון של המוצר הספציפי  */
+  riskLevel: AnalyzePortfolioRiskActionOutputRiskLevelEnum;
+  /** ניתוח קצר של המוצר  */
+  analysis: string;
+  /** נקודות חוזק של המוצר  */
+  strengths?: string[];
+  /** בעיות או נקודות לשיפור במוצר  */
+  issues?: string[];
+}
+
+/**
  * AnalyzePortfolioRisk output payload
  */
 export interface IAnalyzePortfolioRiskActionOutput {
@@ -1164,6 +1180,8 @@ export interface IAnalyzePortfolioRiskActionOutput {
   /** נקודות לשיפור בתיק  */
   improvements: string[];
   breakdown: IAnalyzePortfolioRiskActionOutputBreakdownObject;
+  /** ניתוח פרטני לכל מוצר/קופה בנפרד  */
+  productAnalysis: IAnalyzePortfolioRiskActionOutputAnalyzePortfolioRiskActionOutputProductAnalysisItemObject[];
 }
 
 /**
