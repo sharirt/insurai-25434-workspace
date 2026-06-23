@@ -79,6 +79,13 @@ export function findBaseData(
     const k = key.trim().toLowerCase();
     if (k.includes(pName) || pName.includes(k)) return map[key];
   }
+  // Word-overlap matching
+  const pWords = pName.split(/\s+/).filter((w) => w.length >= 2);
+  for (const key of keys) {
+    const kWords = key.trim().toLowerCase().split(/\s+/).filter((w) => w.length >= 2);
+    const overlap = pWords.some((pw) => kWords.some((kw) => pw === kw));
+    if (overlap) return map[key];
+  }
   if (providerName) {
     const prov = providerName.trim().toLowerCase();
     for (const key of keys) {

@@ -92,6 +92,9 @@ export default function PortfolioRiskAnalysis() {
         fundTotal,
         trackCount: fundTracks.length,
       };
+      if (f.id) {
+        map[f.id] = map[f.planName ?? ""];
+      }
     }
     return map;
   };

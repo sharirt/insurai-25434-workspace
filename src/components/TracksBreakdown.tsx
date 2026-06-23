@@ -13,13 +13,13 @@ interface TracksBreakdownProps {
 }
 
 export const TracksBreakdown = ({ funds, allTracks }: TracksBreakdownProps) => {
-  const policyNumbers = new Set(
-    funds?.map((f: any) => f.policyNumber).filter(Boolean)
+  const fundIds = new Set(
+    funds?.map((f: any) => f.id).filter(Boolean)
   );
 
   const relevantTracks = allTracks?.filter(
     (t: any) =>
-      policyNumbers.has(t.policyNumber) &&
+      fundIds.has(t.policyNumber) &&
       t.trackAccumulationAmount != null &&
       t.trackAccumulationAmount > 0
   ) ?? [];
@@ -46,6 +46,7 @@ export const TracksBreakdown = ({ funds, allTracks }: TracksBreakdownProps) => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>שם קרן</TableHead>
               <TableHead>שם מסלול</TableHead>
               <TableHead>סכום צבירה</TableHead>
               <TableHead>משקל בתיק</TableHead>
@@ -63,8 +64,13 @@ export const TracksBreakdown = ({ funds, allTracks }: TracksBreakdownProps) => {
                   ? ((track.trackAccumulationAmount ?? 0) / totalAccumulation) * 100
                   : 0;
 
+              const fund = funds?.find((f: any) => f.id === track.policyNumber);
+
               return (
                 <TableRow key={track.id ?? index}>
+                  <TableCell className="font-medium">
+                    {fund?.planName ?? "—"}
+                  </TableCell>
                   <TableCell className="font-medium">
                     {track.trackName ?? "—"}
                   </TableCell>
