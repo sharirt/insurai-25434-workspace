@@ -59,6 +59,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: `מסלול ${FIELD_TRANSLATIONS["menayot_sachir"]} נבחר`, expression: "requests.tracks.menayot_sachir !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["clali_ad500m"]} נבחר`, expression: "requests.tracks.clali_ad500m !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["okev_madadim_ad25_menayot"]} נבחר`, expression: "requests.tracks.okev_madadim_ad25_menayot !== ''" },
+  { label: `מסלול ${FIELD_TRANSLATIONS["okev_madadim_agach_ad25_menayot"]} נבחר`, expression: "requests.tracks.okev_madadim_agach_ad25_menayot !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["okev_madadei_menayot"]} נבחר`, expression: "requests.tracks.okev_madadei_menayot !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["agach_sachir"]} נבחר`, expression: "requests.tracks.agach_sachir !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["ad25_menayot"]} נבחר`, expression: "requests.tracks.ad25_menayot !== ''" },
