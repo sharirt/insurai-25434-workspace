@@ -118,6 +118,8 @@ export const MeetingAddRequestDialog = ({
   const [trackSearch, setTrackSearch] = useState("");
   const [isOneTimeTransfer, setIsOneTimeTransfer] = useState(false);
   const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
+  const [isPartialTransfer, setIsPartialTransfer] = useState(false);
+  const [partialTransferAmount, setPartialTransferAmount] = useState<number | undefined>(undefined);
 
   const selectedScheme = useMemo(
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
@@ -165,6 +167,8 @@ export const MeetingAddRequestDialog = ({
       setTrackSearch("");
       setIsOneTimeTransfer(false);
       setOneTimeTransferAmount(undefined);
+      setIsPartialTransfer(false);
+      setPartialTransferAmount(undefined);
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
       setSelectedRequestTypeId(editingRequest.requestTypeId ?? "");
@@ -182,6 +186,8 @@ export const MeetingAddRequestDialog = ({
       setIndependentTransferAmount(editingRequest.independentTransferAmount ?? "");
       setIsOneTimeTransfer(editingRequest.isOneTimeTransfer ?? false);
       setOneTimeTransferAmount(editingRequest.oneTimeTransferAmount);
+      setIsPartialTransfer(editingRequest.isPartialTransfer ?? false);
+      setPartialTransferAmount(editingRequest.partialTransferAmount);
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -285,6 +291,8 @@ export const MeetingAddRequestDialog = ({
       independentTransferAmount: independentTransferAmount || undefined,
       isOneTimeTransfer: isOneTimeTransfer || undefined,
       oneTimeTransferAmount: isOneTimeTransfer ? oneTimeTransferAmount : undefined,
+      isPartialTransfer: isPartialTransfer || undefined,
+      partialTransferAmount: isPartialTransfer ? partialTransferAmount : undefined,
       sourceQuote: editingRequest?.sourceQuote,
       missingFields: updatedMissingFields,
     };
@@ -723,6 +731,48 @@ export const MeetingAddRequestDialog = ({
                       const num = Number(val);
                       if (num < 0) return;
                       setOneTimeTransferAmount(num);
+                    }}
+                    placeholder="0"
+                    dir="rtl"
+                    min={0}
+                    step={1}
+                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                    className="pl-8"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
+                </div>
+              </div>
+            )}
+
+            {/* ניוד חלקי */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isPartialTransferMeeting"
+                  checked={isPartialTransfer}
+                  onCheckedChange={(checked) => {
+                    setIsPartialTransfer(!!checked);
+                    if (!checked) setPartialTransferAmount(undefined);
+                  }}
+                />
+                <Label htmlFor="isPartialTransferMeeting" className="text-sm font-semibold text-foreground cursor-pointer">ניוד חלקי</Label>
+              </div>
+            </div>
+
+            {/* סכום ניוד חלקי */}
+            {isPartialTransfer && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">סכום ניוד חלקי</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={partialTransferAmount ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") { setPartialTransferAmount(undefined); return; }
+                      const num = Number(val);
+                      if (num < 0) return;
+                      setPartialTransferAmount(num);
                     }}
                     placeholder="0"
                     dir="rtl"

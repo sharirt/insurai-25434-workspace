@@ -69,6 +69,8 @@ export const EditRequestDialog = ({
   const [trackSearch, setTrackSearch] = useState("");
   const [isOneTimeTransfer, setIsOneTimeTransfer] = useState(false);
   const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
+  const [isPartialTransfer, setIsPartialTransfer] = useState(false);
+  const [partialTransferAmount, setPartialTransferAmount] = useState<number | undefined>(undefined);
 
   const { data: providers, isLoading: isLoadingProviders } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes, isLoading: isLoadingRequestTypes } = useEntityGetAll(RequestSchemesEntity);
@@ -132,6 +134,8 @@ export const EditRequestDialog = ({
     setIndependentTransferAmount(request.independentTransferAmount ?? "");
     setIsOneTimeTransfer(request.isOneTimeTransfer ?? false);
     setOneTimeTransferAmount(request.oneTimeTransferAmount ?? undefined);
+    setIsPartialTransfer((request as any).isPartialTransfer ?? false);
+    setPartialTransferAmount((request as any).partialTransferAmount ?? undefined);
 
     // Tracks
     if (request.tracks) {
@@ -214,6 +218,8 @@ export const EditRequestDialog = ({
           independentTransferAmount: independentTransferAmount || undefined,
           isOneTimeTransfer,
           oneTimeTransferAmount: isOneTimeTransfer ? oneTimeTransferAmount : undefined,
+          isPartialTransfer,
+          partialTransferAmount: isPartialTransfer ? partialTransferAmount : undefined,
         },
       });
 
@@ -476,6 +482,48 @@ export const EditRequestDialog = ({
                       const num = Number(val);
                       if (num < 0) return;
                       setOneTimeTransferAmount(num);
+                    }}
+                    placeholder="0"
+                    dir="rtl"
+                    min={0}
+                    step={1}
+                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                    className="pl-8"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
+                </div>
+              </div>
+            )}
+
+            {/* ניוד חלקי */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isPartialTransfer"
+                  checked={isPartialTransfer}
+                  onCheckedChange={(checked) => {
+                    setIsPartialTransfer(!!checked);
+                    if (!checked) setPartialTransferAmount(undefined);
+                  }}
+                />
+                <Label htmlFor="isPartialTransfer" className="text-sm font-semibold text-foreground cursor-pointer">ניוד חלקי</Label>
+              </div>
+            </div>
+
+            {/* סכום ניוד חלקי */}
+            {isPartialTransfer && (
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-semibold text-foreground">סכום ניוד חלקי</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={partialTransferAmount ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") { setPartialTransferAmount(undefined); return; }
+                      const num = Number(val);
+                      if (num < 0) return;
+                      setPartialTransferAmount(num);
                     }}
                     placeholder="0"
                     dir="rtl"

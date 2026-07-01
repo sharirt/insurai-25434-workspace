@@ -90,6 +90,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "הפקדה חד פעמית", expression: "requests.independentTransferType === 'הפקדה חד פעמית'" },
   { label: "הוראת קבע", expression: "requests.independentTransferType === 'הוראת קבע'" },
   { label: "אם הפקדה חד פעמית", expression: "requests.isOneTimeTransfer === true" },
+  { label: "אם ניוד חלקי", expression: "requests.isPartialTransfer === true" },
 ];
 
 /**

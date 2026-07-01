@@ -773,6 +773,10 @@ export interface IRequestsEntity {
   isOneTimeTransfer?: boolean;
   /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  isPartialTransfer?: boolean;
+  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  partialTransferAmount?: number;
 }
 
 export const RequestsEntity = {
@@ -1557,6 +1561,10 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   isOneTimeTransfer?: boolean;
   /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  isPartialTransfer?: boolean;
+  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  partialTransferAmount?: number;
 }
 
 /**
@@ -2358,6 +2366,10 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   isOneTimeTransfer?: boolean;
   /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  isPartialTransfer?: boolean;
+  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  partialTransferAmount?: number;
 }
 
 /**
@@ -2681,6 +2693,10 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   isOneTimeTransfer?: boolean;
   /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  isPartialTransfer?: boolean;
+  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  partialTransferAmount?: number;
 }
 
 /**

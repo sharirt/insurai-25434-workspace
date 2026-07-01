@@ -166,6 +166,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "independentTransferAmount", label: "סכום הוראת קבע" },
       { value: "isOneTimeTransfer", label: "הפקדה חד פעמית" },
       { value: "oneTimeTransferAmount", label: "סכום הפקדה חד פעמית" },
+      { value: "isPartialTransfer", label: "ניוד חלקי" },
+      { value: "partialTransferAmount", label: "סכום ניוד חלקי" },
     ],
   },
 ];
