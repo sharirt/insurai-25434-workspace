@@ -116,9 +116,8 @@ export const MeetingAddRequestDialog = ({
   const [independentTransferType, setIndependentTransferType] = useState("");
   const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
-  const [isOneTimeTransfer, setIsOneTimeTransfer] = useState(false);
   const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
-  const [isPartialTransfer, setIsPartialTransfer] = useState(false);
+  const [isPartialTransferField, setIsPartialTransferField] = useState(false);
   const [partialTransferAmount, setPartialTransferAmount] = useState<number | undefined>(undefined);
 
   const selectedScheme = useMemo(
@@ -165,9 +164,8 @@ export const MeetingAddRequestDialog = ({
       setIndependentTransferType("");
       setIndependentTransferAmount("");
       setTrackSearch("");
-      setIsOneTimeTransfer(false);
       setOneTimeTransferAmount(undefined);
-      setIsPartialTransfer(false);
+      setIsPartialTransferField(false);
       setPartialTransferAmount(undefined);
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
@@ -184,9 +182,8 @@ export const MeetingAddRequestDialog = ({
       setChargeDay(editingRequest.chargeDay ?? "");
       setIndependentTransferType(editingRequest.independentTransferType ?? "");
       setIndependentTransferAmount(editingRequest.independentTransferAmount ?? "");
-      setIsOneTimeTransfer(editingRequest.isOneTimeTransfer ?? false);
       setOneTimeTransferAmount(editingRequest.oneTimeTransferAmount);
-      setIsPartialTransfer(editingRequest.isPartialTransfer ?? false);
+      setIsPartialTransferField(editingRequest.isPartialTransfer ?? false);
       setPartialTransferAmount(editingRequest.partialTransferAmount);
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
@@ -289,10 +286,9 @@ export const MeetingAddRequestDialog = ({
       chargeDay: chargeDay || undefined,
       independentTransferType: independentTransferType || undefined,
       independentTransferAmount: independentTransferAmount || undefined,
-      isOneTimeTransfer: isOneTimeTransfer || undefined,
-      oneTimeTransferAmount: isOneTimeTransfer ? oneTimeTransferAmount : undefined,
-      isPartialTransfer: isPartialTransfer || undefined,
-      partialTransferAmount: isPartialTransfer ? partialTransferAmount : undefined,
+      oneTimeTransferAmount,
+      isPartialTransfer: isPartialTransferField,
+      partialTransferAmount: isPartialTransferField ? partialTransferAmount : undefined,
       sourceQuote: editingRequest?.sourceQuote,
       missingFields: updatedMissingFields,
     };
@@ -325,6 +321,9 @@ export const MeetingAddRequestDialog = ({
     chargeDay,
     independentTransferType,
     independentTransferAmount,
+    oneTimeTransferAmount,
+    isPartialTransferField,
+    partialTransferAmount,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -702,67 +701,44 @@ export const MeetingAddRequestDialog = ({
               />
             </div>
 
-            {/* הפקדה חד פעמית */}
+            {/* סכום הפקדה חד פעמית */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="isOneTimeTransferMeeting"
-                  checked={isOneTimeTransfer}
-                  onCheckedChange={(checked) => {
-                    setIsOneTimeTransfer(!!checked);
-                    if (!checked) setOneTimeTransferAmount(undefined);
+              <Label className="text-sm font-semibold text-foreground">סכום הפקדה חד פעמית</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  value={oneTimeTransferAmount ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "") { setOneTimeTransferAmount(undefined); return; }
+                    const num = Number(val);
+                    if (num < 0) return;
+                    setOneTimeTransferAmount(num);
                   }}
+                  placeholder="0"
+                  dir="rtl"
+                  min={0}
+                  onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                  className="pl-8"
                 />
-                <Label htmlFor="isOneTimeTransferMeeting" className="text-sm font-semibold text-foreground cursor-pointer">הפקדה חד פעמית</Label>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
               </div>
             </div>
-
-            {/* סכום הפקדה חד פעמית */}
-            {isOneTimeTransfer && (
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">סכום הפקדה חד פעמית</Label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    value={oneTimeTransferAmount ?? ""}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "") { setOneTimeTransferAmount(undefined); return; }
-                      const num = Number(val);
-                      if (num < 0) return;
-                      setOneTimeTransferAmount(num);
-                    }}
-                    placeholder="0"
-                    dir="rtl"
-                    min={0}
-                    step={1}
-                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
-                    className="pl-8"
-                  />
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
-                </div>
-              </div>
-            )}
 
             {/* ניוד חלקי */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 pt-1">
                 <Checkbox
-                  id="isPartialTransferMeeting"
-                  checked={isPartialTransfer}
+                  id="meetingIsPartialTransfer"
+                  checked={isPartialTransferField}
                   onCheckedChange={(checked) => {
-                    setIsPartialTransfer(!!checked);
+                    setIsPartialTransferField(checked === true);
                     if (!checked) setPartialTransferAmount(undefined);
                   }}
                 />
-                <Label htmlFor="isPartialTransferMeeting" className="text-sm font-semibold text-foreground cursor-pointer">ניוד חלקי</Label>
+                <Label htmlFor="meetingIsPartialTransfer" className="text-sm font-semibold text-foreground cursor-pointer">ניוד חלקי</Label>
               </div>
-            </div>
-
-            {/* סכום ניוד חלקי */}
-            {isPartialTransfer && (
-              <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">סכום ניוד חלקי</Label>
+              {isPartialTransferField && (
                 <div className="relative">
                   <Input
                     type="number"
@@ -774,17 +750,16 @@ export const MeetingAddRequestDialog = ({
                       if (num < 0) return;
                       setPartialTransferAmount(num);
                     }}
-                    placeholder="0"
+                    placeholder="סכום ניוד חלקי"
                     dir="rtl"
                     min={0}
-                    step={1}
                     onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
                     className="pl-8"
                   />
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Choice Duration & Transfer Type — visible only after request type selected */}

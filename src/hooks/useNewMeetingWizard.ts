@@ -43,7 +43,6 @@ export interface PendingRequest {
   chargeDay?: string;
   independentTransferType?: string;
   independentTransferAmount?: string;
-  isOneTimeTransfer?: boolean;
   oneTimeTransferAmount?: number;
   isPartialTransfer?: boolean;
   partialTransferAmount?: number;
@@ -267,10 +266,9 @@ export function useNewMeetingWizard({
             chargeDay: req.chargeDay || undefined,
             independentTransferType: req.independentTransferType || undefined,
             independentTransferAmount: req.independentTransferAmount || undefined,
-            isOneTimeTransfer: req.isOneTimeTransfer ?? undefined,
-            oneTimeTransferAmount: req.isOneTimeTransfer ? req.oneTimeTransferAmount : undefined,
-            isPartialTransfer: req.isPartialTransfer ?? undefined,
-            partialTransferAmount: req.isPartialTransfer ? req.partialTransferAmount : undefined,
+            oneTimeTransferAmount: req.oneTimeTransferAmount ?? undefined,
+            isPartialTransfer: req.isPartialTransfer ?? false,
+            partialTransferAmount: req.isPartialTransfer ? (req.partialTransferAmount ?? undefined) : undefined,
           },
         });
         createdRequestIds.push(createdReq.id);

@@ -89,8 +89,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "מעמד קופה של חבר קיבוץ", expression: "requests.standing === 'חבר קיבוץ'" },
   { label: "הפקדה חד פעמית", expression: "requests.independentTransferType === 'הפקדה חד פעמית'" },
   { label: "הוראת קבע", expression: "requests.independentTransferType === 'הוראת קבע'" },
-  { label: "אם הפקדה חד פעמית", expression: "requests.isOneTimeTransfer === true" },
-  { label: "אם ניוד חלקי", expression: "requests.isPartialTransfer === true" },
+  { label: "ניוד חלקי", expression: "requests.isPartialTransfer === true" },
 ];
 
 /**

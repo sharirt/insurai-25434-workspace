@@ -769,14 +769,12 @@ export interface IRequestsEntity {
   independentTransferType?: RequestsEntityIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
-  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
-  isOneTimeTransfer?: boolean;
-  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
-  oneTimeTransferAmount?: number;
-  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  /** ניוד חלקי - indicates whether this request involves a partial transfer of funds  */
   isPartialTransfer?: boolean;
-  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  /** סכום ניוד חלקי - the amount for a partial transfer in the insurance request  */
   partialTransferAmount?: number;
+  /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
+  oneTimeTransferAmount?: number;
 }
 
 export const RequestsEntity = {
@@ -1557,14 +1555,12 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   independentTransferType?: AutoProcessNewRequestActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
-  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
-  isOneTimeTransfer?: boolean;
-  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
-  oneTimeTransferAmount?: number;
-  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  /** ניוד חלקי - indicates whether this request involves a partial transfer of funds  */
   isPartialTransfer?: boolean;
-  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  /** סכום ניוד חלקי - the amount for a partial transfer in the insurance request  */
   partialTransferAmount?: number;
+  /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
+  oneTimeTransferAmount?: number;
 }
 
 /**
@@ -2362,14 +2358,12 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   independentTransferType?: ProcessRequestFormsActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
-  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
-  isOneTimeTransfer?: boolean;
-  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
-  oneTimeTransferAmount?: number;
-  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  /** ניוד חלקי - indicates whether this request involves a partial transfer of funds  */
   isPartialTransfer?: boolean;
-  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  /** סכום ניוד חלקי - the amount for a partial transfer in the insurance request  */
   partialTransferAmount?: number;
+  /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
+  oneTimeTransferAmount?: number;
 }
 
 /**
@@ -2689,14 +2683,12 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   independentTransferType?: SendCustomProviderEmailActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
-  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
-  isOneTimeTransfer?: boolean;
-  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
-  oneTimeTransferAmount?: number;
-  /** Indicates whether this request includes a partial transfer (ניוד חלקי). True means a partial transfer is requested.  */
+  /** ניוד חלקי - indicates whether this request involves a partial transfer of funds  */
   isPartialTransfer?: boolean;
-  /** The amount for the partial transfer (סכום ניוד חלקי) in this insurance request.  */
+  /** סכום ניוד חלקי - the amount for a partial transfer in the insurance request  */
   partialTransferAmount?: number;
+  /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
+  oneTimeTransferAmount?: number;
 }
 
 /**
@@ -3038,10 +3030,10 @@ export interface ITranscribeAudioWithWhisperActionInput {
 export interface ITranscribeAudioWithWhisperActionOutput {
   /** The transcribed text in Hebrew  */
   text?: string;
-  /** Whether transcription was successful  */
-  success?: boolean;
   /** Error message if transcription failed  */
   error?: string;
+  /** Whether transcription was successful  */
+  success?: boolean;
 }
 
 /**
