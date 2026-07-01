@@ -164,6 +164,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "chargeDay", label: "מועד חיוב" },
       { value: "independentTransferType", label: "סוג העברה עצמאית" },
       { value: "independentTransferAmount", label: "סכום הוראת קבע" },
+      { value: "isOneTimeTransfer", label: "הפקדה חד פעמית" },
+      { value: "oneTimeTransferAmount", label: "סכום הפקדה חד פעמית" },
     ],
   },
 ];

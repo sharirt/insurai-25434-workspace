@@ -769,6 +769,10 @@ export interface IRequestsEntity {
   independentTransferType?: RequestsEntityIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
+  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
+  isOneTimeTransfer?: boolean;
+  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
+  oneTimeTransferAmount?: number;
 }
 
 export const RequestsEntity = {
@@ -1549,6 +1553,10 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   independentTransferType?: AutoProcessNewRequestActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
+  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
+  isOneTimeTransfer?: boolean;
+  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
+  oneTimeTransferAmount?: number;
 }
 
 /**
@@ -2346,6 +2354,10 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   independentTransferType?: ProcessRequestFormsActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
+  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
+  isOneTimeTransfer?: boolean;
+  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
+  oneTimeTransferAmount?: number;
 }
 
 /**
@@ -2665,6 +2677,10 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   independentTransferType?: SendCustomProviderEmailActionOutputIndependentTransferTypeEnum;
   /** The amount for the independent transfer in the insurance request. Stored as a string to support various formats.  */
   independentTransferAmount?: string;
+  /** Indicates whether this request includes a one-time deposit (הפקדה חד פעמית). True means a one-time transfer is requested.  */
+  isOneTimeTransfer?: boolean;
+  /** The amount for the one-time deposit (סכום הפקדה חד פעמית) in this insurance request.  */
+  oneTimeTransferAmount?: number;
 }
 
 /**

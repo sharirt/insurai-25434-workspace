@@ -33,6 +33,7 @@ import {
   AutoProcessNewRequestAction,
 } from "@/product-types";
 import type { IRequestsEntity } from "@/product-types";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Pencil, SlidersHorizontal, Eraser, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { STATUS_VALUES } from "@/utils/StatusConfig";
@@ -66,6 +67,8 @@ export const EditRequestDialog = ({
   const [independentTransferType, setIndependentTransferType] = useState("");
   const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
+  const [isOneTimeTransfer, setIsOneTimeTransfer] = useState(false);
+  const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
 
   const { data: providers, isLoading: isLoadingProviders } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes, isLoading: isLoadingRequestTypes } = useEntityGetAll(RequestSchemesEntity);
@@ -127,6 +130,8 @@ export const EditRequestDialog = ({
     setSelectedStanding(request.standing ?? "");
     setIndependentTransferType(request.independentTransferType ?? "");
     setIndependentTransferAmount(request.independentTransferAmount ?? "");
+    setIsOneTimeTransfer(request.isOneTimeTransfer ?? false);
+    setOneTimeTransferAmount(request.oneTimeTransferAmount ?? undefined);
 
     // Tracks
     if (request.tracks) {
@@ -207,6 +212,8 @@ export const EditRequestDialog = ({
           standing: (selectedStanding === "-" || selectedStanding === "") ? undefined : selectedStanding as any,
           independentTransferType: (independentTransferType === "-" || independentTransferType === "") ? undefined : independentTransferType as any,
           independentTransferAmount: independentTransferAmount || undefined,
+          isOneTimeTransfer,
+          oneTimeTransferAmount: isOneTimeTransfer ? oneTimeTransferAmount : undefined,
         },
       });
 
@@ -439,6 +446,48 @@ export const EditRequestDialog = ({
                 dir="rtl"
               />
             </div>
+
+            {/* הפקדה חד פעמית */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isOneTimeTransfer"
+                  checked={isOneTimeTransfer}
+                  onCheckedChange={(checked) => {
+                    setIsOneTimeTransfer(!!checked);
+                    if (!checked) setOneTimeTransferAmount(undefined);
+                  }}
+                />
+                <Label htmlFor="isOneTimeTransfer" className="text-sm font-semibold text-foreground cursor-pointer">הפקדה חד פעמית</Label>
+              </div>
+            </div>
+
+            {/* סכום הפקדה חד פעמית */}
+            {isOneTimeTransfer && (
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-semibold text-foreground">סכום הפקדה חד פעמית</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={oneTimeTransferAmount ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") { setOneTimeTransferAmount(undefined); return; }
+                      const num = Number(val);
+                      if (num < 0) return;
+                      setOneTimeTransferAmount(num);
+                    }}
+                    placeholder="0"
+                    dir="rtl"
+                    min={0}
+                    step={1}
+                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                    className="pl-8"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Choice Duration & Transfer Type */}

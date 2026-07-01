@@ -36,6 +36,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
 
 interface MeetingAddRequestDialogProps {
@@ -115,6 +116,8 @@ export const MeetingAddRequestDialog = ({
   const [independentTransferType, setIndependentTransferType] = useState("");
   const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
+  const [isOneTimeTransfer, setIsOneTimeTransfer] = useState(false);
+  const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
 
   const selectedScheme = useMemo(
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
@@ -160,6 +163,8 @@ export const MeetingAddRequestDialog = ({
       setIndependentTransferType("");
       setIndependentTransferAmount("");
       setTrackSearch("");
+      setIsOneTimeTransfer(false);
+      setOneTimeTransferAmount(undefined);
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
       setSelectedRequestTypeId(editingRequest.requestTypeId ?? "");
@@ -175,6 +180,8 @@ export const MeetingAddRequestDialog = ({
       setChargeDay(editingRequest.chargeDay ?? "");
       setIndependentTransferType(editingRequest.independentTransferType ?? "");
       setIndependentTransferAmount(editingRequest.independentTransferAmount ?? "");
+      setIsOneTimeTransfer(editingRequest.isOneTimeTransfer ?? false);
+      setOneTimeTransferAmount(editingRequest.oneTimeTransferAmount);
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -276,6 +283,8 @@ export const MeetingAddRequestDialog = ({
       chargeDay: chargeDay || undefined,
       independentTransferType: independentTransferType || undefined,
       independentTransferAmount: independentTransferAmount || undefined,
+      isOneTimeTransfer: isOneTimeTransfer || undefined,
+      oneTimeTransferAmount: isOneTimeTransfer ? oneTimeTransferAmount : undefined,
       sourceQuote: editingRequest?.sourceQuote,
       missingFields: updatedMissingFields,
     };
@@ -684,6 +693,48 @@ export const MeetingAddRequestDialog = ({
                 dir="rtl"
               />
             </div>
+
+            {/* הפקדה חד פעמית */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="isOneTimeTransferMeeting"
+                  checked={isOneTimeTransfer}
+                  onCheckedChange={(checked) => {
+                    setIsOneTimeTransfer(!!checked);
+                    if (!checked) setOneTimeTransferAmount(undefined);
+                  }}
+                />
+                <Label htmlFor="isOneTimeTransferMeeting" className="text-sm font-semibold text-foreground cursor-pointer">הפקדה חד פעמית</Label>
+              </div>
+            </div>
+
+            {/* סכום הפקדה חד פעמית */}
+            {isOneTimeTransfer && (
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-foreground">סכום הפקדה חד פעמית</Label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    value={oneTimeTransferAmount ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "") { setOneTimeTransferAmount(undefined); return; }
+                      const num = Number(val);
+                      if (num < 0) return;
+                      setOneTimeTransferAmount(num);
+                    }}
+                    placeholder="0"
+                    dir="rtl"
+                    min={0}
+                    step={1}
+                    onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                    className="pl-8"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">₪</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Choice Duration & Transfer Type — visible only after request type selected */}

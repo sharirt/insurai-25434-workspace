@@ -43,6 +43,8 @@ export interface PendingRequest {
   chargeDay?: string;
   independentTransferType?: string;
   independentTransferAmount?: string;
+  isOneTimeTransfer?: boolean;
+  oneTimeTransferAmount?: number;
   sourceQuote?: string;
   missingFields?: Record<string, string>;
 }
@@ -263,6 +265,8 @@ export function useNewMeetingWizard({
             chargeDay: req.chargeDay || undefined,
             independentTransferType: req.independentTransferType || undefined,
             independentTransferAmount: req.independentTransferAmount || undefined,
+            isOneTimeTransfer: req.isOneTimeTransfer ?? undefined,
+            oneTimeTransferAmount: req.isOneTimeTransfer ? req.oneTimeTransferAmount : undefined,
           },
         });
         createdRequestIds.push(createdReq.id);
