@@ -674,9 +674,9 @@ export const MeetingAddRequestDialog = ({
               </Select>
             </div>
 
-            {/* סכום העברה עצמאי */}
+            {/* סכום הוראת קבע */}
             <div className="space-y-2">
-              <Label className="text-sm font-semibold text-foreground">סכום העברה עצמאי</Label>
+              <Label className="text-sm font-semibold text-foreground">סכום הוראת קבע</Label>
               <Input
                 value={independentTransferAmount}
                 onChange={(e) => setIndependentTransferAmount(e.target.value)}

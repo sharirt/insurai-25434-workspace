@@ -429,9 +429,9 @@ export const EditRequestDialog = ({
               </Select>
             </div>
 
-            {/* סכום העברה עצמאי */}
+            {/* סכום הוראת קבע */}
             <div className="flex flex-col gap-2">
-              <Label className="text-sm font-semibold text-foreground">סכום העברה עצמאי</Label>
+              <Label className="text-sm font-semibold text-foreground">סכום הוראת קבע</Label>
               <Input
                 value={independentTransferAmount}
                 onChange={(e) => setIndependentTransferAmount(e.target.value)}
