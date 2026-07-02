@@ -368,6 +368,8 @@ export interface IClientsEntity {
   businessAddress?: string;
   /** מחזור הכנסות שנתי של העסק של הלקוח העצמאי. מוצג ועריך רק כאשר תעסוקת הלקוח היא עצמאי.  */
   businessYearlyRevenueCycle?: number;
+  /** Number of children the client has (מספר ילדים). Used for insurance form processing and field mapping.  */
+  childrenNumber?: number;
   /** Stores the last saved portfolio risk analysis result for this client, including riskScore, riskLabel, summary, strengths, improvements, and breakdown. Saved when the agent clicks 'שמור ניתוח' on the PortfolioRiskAnalysis page.  */
   riskAnalysis?: IClientsEntityRiskAnalysisObject;
 }

@@ -367,6 +367,9 @@ export const ClientInfoCard = ({
                     value={client.smoker ? "כן" : "לא"}
                   />
                 )}
+                {client.childrenNumber != null && (
+                  <InfoField label="מספר ילדים" value={String(client.childrenNumber)} />
+                )}
                 {client.tinNumber && (
                   <InfoField label="מספר TIN" value={client.tinNumber} />
                 )}

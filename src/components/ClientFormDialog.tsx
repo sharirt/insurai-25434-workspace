@@ -72,6 +72,7 @@ interface ClientFormState {
   businessAddress: string;
   businessYearlyRevenueCycle: number;
   beneficiariesDivideFree: string;
+  childrenNumber: number | undefined;
   taxCountry: string;
   bankName: string;
   bankCode: string;
@@ -130,6 +131,7 @@ const INITIAL_FORM_STATE: ClientFormState = {
   businessAddress: "",
   businessYearlyRevenueCycle: 0,
   beneficiariesDivideFree: "",
+  childrenNumber: undefined,
   taxCountry: "",
   bankName: "",
   bankCode: "",
@@ -217,6 +219,7 @@ export const ClientFormDialog = ({
         businessYearlyRevenueCycle: client.businessYearlyRevenueCycle || 0,
         beneficiariesDivide: client.beneficiariesDivide || "",
         beneficiariesDivideFree: client.beneficiariesDivideFree || "",
+        childrenNumber: client.childrenNumber ?? undefined,
         taxCountry: client.taxCountry || "",
         bankName: client.bankName || "",
         bankCode: client.bankCode || "",
@@ -335,6 +338,7 @@ export const ClientFormDialog = ({
       if (formState.accountNumber.trim()) data.accountNumber = formState.accountNumber.trim();
       if (formState.relationship) data.relationship = formState.relationship;
       if (formState.clientStatus) data.clientStatus = formState.clientStatus;
+      if (formState.childrenNumber != null && !isNaN(formState.childrenNumber)) data.childrenNumber = formState.childrenNumber;
 
       data.assignedOfficeEmails = selectedOfficeEmails;
       if (idDocumentationUrl) {
@@ -959,6 +963,19 @@ export const ClientFormDialog = ({
                     disabled={isLoading}
                   />
                   <Label htmlFor="smoker" className="cursor-pointer">מעשן</Label>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="childrenNumber">מספר ילדים</Label>
+                  <Input
+                    id="childrenNumber"
+                    type="number"
+                    min={0}
+                    value={formState.childrenNumber != null ? formState.childrenNumber : ""}
+                    onChange={(e) => setFormState(prev => ({ ...prev, childrenNumber: e.target.value ? Number(e.target.value) : undefined }))}
+                    placeholder="הזן מספר ילדים"
+                    disabled={isLoading}
+                  />
                 </div>
 
                 <div className="space-y-2">

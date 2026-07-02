@@ -29,6 +29,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "dateOfBirth", label: "תאריך לידה" },
       { value: "gender", label: "מין" },
       { value: "relationship", label: "מצב משפחתי" },
+      { value: "childrenNumber", label: "מספר ילדים" },
       { value: "address", label: "כתובת" },
       { value: "fullAddress", label: "כתובת מלאה" },
       { value: "cityOfResidence", label: "יישוב" },
