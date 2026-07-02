@@ -80,8 +80,8 @@ export const ClientInfoCard = ({
     return differenceInYears(new Date(), birthDate);
   }, [client.dateOfBirth]);
 
-  const hasParent1 = !!(client.parent1Name || client.parent1Id || client.parent1FirstName || client.parent1LastName || client.parent1DateOfBirth);
-  const hasParent2 = !!(client.parent2Name || client.parent2Id || client.parent2FirstName || client.parent2LastName || client.parent2DateOfBirth);
+  const hasParent1 = !!(client.parent1Name || client.parent1Id || client.parent1FirstName || client.parent1LastName || client.parent1DateOfBirth || client.parent1IssueDate);
+  const hasParent2 = !!(client.parent2Name || client.parent2Id || client.parent2FirstName || client.parent2LastName || client.parent2DateOfBirth || client.parent2IssueDate);
   const hasParents = hasParent1 || hasParent2;
 
   const assignedEmails = client.assignedOfficeEmails ?? [];
@@ -294,6 +294,9 @@ export const ClientInfoCard = ({
                         {client.parent1DateOfBirth && (
                           <InfoField label="תאריך לידה הורה 1" value={formatDate(client.parent1DateOfBirth)} />
                         )}
+                        {client.parent1IssueDate && (
+                          <InfoField label="תאריך הנפקת ת״ז הורה 1" value={client.parent1IssueDate} />
+                        )}
                       </>
                     )}
                     {hasParent2 && (
@@ -308,6 +311,9 @@ export const ClientInfoCard = ({
                         )}
                         {client.parent2DateOfBirth && (
                           <InfoField label="תאריך לידה הורה 2" value={formatDate(client.parent2DateOfBirth)} />
+                        )}
+                        {client.parent2IssueDate && (
+                          <InfoField label="תאריך הנפקת ת״ז הורה 2" value={client.parent2IssueDate} />
                         )}
                       </>
                     )}

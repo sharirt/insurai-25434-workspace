@@ -342,6 +342,10 @@ export interface IClientsEntity {
   branchNumber?: string;
   /** The client's bank account number (מספר חשבון). Stored as string to preserve leading zeros and special formats.  */
   accountNumber?: string;
+  /** The issue date of the first parent's national ID card (תאריך הנפקת ת״ז הורה 1). Stored as a free text string.  */
+  parent1IssueDate?: string;
+  /** The issue date of the second parent's national ID card (תאריך הנפקת ת״ז הורה 2). Stored as a free text string.  */
+  parent2IssueDate?: string;
   /** Computed English street address with number — combines englishStreet and streetNumber fields (רחוב באנגלית עם מספר)  */
   englishStreetWithNumber?: string;
   /** The bank code (קוד בנק) corresponding to the client's bank. Each code maps to a specific Israeli or international bank.  */

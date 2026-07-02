@@ -412,6 +412,20 @@ export const ClientInfoForm = ({
         />
       </div>
 
+      {/* תאריך הנפקת ת״ז הורה 1 */}
+      <div className="space-y-1.5">
+        <Label htmlFor="parent1IssueDate" className="text-sm font-medium">
+          תאריך הנפקת ת״ז הורה 1
+        </Label>
+        <Input
+          id="parent1IssueDate"
+          value={formData.parent1IssueDate ?? ""}
+          onChange={handleInputChange("parent1IssueDate")}
+          placeholder="תאריך הנפקת ת.ז. הורה 1"
+          dir="rtl"
+        />
+      </div>
+
       {/* שם פרטי הורה 2 */}
       <div className="space-y-1.5">
         <Label htmlFor="parent2FirstName" className="text-sm font-medium">
@@ -450,6 +464,20 @@ export const ClientInfoForm = ({
           type="date"
           value={formData.parent2DateOfBirth ?? ""}
           onChange={handleInputChange("parent2DateOfBirth")}
+          dir="rtl"
+        />
+      </div>
+
+      {/* תאריך הנפקת ת״ז הורה 2 */}
+      <div className="space-y-1.5">
+        <Label htmlFor="parent2IssueDate" className="text-sm font-medium">
+          תאריך הנפקת ת״ז הורה 2
+        </Label>
+        <Input
+          id="parent2IssueDate"
+          value={formData.parent2IssueDate ?? ""}
+          onChange={handleInputChange("parent2IssueDate")}
+          placeholder="תאריך הנפקת ת.ז. הורה 2"
           dir="rtl"
         />
       </div>

@@ -58,6 +58,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "parent2Id", label: "ת.ז הורה 2" },
       { value: "parent1DateOfBirth", label: "תאריך לידה הורה 1" },
       { value: "parent2DateOfBirth", label: "תאריך לידה הורה 2" },
+      { value: "parent1IssueDate", label: "תאריך הנפקת ת״ז הורה 1" },
+      { value: "parent2IssueDate", label: "תאריך הנפקת ת״ז הורה 2" },
       { value: "idIssueDate", label: "תאריך הנפקת ת.ז" },
       { value: "apartmentNumber", label: "מספר דירה" },
       { value: "streetName", label: "שם רחוב בלבד" },

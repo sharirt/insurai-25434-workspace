@@ -57,7 +57,9 @@ interface ClientFormState {
   parent2FirstName: string;
   parent2LastName: string;
   parent1DateOfBirth: string;
+  parent1IssueDate: string;
   parent2DateOfBirth: string;
+  parent2IssueDate: string;
   birthCountry: string;
   birthCity: string;
   englishStreet: string;
@@ -108,7 +110,9 @@ const INITIAL_FORM_STATE: ClientFormState = {
   parent2FirstName: "",
   parent2LastName: "",
   parent1DateOfBirth: "",
+  parent1IssueDate: "",
   parent2DateOfBirth: "",
+  parent2IssueDate: "",
   birthCountry: "",
   birthCity: "",
   englishStreet: "",
@@ -188,7 +192,9 @@ export const ClientFormDialog = ({
         parent2FirstName: client.parent2FirstName || "",
         parent2LastName: client.parent2LastName || "",
         parent1DateOfBirth: client.parent1DateOfBirth || "",
+        parent1IssueDate: client.parent1IssueDate || "",
         parent2DateOfBirth: client.parent2DateOfBirth || "",
+        parent2IssueDate: client.parent2IssueDate || "",
         birthCountry: client.birthCountry || "",
         birthCity: client.birthCity || "",
         englishStreet: client.englishStreet || "",
@@ -291,7 +297,9 @@ export const ClientFormDialog = ({
       if (formState.parent2FirstName.trim()) data.parent2FirstName = formState.parent2FirstName.trim();
       if (formState.parent2LastName.trim()) data.parent2LastName = formState.parent2LastName.trim();
       if (formState.parent1DateOfBirth) data.parent1DateOfBirth = formState.parent1DateOfBirth;
+      if (formState.parent1IssueDate.trim()) data.parent1IssueDate = formState.parent1IssueDate.trim();
       if (formState.parent2DateOfBirth) data.parent2DateOfBirth = formState.parent2DateOfBirth;
+      if (formState.parent2IssueDate.trim()) data.parent2IssueDate = formState.parent2IssueDate.trim();
       if (formState.notes.trim()) data.notes = formState.notes.trim();
       if (formState.birthCountry.trim()) data.birthCountry = formState.birthCountry.trim();
       if (formState.birthCity.trim()) data.birthCity = formState.birthCity.trim();
@@ -748,6 +756,20 @@ export const ClientFormDialog = ({
                   </div>
                 </div>
 
+                {/* Parent 1: Issue Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="parent1IssueDate">תאריך הנפקת ת״ז הורה 1</Label>
+                    <Input
+                      id="parent1IssueDate"
+                      value={formState.parent1IssueDate}
+                      onChange={(e) => handleChange("parent1IssueDate", e.target.value)}
+                      placeholder="תאריך הנפקת ת.ז. הורה 1"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
                 {/* Parent 2: First Name | Last Name */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -791,6 +813,19 @@ export const ClientFormDialog = ({
                       type="date"
                       value={formState.parent2DateOfBirth}
                       onChange={(e) => handleChange("parent2DateOfBirth", e.target.value)}
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+                {/* Parent 2: Issue Date */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="parent2IssueDate">תאריך הנפקת ת״ז הורה 2</Label>
+                    <Input
+                      id="parent2IssueDate"
+                      value={formState.parent2IssueDate}
+                      onChange={(e) => handleChange("parent2IssueDate", e.target.value)}
+                      placeholder="תאריך הנפקת ת.ז. הורה 2"
                       disabled={isLoading}
                     />
                   </div>
