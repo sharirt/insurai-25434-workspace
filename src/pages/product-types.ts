@@ -196,6 +196,7 @@ export type ClientsEntityBeneficiariesDivideEnum =
   | "חלקים שווים"
   | "יחסי לחלקם"
   | "יורשים חוקיים"
+  | "(לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר"
   | "אחר";
 
 /**
@@ -347,7 +348,7 @@ export interface IClientsEntity {
   bankCode?: ClientsEntityBankCodeEnum;
   /** Computed full address in English — combines englishCity, englishStreet, streetNumber, and zipCode (כתובת מלאה באנגלית)  */
   englishFullAddress?: string;
-  /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, אחר  */
+  /** How the insurance benefits are divided among beneficiaries (חלוקה בין מוטבים). Enum values: חלקים שווים, יחסי לחלקם, יורשים חוקיים, (לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר, אחר  */
   beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
   beneficiariesDivideFree?: string;

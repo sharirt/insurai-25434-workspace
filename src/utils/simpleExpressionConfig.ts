@@ -45,6 +45,7 @@ export const SIMPLE_CONDITIONS: SimpleCondition[] = [
   { label: "חלוקה בין מוטבים לחלקים שווים", expression: "clients.beneficiariesDivide === 'חלקים שווים'" },
   { label: "חלוקה בין מוטבים יחסי לחלקם", expression: "clients.beneficiariesDivide === 'יחסי לחלקם'" },
   { label: "חלוקה בין מוטבים ליורשים חוקיים", expression: "clients.beneficiariesDivide === 'יורשים חוקיים'" },
+  { label: "חלוקה בין מוטבים - (לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר", expression: "clients.beneficiariesDivide === '(לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר'" },
   { label: "חלוקה בין מוטבים - אחר", expression: "clients.beneficiariesDivide === 'אחר'" },
   { label: `מסלול ${FIELD_TRANSLATIONS["clali"]} נבחר`, expression: "requests.tracks.clali !== ''" },
   { label: `מסלול ${FIELD_TRANSLATIONS["menayot"]} נבחר`, expression: "requests.tracks.menayot !== ''" },

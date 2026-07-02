@@ -1020,6 +1020,7 @@ export const ClientFormDialog = ({
                       <SelectItem value="חלקים שווים">חלקים שווים</SelectItem>
                       <SelectItem value="יחסי לחלקם">יחסי לחלקם</SelectItem>
                       <SelectItem value="יורשים חוקיים">יורשים חוקיים</SelectItem>
+                      <SelectItem value="(לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר">(לבחירה בילין בלבד) יורשים חוקיים על פי דין של המוטב הנפטר</SelectItem>
                       <SelectItem value="אחר">אחר</SelectItem>
                     </SelectContent>
                   </Select>
