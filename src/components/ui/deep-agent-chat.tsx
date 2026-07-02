@@ -108,7 +108,7 @@ const getChatComponentParametersSchema = (component: AgentChatComponent) => {
   }
 };
 
-export const agentChatContentVariants = cva('flex flex-col h-full', {
+export const agentChatContentVariants = cva('flex flex-col h-full relative', {
   variants: {
     size: {
       sm: '',
@@ -1271,6 +1271,7 @@ export function AgentChatInput({
 
 interface AgentChatFooterProps {
   withVoice?: boolean;
+  placeholder?: string;
   inputClassName?: string;
   sendButtonClassName?: string;
   attachmentButtonClassName?: string;
@@ -1292,6 +1293,7 @@ export function AgentChatFooter({
 export function AgentChatFooterInner({
   size = 'md',
   className,
+  placeholder,
   inputClassName,
   sendButtonClassName,
   attachmentButtonClassName,
@@ -1373,6 +1375,7 @@ export function AgentChatFooterInner({
           >
             <AgentChatInput
               size={size}
+              placeholder={placeholder}
               className={cn('flex-1 min-w-0', inputClassName)}
             />
 
@@ -1427,6 +1430,7 @@ export function AgentChatSimple({
   useAgentBlockDirectChat,
   withVoice = false,
   hideAvatar = false,
+  placeholder,
   messagesContainerClassName,
   messageClassName,
   footerClassName,
@@ -1455,6 +1459,7 @@ export function AgentChatSimple({
         <AgentChatFooter
           size={props.size}
           withVoice={withVoice}
+          placeholder={placeholder}
           className={footerClassName}
           inputClassName={inputClassName}
           sendButtonClassName={sendButtonClassName}
@@ -1469,6 +1474,7 @@ export function AgentChatSimple({
 export type AgentChatSimpleProps = AgentChatProps & {
   withVoice?: boolean;
   hideAvatar?: boolean;
+  placeholder?: string;
   messagesContainerClassName?: string;
   messageClassName?: string;
   footerClassName?: string;

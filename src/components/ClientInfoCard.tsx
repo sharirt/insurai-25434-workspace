@@ -238,6 +238,9 @@ export const ClientInfoCard = ({
                 <InfoField label="עיסוק" value={client.occupation} />
                 <InfoField label="מעסיק" value={client.employer} />
                 <InfoField label="ח.פ / ע.מ" value={client.companyId} />
+                {client.employment === "גמלאי" && client.preRetirementOccupation && (
+                  <InfoField label="עיסוק לפני פרישה" value={client.preRetirementOccupation} />
+                )}
               </div>
             </div>
 

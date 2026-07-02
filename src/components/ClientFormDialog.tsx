@@ -37,6 +37,7 @@ interface ClientFormState {
   zipCode: string;
   employment: string;
   occupation: string;
+  preRetirementOccupation: string;
   employer: string;
   companyId: string;
   american: boolean;
@@ -87,6 +88,7 @@ const INITIAL_FORM_STATE: ClientFormState = {
   zipCode: "",
   employment: "",
   occupation: "",
+  preRetirementOccupation: "",
   employer: "",
   companyId: "",
   american: false,
@@ -166,6 +168,7 @@ export const ClientFormDialog = ({
         zipCode: client.zipCode || "",
         employment: client.employment || "",
         occupation: client.occupation || "",
+        preRetirementOccupation: client.preRetirementOccupation || "",
         employer: client.employer || "",
         companyId: client.companyId || "",
         american: client.american || false,
@@ -271,6 +274,7 @@ export const ClientFormDialog = ({
       if (formState.zipCode.trim()) data.zipCode = formState.zipCode.trim();
       if (formState.employment) data.employment = formState.employment;
       if (formState.occupation.trim()) data.occupation = formState.occupation.trim();
+      if (formState.preRetirementOccupation.trim()) data.preRetirementOccupation = formState.preRetirementOccupation.trim();
       if (formState.employer.trim()) data.employer = formState.employer.trim();
       if (formState.companyId.trim()) data.companyId = formState.companyId.trim();
       data.american = formState.american;
@@ -649,6 +653,21 @@ export const ClientFormDialog = ({
                     />
                   </div>
                 </div>
+
+                {formState.employment === "גמלאי" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2 space-y-2">
+                      <Label htmlFor="preRetirementOccupation">עיסוק לפני פרישה</Label>
+                      <Input
+                        id="preRetirementOccupation"
+                        value={formState.preRetirementOccupation}
+                        onChange={(e) => handleChange("preRetirementOccupation", e.target.value)}
+                        placeholder="הזן עיסוק לפני פרישה"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Row 8: Employer | Company ID */}
                 <div className="grid grid-cols-2 gap-4">

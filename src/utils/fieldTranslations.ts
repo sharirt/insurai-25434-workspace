@@ -29,7 +29,7 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   sharia: "שריעה",
   ashrai_veagach_ad25_menayot: "אשראי ואג״ח עד 25% מניות",
   clali_ad500m: "כללי עד 500 מיליון",
-  okev_madadim_ad25_menayot: "עוקב מדדים עד 25% מניות",
+  okev_madadim_ad25_menayot: "עוקב מדדים אג״ח עד 25% מניות",
   ad25_menayot: "עד 25% מניות",
   agach_sachir_ad25_menayot: "אג״ח סחיר עד 25% מניות",
   nihul_ishi: "ניהול אישי",

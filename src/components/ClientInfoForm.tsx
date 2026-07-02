@@ -308,6 +308,22 @@ export const ClientInfoForm = ({
         />
       </div>
 
+      {/* עיסוק לפני פרישה */}
+      {formData.employment === "גמלאי" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="preRetirementOccupation" className="text-sm font-medium">
+            עיסוק לפני פרישה
+          </Label>
+          <Input
+            id="preRetirementOccupation"
+            value={formData.preRetirementOccupation ?? ""}
+            onChange={handleInputChange("preRetirementOccupation")}
+            placeholder="עיסוק לפני פרישה"
+            dir="rtl"
+          />
+        </div>
+      )}
+
       {/* מעסיק */}
       <div className="space-y-1.5">
         <Label htmlFor="employer" className="text-sm font-medium">

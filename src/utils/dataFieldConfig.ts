@@ -35,6 +35,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "zipCode", label: "מיקוד" },
       { value: "employment", label: "תעסוקה" },
       { value: "occupation", label: "עיסוק" },
+      { value: "preRetirementOccupation", label: "עיסוק לפני פרישה" },
       { value: "employer", label: "מעסיק" },
       { value: "companyId", label: "ח.פ / ע.מ" },
       { value: "american", label: "אזרח אמריקאי" },
