@@ -15,7 +15,7 @@ import {
   parseDataFieldExpression,
   getTrackOptions,
 } from "@/utils/dataFieldConfig";
-import { Check, Calendar, Code } from "lucide-react";
+import { Check, Calendar, Code, Search } from "lucide-react";
 
 type ValueMode = "empty" | "text" | "dataField" | "checkmark" | "todayDate" | "expression";
 
@@ -91,6 +91,11 @@ export const ValueModeSelector = ({
     if (initialMode === "dataField") return parseTableField(value).beneficiaryIndex;
     return "";
   });
+
+  const [fieldSearch, setFieldSearch] = useState("");
+  const [trackSearch, setTrackSearch] = useState("");
+  const [fieldDropdownOpen, setFieldDropdownOpen] = useState(false);
+  const [trackDropdownOpen, setTrackDropdownOpen] = useState(false);
 
   const availableFields = useMemo(() => {
     if (!selectedTable) return [];
@@ -172,6 +177,8 @@ export const ValueModeSelector = ({
       setSelectedField("");
       setSelectedTrackKey("");
       setSelectedBeneficiaryIndex("");
+      setFieldSearch("");
+      setTrackSearch("");
       onChange("");
     },
     [onChange]
@@ -181,6 +188,7 @@ export const ValueModeSelector = ({
     (newField: string) => {
       setSelectedField(newField);
       setSelectedTrackKey("");
+      setTrackSearch("");
       if (selectedTable === "requests" && newField === "tracks") {
         onChange("");
         return;
@@ -338,16 +346,44 @@ export const ValueModeSelector = ({
             value={selectedField}
             onValueChange={handleFieldChange}
             disabled={!selectedTable || (selectedTable === "beneficiaries" && selectedBeneficiaryIndex === "")}
+            open={fieldDropdownOpen}
+            onOpenChange={(open) => {
+              setFieldDropdownOpen(open);
+              if (!open) setFieldSearch("");
+            }}
           >
             <SelectTrigger className="text-sm">
               <SelectValue placeholder="בחר שדה" />
             </SelectTrigger>
             <SelectContent>
-              {availableFields.map((field) => (
-                <SelectItem key={field.value} value={field.value}>
-                  {field.label}
-                </SelectItem>
-              ))}
+              <div
+                className="flex items-center gap-2 px-2 pb-2 border-b border-border"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Search className="shrink-0 text-muted-foreground" />
+                <Input
+                  value={fieldSearch}
+                  onChange={(e) => setFieldSearch(e.target.value)}
+                  placeholder="חפש שדה..."
+                  className="h-8 text-sm border-0 shadow-none focus-visible:ring-0"
+                  onKeyDown={(e) => e.stopPropagation()}
+                />
+              </div>
+              {availableFields
+                .filter((field) =>
+                  field.label?.toLowerCase().includes(fieldSearch.toLowerCase())
+                )
+                .map((field) => (
+                  <SelectItem key={field.value} value={field.value}>
+                    {field.label}
+                  </SelectItem>
+                ))}
+              {availableFields.filter((field) =>
+                field.label?.toLowerCase().includes(fieldSearch.toLowerCase())
+              ).length === 0 && (
+                <p className="py-2 px-3 text-sm text-muted-foreground text-center">לא נמצאו שדות</p>
+              )}
             </SelectContent>
           </Select>
 
@@ -355,16 +391,44 @@ export const ValueModeSelector = ({
             <Select
               value={selectedTrackKey}
               onValueChange={handleTrackKeyChange}
+              open={trackDropdownOpen}
+              onOpenChange={(open) => {
+                setTrackDropdownOpen(open);
+                if (!open) setTrackSearch("");
+              }}
             >
               <SelectTrigger className="text-sm">
                 <SelectValue placeholder="בחר מסלול" />
               </SelectTrigger>
               <SelectContent>
-                {trackOptions.map((track) => (
-                  <SelectItem key={track.value} value={track.value}>
-                    {track.label}
-                  </SelectItem>
-                ))}
+                <div
+                  className="flex items-center gap-2 px-2 pb-2 border-b border-border"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Search className="shrink-0 text-muted-foreground" />
+                  <Input
+                    value={trackSearch}
+                    onChange={(e) => setTrackSearch(e.target.value)}
+                    placeholder="חפש מסלול..."
+                    className="h-8 text-sm border-0 shadow-none focus-visible:ring-0"
+                    onKeyDown={(e) => e.stopPropagation()}
+                  />
+                </div>
+                {trackOptions
+                  .filter((track) =>
+                    track.label?.toLowerCase().includes(trackSearch.toLowerCase())
+                  )
+                  .map((track) => (
+                    <SelectItem key={track.value} value={track.value}>
+                      {track.label}
+                    </SelectItem>
+                  ))}
+                {trackOptions.filter((track) =>
+                  track.label?.toLowerCase().includes(trackSearch.toLowerCase())
+                ).length === 0 && (
+                  <p className="py-2 px-3 text-sm text-muted-foreground text-center">לא נמצאו מסלולים</p>
+                )}
               </SelectContent>
             </Select>
           )}
