@@ -80,6 +80,9 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "branchNumber", label: "מספר סניף" },
       { value: "accountNumber", label: "מספר חשבון" },
       { value: "beneficiariesDivideFree", label: "חלוקה בין מוטבים - אחר" },
+      { value: "businessName", label: "שם העסק" },
+      { value: "businessAddress", label: "מען העסק" },
+      { value: "businessYearlyRevenueCycle", label: "מחזור הכנסות שנתי" },
     ],
   },
   {

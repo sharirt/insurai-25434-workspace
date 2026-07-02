@@ -68,6 +68,9 @@ interface ClientFormState {
   beneficiariesDivide: string;
   lastEmployerName: string;
   lastOccupation: string;
+  businessName: string;
+  businessAddress: string;
+  businessYearlyRevenueCycle: number;
   beneficiariesDivideFree: string;
   taxCountry: string;
   bankName: string;
@@ -123,6 +126,9 @@ const INITIAL_FORM_STATE: ClientFormState = {
   beneficiariesDivide: "",
   lastEmployerName: "",
   lastOccupation: "",
+  businessName: "",
+  businessAddress: "",
+  businessYearlyRevenueCycle: 0,
   beneficiariesDivideFree: "",
   taxCountry: "",
   bankName: "",
@@ -206,6 +212,9 @@ export const ClientFormDialog = ({
         smoker: client.smoker || false,
         lastEmployerName: client.lastEmployerName || "",
         lastOccupation: client.lastOccupation || "",
+        businessName: client.businessName || "",
+        businessAddress: client.businessAddress || "",
+        businessYearlyRevenueCycle: client.businessYearlyRevenueCycle || 0,
         beneficiariesDivide: client.beneficiariesDivide || "",
         beneficiariesDivideFree: client.beneficiariesDivideFree || "",
         taxCountry: client.taxCountry || "",
@@ -314,6 +323,9 @@ export const ClientFormDialog = ({
       data.smoker = formState.smoker;
       if (formState.lastEmployerName.trim()) data.lastEmployerName = formState.lastEmployerName.trim();
       if (formState.lastOccupation.trim()) data.lastOccupation = formState.lastOccupation.trim();
+      if (formState.businessName.trim()) data.businessName = formState.businessName.trim();
+      if (formState.businessAddress.trim()) data.businessAddress = formState.businessAddress.trim();
+      if (formState.businessYearlyRevenueCycle) data.businessYearlyRevenueCycle = formState.businessYearlyRevenueCycle;
       if (formState.beneficiariesDivide) data.beneficiariesDivide = formState.beneficiariesDivide;
       if (formState.beneficiariesDivideFree.trim()) data.beneficiariesDivideFree = formState.beneficiariesDivideFree.trim();
       if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
@@ -728,6 +740,42 @@ export const ClientFormDialog = ({
                         value={formState.lastOccupation}
                         onChange={(e) => handleChange("lastOccupation", e.target.value)}
                         placeholder="הזן עיסוק אחרון"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {formState.employment === "עצמאי" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="businessName">שם העסק</Label>
+                      <Input
+                        id="businessName"
+                        value={formState.businessName}
+                        onChange={(e) => handleChange("businessName", e.target.value)}
+                        placeholder="הזן שם העסק"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="businessAddress">מען העסק</Label>
+                      <Input
+                        id="businessAddress"
+                        value={formState.businessAddress}
+                        onChange={(e) => handleChange("businessAddress", e.target.value)}
+                        placeholder="הזן מען העסק"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="businessYearlyRevenueCycle">מחזור הכנסות שנתי</Label>
+                      <Input
+                        id="businessYearlyRevenueCycle"
+                        type="number"
+                        value={formState.businessYearlyRevenueCycle || ""}
+                        onChange={(e) => setFormState(prev => ({ ...prev, businessYearlyRevenueCycle: e.target.value ? Number(e.target.value) : 0 }))}
+                        placeholder="הזן מחזור הכנסות שנתי"
                         disabled={isLoading}
                       />
                     </div>

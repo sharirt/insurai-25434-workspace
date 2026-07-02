@@ -356,12 +356,18 @@ export interface IClientsEntity {
   beneficiariesDivide?: ClientsEntityBeneficiariesDivideEnum;
   /** Free text field for describing the beneficiary division when 'אחר' is selected in beneficiariesDivide (חלוקה בין מוטבים - אחר)  */
   beneficiariesDivideFree?: string;
+  /** שם העסק של הלקוח העצמאי. מוצג ועריך רק כאשר תעסוקת הלקוח היא עצמאי.  */
+  businessName?: string;
   /** העיסוק האחרון של הלקוח. מוצג ורלוונטי רק כאשר סטטוס התעסוקה הוא 'לא עובד/מובטל'.  */
   lastOccupation?: string;
   /** Client's occupation before retirement (עיסוק לפני פרישה). Only relevant when the client's employment status is גמלאי (retiree).  */
   preRetirementOccupation?: string;
   /** שם המעסיק האחרון של הלקוח. מוצג ורלוונטי רק כאשר סטטוס התעסוקה הוא 'לא עובד/מובטל'.  */
   lastEmployerName?: string;
+  /** מען העסק של הלקוח העצמאי. מוצג ועריך רק כאשר תעסוקת הלקוח היא עצמאי.  */
+  businessAddress?: string;
+  /** מחזור הכנסות שנתי של העסק של הלקוח העצמאי. מוצג ועריך רק כאשר תעסוקת הלקוח היא עצמאי.  */
+  businessYearlyRevenueCycle?: number;
   /** Stores the last saved portfolio risk analysis result for this client, including riskScore, riskLabel, summary, strengths, improvements, and breakdown. Saved when the agent clicks 'שמור ניתוח' on the PortfolioRiskAnalysis page.  */
   riskAnalysis?: IClientsEntityRiskAnalysisObject;
 }

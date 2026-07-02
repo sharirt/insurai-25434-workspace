@@ -247,6 +247,15 @@ export const ClientInfoCard = ({
                 {client.employment === "לא עובד/מובטל" && client.lastOccupation && (
                   <InfoField label="עיסוק אחרון" value={client.lastOccupation} />
                 )}
+                {client.employment === "עצמאי" && client.businessName && (
+                  <InfoField label="שם העסק" value={client.businessName} />
+                )}
+                {client.employment === "עצמאי" && client.businessAddress && (
+                  <InfoField label="מען העסק" value={client.businessAddress} />
+                )}
+                {client.employment === "עצמאי" && !!client.businessYearlyRevenueCycle && (
+                  <InfoField label="מחזור הכנסות שנתי" value={formatCurrency(client.businessYearlyRevenueCycle)} />
+                )}
               </div>
             </div>
 

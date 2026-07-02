@@ -356,6 +356,55 @@ export const ClientInfoForm = ({
         </div>
       )}
 
+      {/* שם העסק */}
+      {formData.employment === "עצמאי" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="businessName" className="text-sm font-medium">
+            שם העסק
+          </Label>
+          <Input
+            id="businessName"
+            value={formData.businessName ?? ""}
+            onChange={handleInputChange("businessName")}
+            placeholder="שם העסק"
+            dir="rtl"
+          />
+        </div>
+      )}
+
+      {/* מען העסק */}
+      {formData.employment === "עצמאי" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="businessAddress" className="text-sm font-medium">
+            מען העסק
+          </Label>
+          <Input
+            id="businessAddress"
+            value={formData.businessAddress ?? ""}
+            onChange={handleInputChange("businessAddress")}
+            placeholder="מען העסק"
+            dir="rtl"
+          />
+        </div>
+      )}
+
+      {/* מחזור הכנסות שנתי */}
+      {formData.employment === "עצמאי" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="businessYearlyRevenueCycle" className="text-sm font-medium">
+            מחזור הכנסות שנתי
+          </Label>
+          <Input
+            id="businessYearlyRevenueCycle"
+            type="number"
+            value={formData.businessYearlyRevenueCycle ?? ""}
+            onChange={(e) => onFieldChange("businessYearlyRevenueCycle" as keyof IClientsEntity, e.target.value ? Number(e.target.value) as unknown as string : "" as unknown as string)}
+            placeholder="מחזור הכנסות שנתי"
+            dir="rtl"
+          />
+        </div>
+      )}
+
       {/* מעסיק */}
       <div className="space-y-1.5">
         <Label htmlFor="employer" className="text-sm font-medium">
