@@ -324,6 +324,38 @@ export const ClientInfoForm = ({
         </div>
       )}
 
+      {/* שם מעסיק אחרון */}
+      {formData.employment === "לא עובד/מובטל" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="lastEmployerName" className="text-sm font-medium">
+            שם מעסיק אחרון
+          </Label>
+          <Input
+            id="lastEmployerName"
+            value={formData.lastEmployerName ?? ""}
+            onChange={handleInputChange("lastEmployerName")}
+            placeholder="שם מעסיק אחרון"
+            dir="rtl"
+          />
+        </div>
+      )}
+
+      {/* עיסוק אחרון */}
+      {formData.employment === "לא עובד/מובטל" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="lastOccupation" className="text-sm font-medium">
+            עיסוק אחרון
+          </Label>
+          <Input
+            id="lastOccupation"
+            value={formData.lastOccupation ?? ""}
+            onChange={handleInputChange("lastOccupation")}
+            placeholder="עיסוק אחרון"
+            dir="rtl"
+          />
+        </div>
+      )}
+
       {/* מעסיק */}
       <div className="space-y-1.5">
         <Label htmlFor="employer" className="text-sm font-medium">

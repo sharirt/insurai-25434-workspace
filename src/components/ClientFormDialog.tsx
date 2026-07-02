@@ -66,6 +66,8 @@ interface ClientFormState {
   bornInUSA: boolean;
   smoker: boolean;
   beneficiariesDivide: string;
+  lastEmployerName: string;
+  lastOccupation: string;
   beneficiariesDivideFree: string;
   taxCountry: string;
   bankName: string;
@@ -119,6 +121,8 @@ const INITIAL_FORM_STATE: ClientFormState = {
   bornInUSA: false,
   smoker: false,
   beneficiariesDivide: "",
+  lastEmployerName: "",
+  lastOccupation: "",
   beneficiariesDivideFree: "",
   taxCountry: "",
   bankName: "",
@@ -200,6 +204,8 @@ export const ClientFormDialog = ({
         englishStreet: client.englishStreet || "",
         bornInUSA: client.bornInUSA || false,
         smoker: client.smoker || false,
+        lastEmployerName: client.lastEmployerName || "",
+        lastOccupation: client.lastOccupation || "",
         beneficiariesDivide: client.beneficiariesDivide || "",
         beneficiariesDivideFree: client.beneficiariesDivideFree || "",
         taxCountry: client.taxCountry || "",
@@ -306,6 +312,8 @@ export const ClientFormDialog = ({
       if (formState.englishStreet.trim()) data.englishStreet = formState.englishStreet.trim();
       data.bornInUSA = formState.bornInUSA;
       data.smoker = formState.smoker;
+      if (formState.lastEmployerName.trim()) data.lastEmployerName = formState.lastEmployerName.trim();
+      if (formState.lastOccupation.trim()) data.lastOccupation = formState.lastOccupation.trim();
       if (formState.beneficiariesDivide) data.beneficiariesDivide = formState.beneficiariesDivide;
       if (formState.beneficiariesDivideFree.trim()) data.beneficiariesDivideFree = formState.beneficiariesDivideFree.trim();
       if (formState.taxCountry.trim()) data.taxCountry = formState.taxCountry.trim();
@@ -700,6 +708,31 @@ export const ClientFormDialog = ({
                     />
                   </div>
                 </div>
+
+                {formState.employment === "לא עובד/מובטל" && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="lastEmployerName">שם מעסיק אחרון</Label>
+                      <Input
+                        id="lastEmployerName"
+                        value={formState.lastEmployerName}
+                        onChange={(e) => handleChange("lastEmployerName", e.target.value)}
+                        placeholder="הזן שם מעסיק אחרון"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastOccupation">עיסוק אחרון</Label>
+                      <Input
+                        id="lastOccupation"
+                        value={formState.lastOccupation}
+                        onChange={(e) => handleChange("lastOccupation", e.target.value)}
+                        placeholder="הזן עיסוק אחרון"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Parents Info Section */}

@@ -241,6 +241,12 @@ export const ClientInfoCard = ({
                 {client.employment === "גמלאי" && client.preRetirementOccupation && (
                   <InfoField label="עיסוק לפני פרישה" value={client.preRetirementOccupation} />
                 )}
+                {client.employment === "לא עובד/מובטל" && client.lastEmployerName && (
+                  <InfoField label="שם מעסיק אחרון" value={client.lastEmployerName} />
+                )}
+                {client.employment === "לא עובד/מובטל" && client.lastOccupation && (
+                  <InfoField label="עיסוק אחרון" value={client.lastOccupation} />
+                )}
               </div>
             </div>
 

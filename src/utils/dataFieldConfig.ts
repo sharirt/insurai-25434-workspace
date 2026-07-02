@@ -38,6 +38,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "preRetirementOccupation", label: "עיסוק לפני פרישה" },
       { value: "employer", label: "מעסיק" },
       { value: "companyId", label: "ח.פ / ע.מ" },
+      { value: "lastEmployerName", label: "שם מעסיק אחרון" },
+      { value: "lastOccupation", label: "עיסוק אחרון" },
       { value: "american", label: "אזרח אמריקאי" },
       { value: "americanForTax", label: "תושב ארה\"ב לצורכי מס" },
       { value: "tinNumber", label: "מספר TIN" },
