@@ -846,12 +846,12 @@ export const ClientFormDialog = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="taxCountry">מדינת מס</Label>
+                  <Label htmlFor="taxCountry">מדינת מס באנגלית</Label>
                   <Input
                     id="taxCountry"
                     value={formState.taxCountry}
                     onChange={(e) => handleChange("taxCountry", e.target.value)}
-                    placeholder="הזן מדינת מס"
+                    placeholder="הזן מדינת מס באנגלית"
                     disabled={isLoading}
                   />
                 </div>

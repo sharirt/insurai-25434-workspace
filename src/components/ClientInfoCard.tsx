@@ -338,7 +338,7 @@ export const ClientInfoCard = ({
                   value={client.americanForTax ? "כן" : "לא"}
                 />
                 {client.taxCountry && (
-                  <InfoField label="מדינת מס" value={client.taxCountry} />
+                  <InfoField label="מדינת מס באנגלית" value={client.taxCountry} />
                 )}
                 {client.smoker != null && (
                   <InfoField

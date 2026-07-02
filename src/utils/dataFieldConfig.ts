@@ -70,7 +70,7 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "englishStreetWithNumber", label: "רחוב באנגלית עם מספר" },
       { value: "englishFullAddress", label: "כתובת מלאה באנגלית" },
       { value: "bornInUSA", label: "יליד ארה״ב" },
-      { value: "taxCountry", label: "מדינת מס" },
+      { value: "taxCountry", label: "מדינת מס באנגלית" },
       { value: "bankName", label: "שם בנק" },
       { value: "bankCode", label: "קוד בנק" },
       { value: "branchNumber", label: "מספר סניף" },

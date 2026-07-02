@@ -492,13 +492,13 @@ export const ClientInfoForm = ({
       {/* מדינת מס */}
       <div className="space-y-1.5">
         <Label htmlFor="taxCountry" className="text-sm font-medium">
-          מדינת מס
+          מדינת מס באנגלית
         </Label>
         <Input
           id="taxCountry"
           value={formData.taxCountry ?? ""}
           onChange={handleInputChange("taxCountry")}
-          placeholder="מדינת מס"
+          placeholder="מדינת מס באנגלית"
           dir="rtl"
         />
       </div>
