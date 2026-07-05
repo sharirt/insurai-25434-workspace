@@ -43,6 +43,13 @@ export const FIELD_TRANSLATIONS: Record<string, string> = {
   bnei_50_ad_60: "בני 50 עד 60",
   bnei_60_umaala: "בני 60 ומעלה",
   tlui_gil: "מסלול השקעה תלוי גיל",
+  fidelity_clali: "FIDELITY כללי",
+  fidelity_menayot: "FIDELITY מניות",
+  blackrock_clali: "BLACKROCK כללי",
+  blackrock_menayot: "BLACKROCK מניות",
+  apollo_ashrai_veagach: "APOLLO אשראי ואג״ח",
+  migdal_okev_madad_sp: "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדד S&P 500",
+  migdal_okev_madadei_menayot: "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדדי מניות"
 };
 
 export const STATIC_TRACK_KEYS = Object.keys(FIELD_TRANSLATIONS);
