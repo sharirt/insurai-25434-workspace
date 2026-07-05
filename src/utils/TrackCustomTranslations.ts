@@ -946,6 +946,93 @@ const pensiaMashlimaProviders: ProvidersByName = {
 };
 
 // =============================================
+// פוליסות חיסכון providers
+// =============================================
+
+const polisotChisachonMenora: ProviderMap = {
+  "כללי": { customTranslation: "מנורה ביטוח כללי", trackCode: 18013 },
+  "כספי שקלי": { customTranslation: "מנורה ביטוח כספי (שקלי)**", trackCode: 41 },
+  "אשראי ואג״ח": { customTranslation: "מנורה ביטוח אשראי ואג״ח", trackCode: 42 },
+  "אג״ח ממשלות": { customTranslation: "מנורה ביטוח אג״ח ממשלתי", trackCode: 43 },
+  "אשראי ואג״ח עד 25% מניות": { customTranslation: "מנורה ביטוח אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 13029 },
+  "מניות": { customTranslation: "מנורה ביטוח מניות", trackCode: 44 },
+  "אג״ח ממשלתי סחיר": { customTranslation: "מנורה ביטוח אג״ח ממשלתי סחיר", trackCode: 180 },
+  "משולב סחיר": { customTranslation: "מנורה ביטוח משולב סחיר***", trackCode: 14313 },
+  "מניות סחיר": { customTranslation: "מנורה ביטוח מניות סחיר", trackCode: 101 },
+  "עוקב מדדי אג״ח": { customTranslation: "מנורה ביטוח עוקב מדדי אג״ח", trackCode: 14828 },
+  "עוקב מדדים גמיש": { customTranslation: "מנורה ביטוח עוקב מדדים גמיש", trackCode: 14314 },
+  "עוקב מדדי מניות": { customTranslation: "מנורה ביטוח עוקב מדדי מניות", trackCode: 14315 },
+  "עוקב מדד S&P500": { customTranslation: "מנורה ביטוח עוקב מדד S&P 500", trackCode: 14316 },
+  "הלכתי": { customTranslation: "מנורה ביטוח הלכה", trackCode: 184 },
+  "קיימות": { customTranslation: "מנורה ביטוח קיימות", trackCode: 14675 },
+};
+
+const polisotChisachonHarel: ProviderMap = {
+  "כללי": { customTranslation: "הראל מסלול כללי (ברירת מחדל)", trackCode: 1 },
+  "אשראי ואג״ח": { customTranslation: "הראל מסלול אשראי ואג״ח", trackCode: 3 },
+  "כספי שקלי": { customTranslation: "הראל מסלול כספי (שקלי)", trackCode: 7 },
+  "מניות": { customTranslation: "הראל מסלול מניות", trackCode: 6 },
+  "אג״ח סחיר": { customTranslation: "הראל מסלול אג״ח סחיר", trackCode: 33 },
+  "מניות סחיר": { customTranslation: "הראל מסלול מניות סחיר", trackCode: 34 },
+  "משולב סחיר": { customTranslation: "הראל מסלול משולב סחיר", trackCode: 28 },
+  "אג״ח סחיר עד 25% מניות": { customTranslation: "הראל מסלול סחיר - אג״ח עם מניות (עד 25% מניות)", trackCode: 35 },
+  "עוקב מדדים גמיש": { customTranslation: "הראל מסלול עוקב מדדים - גמיש", trackCode: 29 },
+  "עוקב מדדי אג״ח": { customTranslation: "הראל מסלול עוקב מדדי אג״ח", trackCode: 25 },
+  "עוקב מדדי מניות": { customTranslation: "הראל מסלול עוקב מדדי מניות", trackCode: 30 },
+  "עוקב מדדים אג״ח עד 25% מניות": { customTranslation: "הראל מסלול עוקב מדדים - אג״ח עם מניות (עד 25% מניות)", trackCode: 31 },
+  "עוקב מדד S&P500": { customTranslation: "הראל מסלול עוקב מדד S&P 500", trackCode: 23 },
+  "קיימות": { customTranslation: "הראל מסלול קיימות", trackCode: 27 },
+  "הלכתי": { customTranslation: "הראל מסלול הלכה", trackCode: 32 },
+  "FIDELITY כללי": { customTranslation: "הראל fidelity מסלול כללי", trackCode: 37 },
+  "FIDELITY מניות": { customTranslation: "הראל fidelity מסלול מניות", trackCode: 36 },
+};
+
+const polisotChisachonHaphoenix: ProviderMap = {
+  "כללי": { customTranslation: "הפניקס כללי", trackCode: 50 },
+  "כספי שקלי": { customTranslation: "הפניקס כספי (שקלי)***", trackCode: 9592 },
+  "אשראי ואג״ח עד 25% מניות": { customTranslation: "הפניקס אשראי אג״ח עם מניות (עד 25% מניות)", trackCode: 9585 },
+  "אשראי ואג״ח": { customTranslation: "הפניקס אשראי ואג״ח", trackCode: 47 },
+  "מניות": { customTranslation: "הפניקס מניות", trackCode: 9579 },
+  "אג״ח סחיר": { customTranslation: "הפניקס אג״ח סחיר", trackCode: 12881 },
+  "מניות סחיר": { customTranslation: "הפניקס מניות סחיר", trackCode: 12882 },
+  "עוקב מדדים גמיש": { customTranslation: "הפניקס עוקב מדדים גמיש", trackCode: 12092 },
+  "עוקב מדדים אג״ח עד 25% מניות": { customTranslation: "הפניקס עוקב מדדים אג״ח עם מניות (עד 25% מניות)", trackCode: 15275 },
+  "עוקב מדד S&P500": { customTranslation: "הפניקס עוקב מדד S&P 500", trackCode: 9554 },
+  "עוקב מדדי אג״ח": { customTranslation: "הפניקס עוקב מדדי אג״ח", trackCode: 14916 },
+  "הלכתי": { customTranslation: "הפניקס הלכה", trackCode: 9586 },
+  "שריעה": { customTranslation: "הפניקס שריעה", trackCode: 15206 },
+  "עוקב מדדי מניות": { customTranslation: "הפניקס עוקב מדדי מניות", trackCode: 15530 },
+  "BLACKROCK כללי": { customTranslation: "BlackRock כללי", trackCode: 13644 },
+  "BLACKROCK מניות": { customTranslation: "BlackRock מניות", trackCode: 13645 },
+  "APOLLO אשראי ואג״ח": { customTranslation: "הפניקס Apollo אשראי ואג״ח", trackCode: 15412 },
+};
+
+const polisotChisachonMigdal: ProviderMap = {
+  "כללי": { customTranslation: "מגדל מסלול השקעה כללי", trackCode: 17013 },
+  "מניות": { customTranslation: "מגדל מסלול מניות", trackCode: 76 },
+  "כספי שקלי": { customTranslation: "מגדל מסלול כספי (שקלי)*", trackCode: 1955 },
+  "אשראי ואג״ח": { customTranslation: "מגדל מסלול אשראי ואג״ח", trackCode: 8659 },
+  "אשראי ואג״ח עד 25% מניות": { customTranslation: "מגדל מסלול אשראי ואג״ח עם מניות (עד 25% מניות)", trackCode: 14926 },
+  "אג״ח ממשלות": { customTranslation: "מגדל מסלול אג״ח ממשלות", trackCode: 68 },
+  "משולב סחיר": { customTranslation: "מגדל מסלול משולב סחיר", trackCode: 14239 },
+  "מניות סחיר": { customTranslation: "מגדל מסלול מניות סחיר", trackCode: 15463 },
+  "עוקב מדד S&P500": { customTranslation: "מגדל מסלול עוקב מדד S&P 500", trackCode: 13625 },
+  "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדד S&P 500": { customTranslation: "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדד S&P 500", trackCode: 15062 },
+  "עוקב מדדים גמיש": { customTranslation: "מגדל מסלול עוקב מדדים - גמיש", trackCode: 14240 },
+  "עוקב מדדי מניות": { customTranslation: "מגדל מסלול עוקב מדדי מניות", trackCode: 14925 },
+  "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדדי מניות": { customTranslation: "מגדל - מנוהל ע״י מגדל שוקי הון - מסלול עוקב מדדי מניות", trackCode: 15060 },
+  "עוקב מדדי אג״ח": { customTranslation: "מגדל מסלול עוקב מדד אג״ח", trackCode: 15464 },
+  "הלכתי": { customTranslation: "מגדל מסלול הלכה", trackCode: 185 },
+};
+
+const polisotChisachonProviders: ProvidersByName = {
+  "מנורה": polisotChisachonMenora,
+  "הראל": polisotChisachonHarel,
+  "הפניקס": polisotChisachonHaphoenix,
+  "מגדל": polisotChisachonMigdal,
+};
+
+// =============================================
 // Main translation map: request type -> providers
 // =============================================
 
@@ -970,6 +1057,10 @@ export const TRACK_CUSTOM_TRANSLATIONS: Record<string, Record<string, Record<str
   "פתיחת קרן פנסיה משלימה": pensiaMashlimaProviders,
   "ניוד קרן פנסיה משלימה": pensiaMashlimaProviders,
   "שינוי מסלול קרן פנסיה משלימה": pensiaMashlimaProviders,
+  // פוליסת חיסכון
+  "פתיחת פוליסת חיסכון": polisotChisachonProviders,
+  "ניוד פוליסת חיסכון": polisotChisachonProviders,
+  "שינוי מסלול פוליסת חיסכון": polisotChisachonProviders,
 };
 
 export const getCustomTrackLabel = (
