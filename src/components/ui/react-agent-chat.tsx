@@ -1385,7 +1385,7 @@ export function AgentChat({
       token={token}
       agentChatId={agentChatId}
       chatContext={finalChatContext}
-      noPersistency={noPersistency || !user.isAuthenticated}
+      noPersistency={noPersistency ?? !user.isAuthenticated}
       {...props}
     />
   );

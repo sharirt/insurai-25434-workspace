@@ -943,7 +943,7 @@ export function AgentChat({
         agentHarness={agentHarness}
         useAgentBlockDirectChat={useAgentBlockDirectChat}
         agentChatId={agentChatId}
-        noPersistency={noPersistency || !user.isAuthenticated}
+        noPersistency={noPersistency ?? !user.isAuthenticated}
         chatContext={finalChatContext}
         componentIds={componentIds}
         {...props}
