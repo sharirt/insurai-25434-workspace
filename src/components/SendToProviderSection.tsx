@@ -46,6 +46,7 @@ export const SendToProviderSection = ({
 }: SendToProviderSectionProps) => {
   const [open, setOpen] = useState(false);
   const [toEmail, setToEmail] = useState("");
+  const [ccEmail, setCcEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -112,6 +113,7 @@ export const SendToProviderSection = ({
     setBody(
       `שלום רב,\n\nמצורפים המסמכים החתומים עבור הבקשה: ${requestTypeName}${policyLine}\nלקוח: ${clientName}\nסוכן: ${agentName}\n\nהמסמכים מצורפים כקבצים.\n\nבברכה,\n${agentName}`
     );
+    setCcEmail(client?.assignedOfficeEmails?.[0] || "");
     setAdditionalFiles([]);
     setOpen(true);
   };
@@ -178,6 +180,7 @@ export const SendToProviderSection = ({
         subject,
         body,
         attachmentUrls: [...signedAttachments, ...additionalAttachments],
+        ccEmail: ccEmail.trim() || undefined,
         clientId: request?.clientId,
         requestId: request?.id,
       });
@@ -207,6 +210,7 @@ export const SendToProviderSection = ({
         onOpenChange={(val) => {
           if (!val) {
             setOpen(false);
+            setCcEmail("");
             setAdditionalFiles([]);
           }
         }}
@@ -236,6 +240,17 @@ export const SendToProviderSection = ({
               {emailError && (
                 <p className="text-xs text-destructive">{emailError}</p>
               )}
+            </div>
+
+            {/* CC */}
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs text-muted-foreground">העתק (CC)</Label>
+              <Input
+                type="email"
+                placeholder="כתובת אימייל להעתק"
+                value={ccEmail}
+                onChange={(e) => setCcEmail(e.target.value)}
+              />
             </div>
 
             {/* Subject */}
@@ -343,7 +358,7 @@ export const SendToProviderSection = ({
           <Separator />
 
           <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => { setOpen(false); setAdditionalFiles([]); }}>
+            <Button variant="outline" onClick={() => { setOpen(false); setCcEmail(""); setAdditionalFiles([]); }}>
               ביטול
             </Button>
             <Button onClick={handleSend} disabled={isLoading || hasUploadingFiles}>

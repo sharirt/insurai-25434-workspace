@@ -2564,7 +2564,9 @@ export interface ISendCustomProviderEmailActionInput {
   body: string;
   /** The email subject line  */
   subject: string;
-  /** Optional client ID (kept for backward compatibility, no longer used for CC)  */
+  /** Optional CC email address to carbon copy on the email  */
+  ccEmail?: string;
+  /** Optional client ID (kept for backward compatibility)  */
   clientId?: string;
   /** The ID of the request to update status to 'נשלח ליצרן' after sending  */
   requestId?: string;
@@ -2720,7 +2722,7 @@ export interface ISendCustomProviderEmailActionOutput {
 
 /**
  * SendCustomProviderEmailAction
- * Sends a fully customizable email to a provider/יצרן with custom subject, body, and signed document attachments as real file attachments. After sending, updates the request status to 'נשלח ליצרן'. Used when the agent wants to send signed documents to a provider with a custom message.
+ * Sends a fully customizable email to a provider/יצרן with custom subject, body, and signed document attachments as real file attachments. Supports an optional CC email address. After sending, updates the request status to 'נשלח ליצרן'. Used when the agent wants to send signed documents to a provider with a custom message.
  */
 export const SendCustomProviderEmailAction = {
   actionBlockId: "69db99b27d23f0bc9a2954ab",
