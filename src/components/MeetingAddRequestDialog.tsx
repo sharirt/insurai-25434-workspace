@@ -216,7 +216,10 @@ export const MeetingAddRequestDialog = ({
   }, 0);
 
   const TRACKS_SUM_EPSILON = 0.01;
-  const isTracksSumValid = Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
+  const isPoaB1 = selectedRequestTypeName === "ייפוי כוח - ב1";
+  const isTracksSumValid = isPoaB1
+    ? (tracksSum < TRACKS_SUM_EPSILON || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON)
+    : Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON;
 
   const isPartialAmountValid =
     isTotalTransfer ||
