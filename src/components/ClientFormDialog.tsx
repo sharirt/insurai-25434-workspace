@@ -1,3 +1,12 @@
+function normalizeIsraeliPhone(raw: string): string {
+  const cleaned = raw.replace(/[\s\-\.\(\)]/g, '');
+  if (!cleaned) return '';
+  if (cleaned.startsWith('+972')) return cleaned;
+  if (cleaned.startsWith('972')) return '+' + cleaned;
+  if (cleaned.startsWith('0')) return '+972' + cleaned.slice(1);
+  return cleaned;
+}
+
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -289,7 +298,9 @@ export const ClientFormDialog = ({
       if (formState.national_id.trim()) data.national_id = formState.national_id.trim();
       if (formState.idIssueDate) data.idIssueDate = formState.idIssueDate;
       if (formState.dateOfBirth) data.dateOfBirth = formState.dateOfBirth;
-      if (formState.phone_number.trim()) data.phone_number = formState.phone_number.trim();
+      if (formState.phone_number.trim()) {
+        data.phone_number = normalizeIsraeliPhone(formState.phone_number);
+      }
       if (formState.email.trim()) data.email = formState.email.trim();
       if (formState.cityOfResidence.trim()) data.cityOfResidence = formState.cityOfResidence.trim();
       if (formState.address.trim()) data.address = formState.address.trim();
@@ -544,6 +555,7 @@ export const ClientFormDialog = ({
                       placeholder="הזן מספר טלפון"
                       disabled={isLoading}
                     />
+                    <p className="text-xs text-muted-foreground">פורמט: 050-1234567 או +972501234567</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">מייל</Label>
@@ -650,7 +662,7 @@ export const ClientFormDialog = ({
                 {/* Row 7: Employment | Occupation */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>תעסוקה</Label>
+                    <Label>סטטוס תעסוקתי</Label>
                     <Select
                       value={formState.employment}
                       onValueChange={(value) => handleChange("employment", value)}
@@ -675,7 +687,7 @@ export const ClientFormDialog = ({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="occupation">עיסוק</Label>
+                    <Label htmlFor="occupation">פירוט עיסוק</Label>
                     <Input
                       id="occupation"
                       value={formState.occupation}
@@ -704,7 +716,7 @@ export const ClientFormDialog = ({
                 {/* Row 8: Employer | Company ID */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="employer">מעסיק</Label>
+                    <Label htmlFor="employer">שם מעסיק</Label>
                     <Input
                       id="employer"
                       value={formState.employer}

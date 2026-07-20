@@ -19,3 +19,32 @@
     filter: invert(1);
   }
 }
+
+/* RTL chat markdown — Streamdown resolves dir="auto" per block and stamps the resolved
+   dir on each block wrapper. Its own utility classes are physical (left-based), so flip
+   the two that matter inside RTL blocks, keep code LTR, and let table cells align with
+   the text direction.
+   The `li` in the list selector is deliberate, not a typo: Streamdown pads NESTED lists
+   only (its ol/ul carry `[li_&]:pl-6` — pl applies when the list sits inside an li);
+   top-level lists are `list-inside` with no padding. This rule mirrors that exact
+   scoping to the right side, so top-level RTL lists must stay unpadded like LTR ones. */
+[dir='rtl']
+  li
+  :is([data-streamdown='ordered-list'], [data-streamdown='unordered-list']) {
+  padding-left: 0;
+  padding-right: 1.5rem;
+}
+[dir='rtl'] [data-streamdown='blockquote'] {
+  border-left-width: 0;
+  border-right-width: 4px;
+  padding-left: 0;
+  padding-right: 1rem;
+}
+[dir='rtl']
+  :is([data-streamdown='table-header-cell'], [data-streamdown='table-cell']) {
+  text-align: right;
+}
+[dir='rtl'] :is(pre, [data-streamdown='code-block']) {
+  direction: ltr;
+  text-align: left;
+}

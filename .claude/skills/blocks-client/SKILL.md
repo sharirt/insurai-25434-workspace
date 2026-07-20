@@ -1,6 +1,6 @@
 ---
 name: blocks-client
-description: All data access and platform interaction in this project — entity CRUD (fetch, create, update, delete), executing backend actions, file uploads, current user info, page navigation, and AI chat. Load this skill any time the task involves reading or writing data, calling actions, handling user state, or navigating between pages. If the task touches data at all, this skill is needed.
+description: All data access and platform interaction in this project — entity CRUD (fetch, create, update, delete), executing backend actions, file uploads, current user info, page navigation, AI chat, and app agent identity (useAgent for the agent's title, job title, and photos). Load this skill any time the task involves reading or writing data, calling actions, handling user state, navigating between pages, or showing an app agent in the UI. If the task touches data at all, this skill is needed.
 user-invocable: false
 ---
 
@@ -15,7 +15,7 @@ Use this skill to interact with the Blocks platform - entity CRUD operations, ac
 - User needs file upload functionality
 - User needs to access current user information
 - User needs page navigation
-- User needs to reference app agents
+- UI shows an app agent (profile card, chat header, team list) — read identity via `useAgent`, never invent it
 - User needs AI chat interface
 - Any interaction with the Blocks platform
 
@@ -449,11 +449,13 @@ const isLoginPage = location.pathname === getPageUrl(loginPageConfig);
 
 ## Agents
 
-Agents are app AI teammates created in the Logic section. Use `useAgent(GeneratedAgent)` when the UI needs an agent's generated identity or metadata.
+Agents are app AI teammates created in the Logic section. Use `useAgent(GeneratedAgent)` when the UI needs an agent's identity.
 
-### useAgent - Read Agent Metadata
+### useAgent - Read Agent Identity
 
-Use for agent profile cards, chat headers, sidebars, assigned-agent UI, assistant/team lists, and any place that shows an agent name, title, avatar, or photo.
+Use for agent profile cards, chat headers, sidebars, assigned-agent UI, assistant/team lists, and any place that shows the agent's persona.
+
+Destructure the identity fields **directly off the object returned by `useAgent()`** — do NOT call `agent.getAgentProps()` (deprecated):
 
 ```tsx
 import { useAgent } from '@blocksdiy/blocks-client-sdk/reactSdk';
@@ -461,9 +463,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CustomerSupportAgent } from '@/product-types';
 
 function AgentProfileCard() {
-  const agent = useAgent(CustomerSupportAgent);
-  const { name, title, avatarUrl, photoUrl } = agent.getAgentProps();
-  const fallback = name
+  const { title, jobTitle, avatarUrl, photoUrl } =
+    useAgent(CustomerSupportAgent);
+  const displayName = title ?? jobTitle;
+  const fallback = displayName
     ?.split(' ')
     .map((word) => word[0])
     .join('')
@@ -476,8 +479,8 @@ function AgentProfileCard() {
         <AvatarFallback>{fallback}</AvatarFallback>
       </Avatar>
       <div>
-        <div className="font-medium">{name}</div>
-        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className="font-medium">{displayName}</div>
+        <div className="text-sm text-muted-foreground">{jobTitle}</div>
       </div>
     </div>
   );
@@ -488,10 +491,9 @@ function AgentProfileCard() {
 
 ```typescript
 type AgentConfig = {
-  id: string;
-  name?: string;
-  title?: string;
-  harness?: string;
+  id: string; // identifier — never display it
+  title?: string; // persona display name (e.g. "Leo")
+  jobTitle?: string; // role title (e.g. "Support Specialist")
   photoUrl?: string;
   avatarUrl?: string;
 };
@@ -499,18 +501,15 @@ type AgentConfig = {
 
 ### Return Values
 
-`useAgent()` returns an `Agent` instance. Call `agent.getAgentProps()` to read:
+Read the fields directly off `useAgent()`:
 
-- `id`
-- `name`
-- `title`
-- `harness`
-- `photoUrl`
-- `avatarUrl`
-- `appId`
-- `token`
+- `title` — persona display name (e.g. "Leo"); unset on a brand-new agent, so fall back to `jobTitle`
+- `jobTitle` — role title (e.g. "Support Specialist")
+- `avatarUrl` / `photoUrl` — persona images
 
-Do not hardcode agent names, titles, avatars, or profile URLs when a generated agent exists. Import the generated agent constant from `@/product-types` and call `useAgent()`.
+These are the only display fields — there is no `name`, `harness`, `appId`, or `token`.
+
+Do not hardcode agent titles, job titles, avatars, or profile URLs when a generated agent exists. Import the generated agent constant from `@/product-types` and call `useAgent()`.
 
 Use `useAgentChat` and `<AgentChatSimple>` for the conversational UI. Use `useAgent` for the identity around that chat, such as headers, sidebars, and profile cards.
 
@@ -562,9 +561,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { CustomerSupportAgent } from '@/product-types';
 
 function ChatHeader() {
-  const agent = useAgent(CustomerSupportAgent);
-  const { name, title, avatarUrl, photoUrl } = agent.getAgentProps();
-  const initials = (name ?? 'A')
+  const { title, jobTitle, avatarUrl, photoUrl } =
+    useAgent(CustomerSupportAgent);
+  const displayName = title ?? jobTitle ?? 'Agent';
+  const initials = displayName
     .split(' ')
     .map((w) => w[0])
     .join('')
@@ -573,12 +573,12 @@ function ChatHeader() {
   return (
     <header className="flex items-center gap-3 px-4 py-3">
       <Avatar className="h-9 w-9">
-        <AvatarImage src={avatarUrl ?? photoUrl} alt={name} />
+        <AvatarImage src={avatarUrl ?? photoUrl} alt={displayName} />
         <AvatarFallback>{initials}</AvatarFallback>
       </Avatar>
       <div>
-        <div className="font-semibold">{name}</div>
-        <div className="text-sm text-muted-foreground">{title}</div>
+        <div className="font-semibold">{displayName}</div>
+        <div className="text-sm text-muted-foreground">{jobTitle}</div>
       </div>
     </header>
   );
@@ -607,25 +607,25 @@ Server-side filtered lists still update automatically after every write, but mem
 
 ## Quick Reference: All Hooks
 
-| Hook                  | Import               | Purpose                      |
-| --------------------- | -------------------- | ---------------------------- |
-| `useEntityGetAll`     | `reactSdk`           | Fetch multiple entities      |
-| `useEntityGetOne`     | `reactSdk`           | Fetch single entity          |
-| `useEntityCreate`     | `reactSdk`           | Create one entity            |
-| `useEntityCreateMany` | `reactSdk`           | Create multiple entities     |
-| `useEntityUpdate`     | `reactSdk`           | Update one entity            |
-| `useEntityDelete`     | `reactSdk`           | Delete one entity            |
-| `useEntityDeleteMany` | `reactSdk`           | Delete multiple entities     |
-| `useExecuteAction`    | `reactSdk`           | Execute backend action       |
-| `useFileUpload`       | `reactSdk`           | Upload files                 |
-| `useUser`             | `reactSdk`           | Get current user             |
-| `useGoogleLogin`      | `reactSdk`           | Google OAuth URL             |
-| `useSendLoginLink`    | `reactSdk`           | Send email login link        |
-| `useChangeUserRole`   | `reactSdk`           | Change user roles            |
-| `useThemeMode`        | `reactSdk`           | Dark/light/system mode       |
-| `useAgent`            | `reactSdk`           | Get generated agent metadata |
-| `useAgentChat`        | `reactSdk`           | AI chat instance             |
-| `getPageUrl`          | `@/lib/utils`        | Generate page URLs           |
-| `logOut`              | `@/lib/utils`        | Log out user                 |
-| `cn`                  | `@/lib/utils`        | Merge class names            |
-| `useIsMobile`         | `@/hooks/use-mobile` | Mobile detection             |
+| Hook                  | Import               | Purpose                                  |
+| --------------------- | -------------------- | ---------------------------------------- |
+| `useEntityGetAll`     | `reactSdk`           | Fetch multiple entities                  |
+| `useEntityGetOne`     | `reactSdk`           | Fetch single entity                      |
+| `useEntityCreate`     | `reactSdk`           | Create one entity                        |
+| `useEntityCreateMany` | `reactSdk`           | Create multiple entities                 |
+| `useEntityUpdate`     | `reactSdk`           | Update one entity                        |
+| `useEntityDelete`     | `reactSdk`           | Delete one entity                        |
+| `useEntityDeleteMany` | `reactSdk`           | Delete multiple entities                 |
+| `useExecuteAction`    | `reactSdk`           | Execute backend action                   |
+| `useFileUpload`       | `reactSdk`           | Upload files                             |
+| `useUser`             | `reactSdk`           | Get current user                         |
+| `useGoogleLogin`      | `reactSdk`           | Google OAuth URL                         |
+| `useSendLoginLink`    | `reactSdk`           | Send email login link                    |
+| `useChangeUserRole`   | `reactSdk`           | Change user roles                        |
+| `useThemeMode`        | `reactSdk`           | Dark/light/system mode                   |
+| `useAgent`            | `reactSdk`           | Agent identity (title, jobTitle, photos) |
+| `useAgentChat`        | `reactSdk`           | AI chat instance                         |
+| `getPageUrl`          | `@/lib/utils`        | Generate page URLs                       |
+| `logOut`              | `@/lib/utils`        | Log out user                             |
+| `cn`                  | `@/lib/utils`        | Merge class names                        |
+| `useIsMobile`         | `@/hooks/use-mobile` | Mobile detection                         |

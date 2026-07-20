@@ -16,7 +16,7 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.11.3(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.4.3)
+        version: 1.12.0(@types/react@19.2.14)(react@19.2.4)
       '@blocksdiy/react-common':
         specifier: latest
         version: 1.35.2(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)
@@ -488,8 +488,12 @@ packages:
     peerDependencies:
       react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.11.3':
-    resolution: {integrity: sha512-Xm8qFccQfB3b0HyuhirnWBSXuvHtoHcTEZJW+Ihmc7Rbg2aRe8EadZBA0fH+pEsFoA/IVm3JYnwjI0mikAlvSw==}
+  '@blocksdiy/blocks-client-api@1.5.0':
+    resolution: {integrity: sha512-vzsgP0682zZmjrQ0yXg4EUaspQ8Vd3JhkfdIV7PzMJtuYt4fzcBJOTa8k5qQv0wu+vPnNAsROxcsRLzIkoXitA==}
+    engines: {node: '>=24.11.0'}
+
+  '@blocksdiy/blocks-client-sdk@1.12.0':
+    resolution: {integrity: sha512-tDuaNpBiF/+Y5uXiU0h2uhfbcJBgG1H/vT8SpgYYa+mK2HIIGAMz4MVCMJoVu4ejCW51ZuVynMfJ8P+vT+wFFg==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -502,6 +506,10 @@ packages:
 
   '@blocksdiy/react-common@1.35.2':
     resolution: {integrity: sha512-yU/FQuLURAIPW1lOJCBr3k5XW/0X57DEozCHNex9u6ZhSl8UFCDiB2FatlL+Ikc5vAqlQV1pE6mpumuNkzUU2Q==}
+    engines: {node: '>=24.11.0'}
+
+  '@blocksdiy/react-common@1.5.2':
+    resolution: {integrity: sha512-+52x75xDlD4KZMkUzX+/Fxnz5v7l+rYTRApRen/rOXdu/dYQx5sq4y4Fdk9pqJb4kM9Zd4beHjwhw6BZdIz3JA==}
     engines: {node: '>=24.11.0'}
 
   '@braintree/sanitize-url@7.1.2':
@@ -3693,8 +3701,8 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
-  electron-to-chromium@1.5.392:
-    resolution: {integrity: sha512-1yQq3VQCZRwsnYc67Oc+1fge6Lwtn0hzi6zmEVkB61Zx21kTbwJAW4dFLadl5Rc1tKhG/kSpYXnfiAhu0f0a1g==}
+  electron-to-chromium@1.5.393:
+    resolution: {integrity: sha512-kiDJdIUawuEIcp9XoICKp1iTYDEbgguIPq526N1Q7jIQDeQ3CqoMx71025PI/7E48Ddtw2HuWsVjY7afEgNxmg==}
 
   embla-carousel-react@8.6.0:
     resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
@@ -5217,8 +5225,8 @@ packages:
     resolution: {integrity: sha512-gXah6aZrcUxjWg2zR2MwouP2eHlCBzdV4pygudehaKXSGW4v2AsRQUK+lwwXhii6KFZcunEnmSUoYp5CXibxtA==}
     engines: {node: '>= 0.4'}
 
-  obug@2.1.3:
-    resolution: {integrity: sha512-9miFgM2OFba7hB+pRgvtV84pYTBaoTHohvmIgiRt6dRIzbwEOIaNaP+dIlGs2fNFoB0SeISs0Jz5WFVRid6Xyg==}
+  obug@2.1.4:
+    resolution: {integrity: sha512-4a+OsYv9UktOJKE+l1A4OufDgdRF9PifWj+tJnHURo/P+WOxpG4GzUFL9qCalmWauao6ogiG+QvnCovwPoyAWA==}
     engines: {node: '>=12.20.0'}
 
   once@1.4.0:
@@ -5412,8 +5420,8 @@ packages:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.19:
-    resolution: {integrity: sha512-Mz8SaolMd8nB+G13WkORcxQKHZ/NE4xXevtkJHVuG+guo9/wYKlIMTKAqGdEmYOXR2ijPjTYNHssizdaVSUNdQ==}
+  postcss@8.5.20:
+    resolution: {integrity: sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==}
     engines: {node: ^10 || ^12 || >=14}
 
   prebuild-install@7.1.3:
@@ -6071,8 +6079,8 @@ packages:
   style-to-object@1.0.14:
     resolution: {integrity: sha512-LIN7rULI0jBscWQYaSswptyderlarFkjQ+t79nzty8tcIAceVomEVlLzH5VP4Cmsv6MtKhs7qaAiwlcp+Mgaxw==}
 
-  styled-components@6.4.3:
-    resolution: {integrity: sha512-wYXrhu+JmDjZ1Tv7O0OopGTfztbzun43Pjjhh2H+xc0h5A09dwpZ5FJbrifJDcL8g5TA9btpWOX2+iSRuJTExw==}
+  styled-components@6.4.4:
+    resolution: {integrity: sha512-tJk5CmKUPMDoTsZQ8m0hHInBk9HFKUPSusqmbBuefDX+yUbMBWea2Ob/wdXFyHW8XZqXkprJscysAdKeGWNqlA==}
     engines: {node: '>= 16'}
     peerDependencies:
       css-to-react-native: '>= 3.2.0'
@@ -6830,23 +6838,19 @@ snapshots:
       pusher-js: 8.4.0-rc2
       react: 19.2.4
 
-  '@blocksdiy/blocks-client-sdk@1.11.3(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.4.3)':
+  '@blocksdiy/blocks-client-api@1.5.0':
     dependencies:
-      '@blocksdiy/blocks-client-api': 1.20.0(react@19.2.4)
-      '@blocksdiy/react-common': 1.35.2(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)
+      lodash: 4.18.1
+      pusher-js: 8.4.0-rc2
+
+  '@blocksdiy/blocks-client-sdk@1.12.0(@types/react@19.2.14)(react@19.2.4)':
+    dependencies:
+      '@blocksdiy/blocks-client-api': 1.5.0
+      '@blocksdiy/react-common': 1.5.2(@types/react@19.2.14)
       '@tanstack/react-query': 5.101.2(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
-      - '@types/mdast'
       - '@types/react'
-      - '@types/react-dom'
-      - encoding
-      - graphql
-      - micromark
-      - micromark-util-types
-      - react-dom
-      - supports-color
-      - zod
 
   '@blocksdiy/eslint-plugin-auto-import@1.1.1(eslint@9.39.2(jiti@2.7.0))':
     dependencies:
@@ -6878,6 +6882,16 @@ snapshots:
       - react-dom
       - supports-color
       - zod
+
+  '@blocksdiy/react-common@1.5.2(@types/react@19.2.14)':
+    dependencies:
+      '@blocksdiy/blocks-client-api': 1.5.0
+      '@radix-ui/react-slot': 1.3.0(@types/react@19.2.14)(react@19.2.4)
+      '@vapi-ai/web': 2.6.1
+      penpal: 7.0.6
+      react: 19.2.4
+    transitivePeerDependencies:
+      - '@types/react'
 
   '@braintree/sanitize-url@7.1.2': {}
 
@@ -7021,7 +7035,7 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
       react-pdf: 9.2.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      styled-components: 6.4.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      styled-components: 6.4.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     transitivePeerDependencies:
       - '@types/react'
       - css-to-react-native
@@ -9698,7 +9712,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.10.43
       caniuse-lite: 1.0.30001806
-      electron-to-chromium: 1.5.392
+      electron-to-chromium: 1.5.393
       node-releases: 2.0.51
       update-browserslist-db: 1.2.3(browserslist@4.28.6)
 
@@ -10193,7 +10207,7 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
-  electron-to-chromium@1.5.392: {}
+  electron-to-chromium@1.5.393: {}
 
   embla-carousel-react@8.6.0(react@19.2.4):
     dependencies:
@@ -12162,7 +12176,7 @@ snapshots:
       define-properties: 1.2.1
       es-object-atoms: 1.1.2
 
-  obug@2.1.3: {}
+  obug@2.1.4: {}
 
   once@1.4.0:
     dependencies:
@@ -12359,7 +12373,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.19:
+  postcss@8.5.20:
     dependencies:
       nanoid: 3.3.16
       picocolors: 1.1.1
@@ -13288,7 +13302,7 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-components@6.4.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  styled-components@6.4.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@emotion/is-prop-valid': 1.4.0
       csstype: 3.2.3
@@ -13737,7 +13751,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.5
-      postcss: 8.5.19
+      postcss: 8.5.20
       rolldown: 1.0.3
       tinyglobby: 0.2.17
     optionalDependencies:
@@ -13759,7 +13773,7 @@ snapshots:
       es-module-lexer: 2.3.1
       expect-type: 1.4.0
       magic-string: 0.30.21
-      obug: 2.1.3
+      obug: 2.1.4
       pathe: 2.0.3
       picomatch: 4.0.5
       std-env: 4.2.0

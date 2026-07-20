@@ -3071,8 +3071,8 @@ export const TranscribeAudioWithWhisperAction = {
 export const NicoAgent = {
   id: "69db99a87d23f0bc9a294e93",
   name: "Nico",
-  title: "",
-  harness: undefined,
+  title: "Nico",
+  jobTitle: "",
   photoUrl:
     "https://res.cloudinary.com/blocksws/image/upload/Blocks/app-agents/Nico/Nico_image.png",
   avatarUrl:

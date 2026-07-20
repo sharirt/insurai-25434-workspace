@@ -633,6 +633,7 @@ function AgentChatMessageTextPart({
     <AgentChatMessagePart {...props}>
       <Streamdown
         mode={isStreaming ? 'streaming' : 'static'}
+        dir="auto"
         animated={{ animation: 'fadeIn' }}
         isAnimating={isStreaming}
         className={agentChatStreamdownVariants()}
@@ -1261,6 +1262,7 @@ export function AgentChatInput({
     <AgentChatPrimitive.AgentChatInput asChild>
       <Textarea
         placeholder={placeholder}
+        dir="auto"
         className={cn(agentChatInputVariants({ size: props.size }), className)}
         onSubmit={sendOnEnter ? undefined : onSubmit}
         {...props}

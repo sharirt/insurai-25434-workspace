@@ -938,6 +938,7 @@ function AgentChatStreamdown({
   return (
     <Streamdown
       mode={shouldUseStreamingMarkdown ? 'streaming' : 'static'}
+      dir="auto"
       animated={
         shouldUseStreamingMarkdown
           ? {
@@ -1506,6 +1507,7 @@ export function AgentChatInput({
       <Textarea
         placeholder={placeholder}
         rows={1}
+        dir="auto"
         className={cn(agentChatInputVariants({ size: props.size }), className)}
         onSubmit={sendOnEnter ? undefined : onSubmit}
         {...props}
