@@ -1,6 +1,9 @@
 import React from "react";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
+  useEntityGetAll,
+} from "@blocksdiy/blocks-client-sdk/reactSdk";
+import {
   Dialog,
   DialogContent,
   DialogFooter,
@@ -37,7 +40,8 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
+import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown, FileText } from "lucide-react";
+import { FormsEntity } from "@/product-types";
 
 interface MeetingAddRequestDialogProps {
   open: boolean;
@@ -119,6 +123,20 @@ export const MeetingAddRequestDialog = ({
   const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
   const [isPartialTransferField, setIsPartialTransferField] = useState(false);
   const [partialTransferAmount, setPartialTransferAmount] = useState<number | undefined>(undefined);
+  const [selectedFormId, setSelectedFormId] = useState("");
+  const [selectedFormTitle, setSelectedFormTitle] = useState("");
+  const [formPopoverOpen, setFormPopoverOpen] = useState(false);
+
+  const { data: allForms } = useEntityGetAll(FormsEntity);
+
+  const filteredForms = useMemo(() => {
+    if (!allForms || !selectedProviderId || !selectedRequestTypeId) return [];
+    return allForms.filter(
+      (f) =>
+        f.providers?.includes(selectedProviderId) &&
+        f.requests?.includes(selectedRequestTypeId)
+    );
+  }, [allForms, selectedProviderId, selectedRequestTypeId]);
 
   const selectedScheme = useMemo(
     () => requestSchemes?.find((rt) => rt.id === selectedRequestTypeId),
@@ -167,6 +185,9 @@ export const MeetingAddRequestDialog = ({
       setOneTimeTransferAmount(undefined);
       setIsPartialTransferField(false);
       setPartialTransferAmount(undefined);
+      setSelectedFormId("");
+      setSelectedFormTitle("");
+      setFormPopoverOpen(false);
     } else if (open && editingRequest) {
       setSelectedFundId(editingRequest.fundId ?? "");
       setSelectedRequestTypeId(editingRequest.requestTypeId ?? "");
@@ -185,6 +206,8 @@ export const MeetingAddRequestDialog = ({
       setOneTimeTransferAmount(editingRequest.oneTimeTransferAmount);
       setIsPartialTransferField(editingRequest.isPartialTransfer ?? false);
       setPartialTransferAmount(editingRequest.partialTransferAmount);
+      setSelectedFormId(editingRequest.selectedFormId ?? "");
+      setSelectedFormTitle(editingRequest.selectedFormTitle ?? "");
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -294,6 +317,8 @@ export const MeetingAddRequestDialog = ({
       partialTransferAmount: isPartialTransferField ? partialTransferAmount : undefined,
       sourceQuote: editingRequest?.sourceQuote,
       missingFields: updatedMissingFields,
+      selectedFormId: selectedFormId || undefined,
+      selectedFormTitle: selectedFormTitle || undefined,
     };
 
     onAdd(newRequest);
@@ -327,6 +352,8 @@ export const MeetingAddRequestDialog = ({
     oneTimeTransferAmount,
     isPartialTransferField,
     partialTransferAmount,
+    selectedFormId,
+    selectedFormTitle,
   ]);
 
   const onTrackFieldChange = useCallback(
@@ -1016,6 +1043,101 @@ export const MeetingAddRequestDialog = ({
                 )}
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Form Selector */}
+        <div className="px-10 pt-4">
+          <Separator className="mb-4" />
+          <div className="flex items-center gap-2 mb-2">
+            <FileText className="text-muted-foreground" style={{ width: 16, height: 16 }} />
+            <Label className="text-sm font-semibold text-foreground">טופס לעיבוד</Label>
+          </div>
+          {!selectedProviderId || !selectedRequestTypeId ? (
+            <Button variant="outline" disabled className="w-full justify-between font-normal h-10 text-muted-foreground">
+              בחר קודם יצרן וסוג בקשה
+            </Button>
+          ) : filteredForms.length === 0 ? (
+            <Button variant="outline" disabled className="w-full justify-between font-normal h-10 text-muted-foreground">
+              לא נמצאו טפסים מתאימים
+            </Button>
+          ) : (
+            <Popover open={formPopoverOpen} onOpenChange={setFormPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={formPopoverOpen}
+                  className={cn(
+                    "w-full justify-between font-normal h-10",
+                    !selectedFormId && "text-muted-foreground"
+                  )}
+                >
+                  <span className="truncate">
+                    {selectedFormId
+                      ? selectedFormTitle || "טופס ללא שם"
+                      : "בחר טופס (אופציונלי)"}
+                  </span>
+                  <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                <Command dir="rtl" filter={(value, search) => {
+                  if (value === "__none__") {
+                    return "ללא טופס".includes(search.toLowerCase()) ? 1 : 0;
+                  }
+                  const form = filteredForms.find((f) => f.id === value);
+                  if (!form) return 0;
+                  const label = (form.formTitleHebrew || form.formTitle || "").toLowerCase();
+                  return label.includes(search.toLowerCase()) ? 1 : 0;
+                }}>
+                  <CommandInput placeholder="חפש טופס..." className="text-right" dir="rtl" />
+                  <CommandList>
+                    <CommandEmpty>לא נמצאו תוצאות</CommandEmpty>
+                    <CommandGroup>
+                      <CommandItem
+                        value="__none__"
+                        onSelect={() => {
+                          setSelectedFormId("");
+                          setSelectedFormTitle("");
+                          setFormPopoverOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            !selectedFormId ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <span>ללא טופס</span>
+                      </CommandItem>
+                      {filteredForms.map((form) => {
+                        const title = form.formTitleHebrew || form.formTitle || "טופס ללא שם";
+                        return (
+                          <CommandItem
+                            key={form.id}
+                            value={form.id}
+                            onSelect={() => {
+                              setSelectedFormId(form.id);
+                              setSelectedFormTitle(title);
+                              setFormPopoverOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "h-4 w-4 shrink-0",
+                                selectedFormId === form.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span>{title}</span>
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           )}
         </div>
 

@@ -2722,7 +2722,7 @@ export interface ISendCustomProviderEmailActionOutput {
 
 /**
  * SendCustomProviderEmailAction
- * Sends a fully customizable email to a provider/יצרן with custom subject, body, and signed document attachments as real file attachments. Supports an optional CC email address. After sending, updates the request status to 'נשלח ליצרן'. Used when the agent wants to send signed documents to a provider with a custom message.
+ * Sends a fully customizable email to a provider/יצרן with custom subject, body, and signed document attachments as real file attachments. The CC address is placed in the CC header of the same email — one email, not two. After sending, updates the request status to 'נשלח ליצרן'.
  */
 export const SendCustomProviderEmailAction = {
   actionBlockId: "69db99b27d23f0bc9a2954ab",

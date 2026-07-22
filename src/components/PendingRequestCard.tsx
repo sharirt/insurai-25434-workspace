@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X, Pencil, Quote } from "lucide-react";
+import { X, Pencil, Quote, FileText } from "lucide-react";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import { getFieldLabel } from "@/utils/fieldTranslations";
 import { formatCurrency } from "@/utils/FormatUtils";
@@ -42,6 +42,12 @@ export const PendingRequestCard = ({
             </h4>
             <Badge variant="secondary">{request.providerName}</Badge>
           </div>
+          {request.selectedFormId && request.selectedFormTitle && (
+            <div className="flex items-center gap-1 mt-1">
+              <FileText className="text-muted-foreground" style={{ width: 14, height: 14 }} />
+              <span className="text-xs text-muted-foreground">{request.selectedFormTitle}</span>
+            </div>
+          )}
           {request.sourceQuote && (
             <div className="border-r-2 border-accent bg-muted/40 rounded px-2.5 py-1.5 mt-2">
               <div className="flex items-center gap-1 mb-0.5">

@@ -3,6 +3,7 @@ import {
   useEntityGetAll,
   useEntityCreate,
   useEntityUpdate,
+  useExecuteAction,
   useUser,
 } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import {
@@ -12,6 +13,7 @@ import {
   RequestsEntity,
   MeetingsEntity,
   FundsEntity,
+  ProcessRequestFormsAction,
 } from "@/product-types";
 import { toast } from "sonner";
 
@@ -48,6 +50,8 @@ export interface PendingRequest {
   partialTransferAmount?: number;
   sourceQuote?: string;
   missingFields?: Record<string, string>;
+  selectedFormId?: string;
+  selectedFormTitle?: string;
 }
 
 interface UseNewMeetingWizardProps {
@@ -139,6 +143,9 @@ export function useNewMeetingWizard({
   const { createFunction: createMeeting } = useEntityCreate(MeetingsEntity);
   const { createFunction: createRequest } = useEntityCreate(RequestsEntity);
   const { updateFunction: updateMeeting } = useEntityUpdate(MeetingsEntity);
+  const { updateFunction: updateRequest } = useEntityUpdate(RequestsEntity);
+  const { executeFunction: executeProcessForms } = useExecuteAction(ProcessRequestFormsAction);
+  const [formProcessingText, setFormProcessingText] = useState("");
 
   // Sorted data — spread into new arrays to avoid mutating SDK-returned (possibly frozen) arrays
   const sortedAgents = useMemo(
@@ -243,6 +250,8 @@ export function useNewMeetingWizard({
       // 2. Create each pending request
       const createdRequestIds: string[] = [];
 
+      const requestsWithForms: Array<{ requestId: string; pendingReq: PendingRequest }> = [];
+
       for (const req of pendingRequests) {
         const createdReq = await createRequest({
           data: {
@@ -272,6 +281,25 @@ export function useNewMeetingWizard({
           },
         });
         createdRequestIds.push(createdReq.id);
+
+        if (req.selectedFormId) {
+          requestsWithForms.push({ requestId: createdReq.id, pendingReq: req });
+        }
+      }
+
+      // Process forms for requests that have a selected form
+      if (requestsWithForms.length > 0) {
+        setFormProcessingText("מעבד טפסים...");
+        for (const { requestId, pendingReq } of requestsWithForms) {
+          await updateRequest({
+            id: requestId,
+            data: {
+              forms: [{ formId: pendingReq.selectedFormId, url: "" }],
+            },
+          });
+          await executeProcessForms({ requestId });
+        }
+        setFormProcessingText("");
       }
 
       // 3. Update meeting with request IDs if any requests were created
@@ -308,6 +336,8 @@ export function useNewMeetingWizard({
     createMeeting,
     createRequest,
     updateMeeting,
+    updateRequest,
+    executeProcessForms,
     onSuccess,
   ]);
 
@@ -343,5 +373,6 @@ export function useNewMeetingWizard({
     // Submit
     handleSubmit,
     isSubmitting,
+    formProcessingText,
   };
 }
