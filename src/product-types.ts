@@ -794,6 +794,8 @@ export interface IRequestsEntity {
   partialTransferAmount?: number;
   /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether the pitzuim (severance) should be handled separately in this request  */
+  pitzuimSeparate?: boolean;
 }
 
 export const RequestsEntity = {
@@ -1580,6 +1582,8 @@ export interface IAutoProcessNewRequestActionOutputAutoProcessNewRequestActionOu
   partialTransferAmount?: number;
   /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether the pitzuim (severance) should be handled separately in this request  */
+  pitzuimSeparate?: boolean;
 }
 
 /**
@@ -2383,6 +2387,8 @@ export interface IProcessRequestFormsActionOutputProcessRequestFormsActionOutput
   partialTransferAmount?: number;
   /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether the pitzuim (severance) should be handled separately in this request  */
+  pitzuimSeparate?: boolean;
 }
 
 /**
@@ -2710,6 +2716,8 @@ export interface ISendCustomProviderEmailActionOutputSendCustomProviderEmailActi
   partialTransferAmount?: number;
   /** סכום הפקדה חד פעמית - the amount for a one-time deposit transfer in the insurance request  */
   oneTimeTransferAmount?: number;
+  /** Indicates whether the pitzuim (severance) should be handled separately in this request  */
+  pitzuimSeparate?: boolean;
 }
 
 /**
