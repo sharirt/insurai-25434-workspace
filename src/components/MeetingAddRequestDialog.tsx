@@ -1062,7 +1062,7 @@ export const MeetingAddRequestDialog = ({
               {qualifying && pitzuimSeparate && (
                 <>
                   <Separator className="my-4" />
-                  <div className="rounded-lg p-4 flex flex-col gap-4" style={{ background: "hsl(45 100% 96%)" }}>
+                  <div className="rounded-lg p-4 flex flex-col gap-4" style={{ background: "hsl(30 100% 94%)" }}>
                     <div className="flex items-center gap-2">
                       <Banknote className="size-4 text-foreground" />
                       <span className="text-sm font-bold text-foreground">מסלולי פיצויים</span>
