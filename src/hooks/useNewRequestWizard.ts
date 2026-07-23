@@ -12,6 +12,7 @@ import {
   FundsEntity,
 } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
+import { BASE_TRACK_KEYS, isPitzuimQualifying, applyPitzuimMirroring, stripPitzuimKeys } from "@/utils/PitzuimUtils";
 
 // Use ProcessRequestFormsAction as the auto-process action for new requests
 const AutoProcessNewRequestAction = ProcessRequestFormsAction;
@@ -47,6 +48,7 @@ export function useNewRequestWizard({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [standing, setStanding] = useState("");
+  const [pitzuimSeparate, setPitzuimSeparate] = useState(false);
 
   const { data: providers, isLoading: isLoadingProviders } =
     useEntityGetAll(ProvidersEntity);
@@ -98,6 +100,7 @@ export function useNewRequestWizard({
       setTracksValues({});
       setIsSubmitting(false);
       setStanding("");
+      setPitzuimSeparate(false);
     }
   }, [open]);
 
@@ -129,6 +132,18 @@ export function useNewRequestWizard({
     setIsSubmitting(true);
 
     try {
+      // Compute tracks with pitzuim logic
+      const selectedRequestTypeName = sortedRequestTypes.find(
+        (rt) => rt.id === selectedRequestTypeId
+      )?.requestTypeName;
+      const qualifying = isPitzuimQualifying(selectedRequestTypeName);
+      let finalTracks = tracksValues;
+      if (qualifying && !pitzuimSeparate) {
+        finalTracks = applyPitzuimMirroring(tracksValues);
+      } else if (!qualifying) {
+        finalTracks = stripPitzuimKeys(tracksValues);
+      }
+
       // Step 1: Create the request
       const createdRequest = await createFunction({
         data: {
@@ -137,7 +152,8 @@ export function useNewRequestWizard({
           requestTypeId: selectedRequestTypeId,
           isStandalone: isStandalone ?? false,
           status: "מעבד" as const,
-          tracks: tracksValues,
+          tracks: finalTracks,
+          pitzuimSeparate: qualifying ? pitzuimSeparate : undefined,
           fundId: selectedFundId || undefined,
           managementFee: managementFee ?? undefined,
           managementFeeAccumulation: managementFeeAccumulation ?? undefined,
@@ -168,6 +184,8 @@ export function useNewRequestWizard({
     isStandalone,
     clientId,
     tracksValues,
+    pitzuimSeparate,
+    sortedRequestTypes,
     createFunction,
     executeAutoProcess,
     onSuccess,
@@ -202,5 +220,7 @@ export function useNewRequestWizard({
     sortedFunds,
     standing,
     setStanding,
+    pitzuimSeparate,
+    setPitzuimSeparate,
   };
 }

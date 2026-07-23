@@ -115,6 +115,8 @@ export default function NewRequestWizard() {
     sortedFunds,
     standing,
     setStanding,
+    pitzuimSeparate,
+    setPitzuimSeparate,
   } = useNewRequestWizard({
     open: true,
     clientId,
@@ -256,6 +258,8 @@ export default function NewRequestWizard() {
                 handleTrackValue={handleTrackValue}
                 selectedRequestTypeName={sortedRequestTypes.find((rt) => rt.id === selectedRequestTypeId)?.requestTypeName}
                 selectedProviderName={sortedProviders.find((p) => p.id === selectedProviderId)?.provider_name}
+                pitzuimSeparate={pitzuimSeparate}
+                onPitzuimSeparateChange={setPitzuimSeparate}
               />
             )}
           </CardContent>

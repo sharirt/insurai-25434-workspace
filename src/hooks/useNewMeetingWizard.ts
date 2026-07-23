@@ -46,6 +46,7 @@ export interface PendingRequest {
   oneTimeTransferAmount?: number;
   isPartialTransfer?: boolean;
   partialTransferAmount?: number;
+  pitzuimSeparate?: boolean;
   sourceQuote?: string;
   missingFields?: Record<string, string>;
 }
@@ -269,6 +270,7 @@ export function useNewMeetingWizard({
             oneTimeTransferAmount: req.oneTimeTransferAmount ?? undefined,
             isPartialTransfer: req.isPartialTransfer ?? false,
             partialTransferAmount: req.isPartialTransfer ? (req.partialTransferAmount ?? undefined) : undefined,
+            pitzuimSeparate: req.pitzuimSeparate ?? false,
           },
         });
         createdRequestIds.push(createdReq.id);

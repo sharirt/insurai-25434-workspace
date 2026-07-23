@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { FundCombobox } from "@/components/FundCombobox";
 import { getFieldLabel, STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
+import { BASE_TRACK_KEYS, isPitzuimQualifying, applyPitzuimMirroring, stripPitzuimKeys } from "@/utils/PitzuimUtils";
 import { getCustomTrackLabel } from "@/utils/TrackCustomTranslations";
 import type { PendingRequest } from "@/hooks/useNewMeetingWizard";
 import {
@@ -37,7 +38,7 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
+import { ClipboardPlus, SlidersHorizontal, Pencil, Eraser, Search, AlertTriangle, Check, ChevronsUpDown, Banknote } from "lucide-react";
 
 interface MeetingAddRequestDialogProps {
   open: boolean;
@@ -116,6 +117,7 @@ export const MeetingAddRequestDialog = ({
   const [independentTransferType, setIndependentTransferType] = useState("");
   const [independentTransferAmount, setIndependentTransferAmount] = useState("");
   const [trackSearch, setTrackSearch] = useState("");
+  const [pitzuimSeparate, setPitzuimSeparate] = useState(false);
   const [oneTimeTransferAmount, setOneTimeTransferAmount] = useState<number | undefined>(undefined);
   const [isPartialTransferField, setIsPartialTransferField] = useState(false);
   const [partialTransferAmount, setPartialTransferAmount] = useState<number | undefined>(undefined);
@@ -140,7 +142,8 @@ export const MeetingAddRequestDialog = ({
 
 
 
-  const tracksKeys = STATIC_TRACK_KEYS;
+  const tracksKeys = BASE_TRACK_KEYS;
+  const qualifying = isPitzuimQualifying(selectedRequestTypeName);
 
   useEffect(() => {
     if (!open) {
@@ -163,6 +166,7 @@ export const MeetingAddRequestDialog = ({
       setIndependentTransferType("");
       setIndependentTransferAmount("");
       setTrackSearch("");
+      setPitzuimSeparate(false);
       setOneTimeTransferAmount(undefined);
       setIsPartialTransferField(false);
       setPartialTransferAmount(undefined);
@@ -184,6 +188,7 @@ export const MeetingAddRequestDialog = ({
       setOneTimeTransferAmount(editingRequest.oneTimeTransferAmount);
       setIsPartialTransferField(editingRequest.isPartialTransfer ?? false);
       setPartialTransferAmount(editingRequest.partialTransferAmount);
+      setPitzuimSeparate(editingRequest.pitzuimSeparate ?? false);
       if (editingRequest.isTotalTransfer !== undefined) {
         setIsTotalTransfer(editingRequest.isTotalTransfer);
         if (editingRequest.isTotalTransfer === false) {
@@ -214,7 +219,15 @@ export const MeetingAddRequestDialog = ({
     return sum + (isNaN(val) ? 0 : val);
   }, 0);
 
+  const pitzuimSum = qualifying && pitzuimSeparate
+    ? BASE_TRACK_KEYS.reduce((sum, key) => {
+        const val = parseFloat(tracksValues[key + "__pitzuim"] ?? "");
+        return sum + (isNaN(val) ? 0 : val);
+      }, 0)
+    : 0;
+
   const TRACKS_SUM_EPSILON = 0.01;
+  const isPitzuimSumValid = !qualifying || !pitzuimSeparate || pitzuimSum === 0 || Math.abs(pitzuimSum - 100) < TRACKS_SUM_EPSILON;
   const isPoaB1 = selectedRequestTypeName?.includes("ייפוי כוח") ?? false;
   const isTracksSumValid = isPoaB1
     ? (tracksSum < TRACKS_SUM_EPSILON || Math.abs(tracksSum - 100) < TRACKS_SUM_EPSILON)
@@ -233,7 +246,8 @@ export const MeetingAddRequestDialog = ({
     !!selectedRequestTypeId &&
     !!selectedProviderId &&
     isTracksSumValid &&
-    isPartialAmountValid;
+    isPartialAmountValid &&
+    isPitzuimSumValid;
 
   const handleAdd = useCallback(() => {
     if (!isValid) return;
@@ -259,6 +273,14 @@ export const MeetingAddRequestDialog = ({
       if (Object.keys(updatedMissingFields).length === 0) updatedMissingFields = undefined;
     }
 
+    // Apply pitzuim logic to tracks
+    let finalTracks = tracksValues;
+    if (qualifying && !pitzuimSeparate) {
+      finalTracks = applyPitzuimMirroring(tracksValues);
+    } else if (!qualifying) {
+      finalTracks = stripPitzuimKeys(tracksValues);
+    }
+
     const newRequest: PendingRequest = {
       id: isEditMode ? editingRequest!.id : crypto.randomUUID(),
       fundId: selectedFundId,
@@ -272,9 +294,10 @@ export const MeetingAddRequestDialog = ({
         : {}),
       ...(fund?.totalBalance != null ? { fundTotalBalance: fund.totalBalance } : {}),
       tracks: STATIC_TRACK_KEYS.reduce((acc, key) => {
-        acc[key] = tracksValues[key] ?? '';
+        acc[key] = finalTracks[key] ?? '';
         return acc;
       }, {} as Record<string, string>),
+      pitzuimSeparate: qualifying ? pitzuimSeparate : undefined,
       tracksCount: tracksKeys.length,
       managementFee,
       managementFeeAccumulation,
@@ -898,6 +921,26 @@ export const MeetingAddRequestDialog = ({
                     <span className="text-xs text-amber-600">{missingFields.tracks}</span>
                   </div>
                 )}
+                {/* Pitzuim checkbox */}
+                {qualifying && (
+                  <div className="flex items-start gap-3 rounded-lg border border-border bg-background/60 px-4 py-3">
+                    <Checkbox
+                      id="meetingPitzuimSeparate"
+                      checked={pitzuimSeparate}
+                      onCheckedChange={(checked) => setPitzuimSeparate(checked === true)}
+                      className="mt-0.5"
+                    />
+                    <div className="flex flex-col gap-0.5">
+                      <Label htmlFor="meetingPitzuimSeparate" className="text-sm font-bold text-foreground cursor-pointer">
+                        פיצויים בנפרד
+                      </Label>
+                      <span className="text-xs text-muted-foreground">
+                        כאשר מסומן, ניתן להגדיר מסלולי פיצויים שונים מהתגמולים
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Tracks section header */}
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
@@ -1014,6 +1057,77 @@ export const MeetingAddRequestDialog = ({
                   </div>
                 )}
               </div>
+
+              {/* Pitzuim grid section */}
+              {qualifying && pitzuimSeparate && (
+                <>
+                  <Separator className="my-4" />
+                  <div className="rounded-lg p-4 flex flex-col gap-4" style={{ background: "hsl(45 100% 96%)" }}>
+                    <div className="flex items-center gap-2">
+                      <Banknote className="size-4 text-foreground" />
+                      <span className="text-sm font-bold text-foreground">מסלולי פיצויים</span>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg bg-background/60 px-4 py-2">
+                      <span className="text-sm font-semibold text-foreground">פיצויים סה״כ</span>
+                      <span
+                        className={`text-sm font-bold ${
+                          Math.abs(pitzuimSum - 100) < TRACKS_SUM_EPSILON
+                            ? "text-primary"
+                            : pitzuimSum > 0
+                              ? "text-destructive"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        {pitzuimSum.toFixed(2)}%
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                      {tracksKeys.filter((key) => !trackSearch || getTrackLabel(key + "__pitzuim")?.toLowerCase().includes(trackSearch.toLowerCase())).map((key) => {
+                        const pKey = key + "__pitzuim";
+                        return (
+                          <div key={pKey} className="flex flex-col gap-1.5">
+                            <Label className="text-sm font-semibold text-foreground">{getTrackLabel(pKey)}</Label>
+                            <div className="relative">
+                              <Input
+                                type="number"
+                                min={0}
+                                step={0.01}
+                                value={tracksValues[pKey] ?? ""}
+                                onChange={onTrackFieldChange(pKey)}
+                                placeholder="0.00"
+                                dir="rtl"
+                                className="pl-8"
+                                onKeyDown={(e) => { if (e.key === "-" || e.key === "e" || e.key === "E") e.preventDefault(); }}
+                              />
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">%</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 pt-1">
+                              {[0, 10, 15, 25, 33, 50, 66, 75, 85, 90, 100].map((pct) => (
+                                <button
+                                  key={pct}
+                                  type="button"
+                                  onClick={() => handleTrackValue(pKey, pct === 0 ? "" : String(pct))}
+                                  className="px-2 py-0.5 text-xs rounded-md border border-border bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                                >
+                                  {pct}%
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {!isPitzuimSumValid && (
+                      <div className="flex justify-end pt-2">
+                        <span className="text-xs text-destructive">סכום אחוזי הפיצויים חייב להסתכם ל-100%</span>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -1030,15 +1144,26 @@ export const MeetingAddRequestDialog = ({
           <div className="flex items-center justify-between w-full gap-3">
             {/* Total percentage pill — always visible in footer */}
             {selectedRequestTypeId ? (
-              <span
-                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors ${
-                  isTracksSumValid
-                    ? "bg-green-600"
-                    : "bg-destructive"
-                }`}
-              >
-                סה״כ: {tracksSum.toFixed(2)}%
-              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-colors ${
+                    isTracksSumValid
+                      ? "bg-chart-5"
+                      : "bg-destructive"
+                  }`}
+                >
+                  סה״כ: {tracksSum.toFixed(2)}%
+                </span>
+                {qualifying && pitzuimSeparate && (
+                  <span
+                    className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold shadow-sm transition-colors ${
+                      isPitzuimSumValid ? "bg-chart-3 text-primary-foreground" : "bg-destructive text-primary-foreground"
+                    }`}
+                  >
+                    פיצויים: {pitzuimSum.toFixed(2)}%
+                  </span>
+                )}
+              </div>
             ) : (
               <span />
             )}
