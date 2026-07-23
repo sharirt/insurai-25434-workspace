@@ -1068,6 +1068,10 @@ export const getCustomTrackLabel = (
   providerName: string,
   trackKey: string
 ): string => {
+  if (trackKey.endsWith("__pitzuim")) {
+    const baseKey = trackKey.slice(0, -"__pitzuim".length);
+    return `${getCustomTrackLabel(requestTypeName, providerName, baseKey)} (פיצויים)`;
+  }
   const defaultTranslation = getFieldLabel(trackKey);
   const entry =
     TRACK_CUSTOM_TRANSLATIONS[requestTypeName]?.[providerName]?.[defaultTranslation];
