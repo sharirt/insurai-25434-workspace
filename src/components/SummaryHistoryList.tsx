@@ -4,14 +4,14 @@ import { Clock, ChevronLeft, Pencil, Sparkles, ExternalLink, Trash2, Loader2 } f
 import { useEntityGetAll, useEntityUpdate, useEntityDelete, useExecuteAction, useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { MeetingSummariesEntity, NewMeetingWizardPage, ParseMeetingSummaryActionAction, IProvidersEntity, IRequestSchemesEntity, IClientsEntity } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
-import { getPageUrl } from "@/lib/utils";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { getPageUrl, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 interface SummaryHistoryListProps {
@@ -28,8 +28,7 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
   const { deleteFunction, isLoading: isDeleting } = useEntityDelete(MeetingSummariesEntity);
   const { executeFunction, isLoading: isProcessing } = useExecuteAction(ParseMeetingSummaryActionAction);
 
-  const [selectedRecord, setSelectedRecord] = useState<any>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editedRawText, setEditedRawText] = useState("");
   const [editedClientName, setEditedClientName] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
@@ -44,14 +43,19 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
     })
     .slice(0, 20);
 
-  const openSheet = (record: any) => {
-    setSelectedRecord(record);
-    setEditedRawText(record.rawText || "");
-    setEditedClientName(record.clientName || "");
-    setIsEditingName(false);
-    setShowDeleteConfirm(false);
-    setSheetOpen(true);
+  const toggleExpand = (record: any) => {
+    if (expandedId === record.id) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(record.id);
+      setEditedRawText(record.rawText || "");
+      setEditedClientName(record.clientName || "");
+      setIsEditingName(false);
+      setShowDeleteConfirm(false);
+    }
   };
+
+  const selectedRecord = sorted.find((r: any) => r.id === expandedId) || null;
 
   const handleSaveChanges = async () => {
     if (!selectedRecord) return;
@@ -114,8 +118,7 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
     try {
       await deleteFunction({ id: selectedRecord.id });
       toast.success("הסיכום נמחק בהצלחה");
-      setSheetOpen(false);
-      setSelectedRecord(null);
+      setExpandedId(null);
     } catch (err: any) {
       toast.error(err?.message || "שגיאה במחיקת הסיכום");
     }
@@ -140,193 +143,211 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
     );
   }
 
-  const hasExtractedData = selectedRecord?.extractedData && Object.keys(selectedRecord.extractedData).length > 0;
-
   return (
-    <>
-      <div className="flex flex-col gap-3">
-        {sorted.map((record: any) => {
-          const date = record.createdAt
-            ? new Date(record.createdAt).toLocaleDateString("he-IL", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "";
-          const clientName = record.clientName || "לקוח לא ידוע";
-          const requestCount = record.requestCount ?? 0;
-          const rawPreview = record.rawText
-            ? record.rawText.length > 100
-              ? record.rawText.slice(0, 100) + "..."
-              : record.rawText
-            : "";
+    <div className="flex flex-col gap-3">
+      {sorted.map((record: any) => {
+        const isExpanded = expandedId === record.id;
+        const date = record.createdAt
+          ? new Date(record.createdAt).toLocaleDateString("he-IL", {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
+        const clientName = record.clientName || "לקוח לא ידוע";
+        const requestCount = record.requestCount ?? 0;
+        const rawPreview = record.rawText
+          ? record.rawText.length > 100
+            ? record.rawText.slice(0, 100) + "..."
+            : record.rawText
+          : "";
+        const hasExtracted = record.extractedData && Object.keys(record.extractedData).length > 0;
 
-          return (
-            <Card
-              key={record.id}
-              className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
-              style={{ direction: "rtl" }}
-              onClick={() => openSheet(record)}
+        return (
+          <Card
+            key={record.id}
+            className={cn(
+              "p-4 transition-colors",
+              isExpanded ? "border-primary/30" : "hover:bg-accent/50 cursor-pointer"
+            )}
+            style={{ direction: "rtl" }}
+          >
+            <div
+              className={cn("flex items-start justify-between gap-3", !isExpanded && "cursor-pointer")}
+              onClick={() => toggleExpand(record)}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex flex-col gap-1 flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{clientName}</span>
-                    {requestCount > 0 && (
-                      <Badge variant="secondary">{requestCount} בקשות</Badge>
-                    )}
-                  </div>
-                  {rawPreview && (
-                    <p className="text-xs text-muted-foreground truncate">
-                      {rawPreview}
-                    </p>
+              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-medium text-sm">{clientName}</span>
+                  {requestCount > 0 && (
+                    <Badge variant="secondary">{requestCount} בקשות</Badge>
                   )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {date}
-                  </span>
-                  <ChevronLeft className="size-4 text-muted-foreground" />
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="right" className="sm:max-w-[500px] w-full overflow-y-auto" style={{ direction: "rtl" }}>
-          <SheetHeader>
-            <SheetTitle className="text-right">פרטי סיכום</SheetTitle>
-          </SheetHeader>
-
-          {selectedRecord && (
-            <div className="flex flex-col gap-4 mt-4">
-              {/* Client name - inline edit */}
-              <div className="flex items-center gap-2">
-                {isEditingName ? (
-                  <Input
-                    value={editedClientName}
-                    onChange={(e) => setEditedClientName(e.target.value)}
-                    onBlur={() => setIsEditingName(false)}
-                    onKeyDown={(e) => { if (e.key === "Enter") setIsEditingName(false); }}
-                    autoFocus
-                    className="text-sm"
-                    placeholder="שם לקוח"
-                  />
-                ) : (
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors"
-                    onClick={() => setIsEditingName(true)}
-                  >
-                    <span>{editedClientName || "לקוח לא ידוע"}</span>
-                    <Pencil className="size-3.5" />
-                  </button>
+                {rawPreview && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {rawPreview}
+                  </p>
                 )}
               </div>
-
-              {/* Raw text textarea */}
-              <Textarea
-                value={editedRawText}
-                onChange={(e) => setEditedRawText(e.target.value)}
-                className="min-h-[300px] resize-y"
-                placeholder="טקסט הסיכום..."
-              />
-
-              {/* Action buttons */}
-              <div className="flex flex-col gap-2">
-                <Button
-                  onClick={handleSaveChanges}
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? (
-                    <>
-                      <Loader2 className="animate-spin" data-icon="inline-start" />
-                      שומר...
-                    </>
-                  ) : (
-                    "שמור שינויים"
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  {date}
+                </span>
+                <ChevronLeft
+                  className={cn(
+                    "size-4 text-muted-foreground transition-transform duration-200",
+                    isExpanded && "rotate-[-90deg]"
                   )}
-                </Button>
+                />
+              </div>
+            </div>
 
-                {!hasExtractedData && (
-                  <Button
-                    variant="outline"
-                    onClick={handleProcess}
-                    disabled={isProcessing || !editedRawText.trim()}
+            <div
+              className={cn(
+                "grid transition-all duration-300",
+                isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              )}
+            >
+              <div className="min-h-0 overflow-hidden">
+                {isExpanded && (
+                  <div
+                    className="flex flex-col gap-4 pt-3"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="animate-spin" data-icon="inline-start" />
-                        מעבד...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles data-icon="inline-start" />
-                        עבד סיכום
-                      </>
-                    )}
-                  </Button>
-                )}
+                    <Separator />
 
-                {hasExtractedData && (
-                  <Button
-                    variant="outline"
-                    onClick={handleReopen}
-                  >
-                    <ExternalLink data-icon="inline-start" />
-                    פתח שוב
-                  </Button>
-                )}
+                    {/* Client name - inline edit */}
+                    <div className="flex items-center gap-2">
+                      {isEditingName ? (
+                        <Input
+                          value={editedClientName}
+                          onChange={(e) => setEditedClientName(e.target.value)}
+                          onBlur={() => setIsEditingName(false)}
+                          onKeyDown={(e) => { if (e.key === "Enter") setIsEditingName(false); }}
+                          autoFocus
+                          className="text-sm"
+                          placeholder="שם לקוח"
+                        />
+                      ) : (
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors"
+                          onClick={() => setIsEditingName(true)}
+                        >
+                          <span>{editedClientName || "לקוח לא ידוע"}</span>
+                          <Pencil className="size-3.5" />
+                        </button>
+                      )}
+                    </div>
 
-                {/* Delete with inline confirmation */}
-                {!showDeleteConfirm ? (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setShowDeleteConfirm(true)}
-                  >
-                    <Trash2 data-icon="inline-start" />
-                    מחק
-                  </Button>
-                ) : (
-                  <div className="flex flex-col gap-2 rounded-md border border-destructive p-3">
-                    <p className="text-sm text-destructive font-medium">האם אתה בטוח?</p>
-                    <div className="flex gap-2">
+                    {/* Raw text textarea */}
+                    <Textarea
+                      value={editedRawText}
+                      onChange={(e) => setEditedRawText(e.target.value)}
+                      className="min-h-[200px] resize-y"
+                      placeholder="טקסט הסיכום..."
+                    />
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-2">
                       <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="flex-1"
+                        className="w-full"
+                        onClick={handleSaveChanges}
+                        disabled={isUpdating}
                       >
-                        {isDeleting ? (
+                        {isUpdating ? (
                           <>
                             <Loader2 className="animate-spin" data-icon="inline-start" />
-                            מוחק...
+                            שומר...
                           </>
                         ) : (
-                          "כן, מחק"
+                          "שמור שינויים"
                         )}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(false)}
-                        className="flex-1"
-                      >
-                        ביטול
-                      </Button>
+
+                      {!hasExtracted && (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleProcess}
+                          disabled={isProcessing || !editedRawText.trim()}
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader2 className="animate-spin" data-icon="inline-start" />
+                              מעבד...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles data-icon="inline-start" />
+                              עבד סיכום
+                            </>
+                          )}
+                        </Button>
+                      )}
+
+                      {hasExtracted && (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={handleReopen}
+                        >
+                          <ExternalLink data-icon="inline-start" />
+                          פתח שוב
+                        </Button>
+                      )}
+
+                      {/* Delete with inline confirmation */}
+                      {!showDeleteConfirm ? (
+                        <Button
+                          variant="destructive"
+                          className="w-full"
+                          onClick={() => setShowDeleteConfirm(true)}
+                        >
+                          <Trash2 data-icon="inline-start" />
+                          מחק
+                        </Button>
+                      ) : (
+                        <div className="flex flex-col gap-2 rounded-md border border-destructive p-3">
+                          <p className="text-sm text-destructive font-medium">האם אתה בטוח?</p>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={handleDelete}
+                              disabled={isDeleting}
+                              className="flex-1"
+                            >
+                              {isDeleting ? (
+                                <>
+                                  <Loader2 className="animate-spin" data-icon="inline-start" />
+                                  מוחק...
+                                </>
+                              ) : (
+                                "כן, מחק"
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowDeleteConfirm(false)}
+                              className="flex-1"
+                            >
+                              ביטול
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          )}
-        </SheetContent>
-      </Sheet>
-    </>
+          </Card>
+        );
+      })}
+    </div>
   );
 };
