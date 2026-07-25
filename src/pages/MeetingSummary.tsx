@@ -10,12 +10,15 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { getPageUrl } from "@/lib/utils";
 import {
   useEntityGetAll,
   useEntityGetOne,
+  useEntityCreate,
   useExecuteAction,
+  useUser,
 } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import {
   ProvidersEntity,
@@ -23,13 +26,16 @@ import {
   ClientsEntity,
   NewMeetingWizardPage,
   ParseMeetingSummaryActionAction,
+  MeetingSummariesEntity,
 } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { ClientSelectionSection } from "@/components/ClientSelectionSection";
 import { AudioRecorder } from "@/components/AudioRecorder";
+import { SummaryHistoryList } from "@/components/SummaryHistoryList";
 
 export default function MeetingSummary() {
   const navigate = useNavigate();
+  const user = useUser();
   const [searchParams] = useSearchParams();
   const clientId = searchParams.get("id");
   const [summary, setSummary] = useState("");
@@ -37,6 +43,7 @@ export default function MeetingSummary() {
   const [isExistingClient, setIsExistingClient] = useState(false);
 
   const { data: clientRecord } = useEntityGetOne(ClientsEntity, { id: clientId || "" }, { enabled: !!clientId });
+  const { createFunction: createSummaryRecord } = useEntityCreate(MeetingSummariesEntity);
 
   const { data: providers } = useEntityGetAll(ProvidersEntity);
   const { data: requestSchemes } = useEntityGetAll(RequestSchemesEntity);
@@ -84,6 +91,30 @@ export default function MeetingSummary() {
           national_id: c.national_id,
         })),
       });
+
+      // Auto-save summary record (fire-and-forget)
+      try {
+        let resolvedClientName = "";
+        if (result?.clientUpdates?.first_name || result?.clientUpdates?.last_name) {
+          resolvedClientName = [result?.clientUpdates?.first_name, result?.clientUpdates?.last_name].filter(Boolean).join(" ");
+        } else if (result?.clientId && clients) {
+          const matched = clients.find((c: any) => c.id === result.clientId);
+          if (matched) {
+            resolvedClientName = [matched.first_name, matched.last_name].filter(Boolean).join(" ");
+          }
+        }
+        createSummaryRecord({
+          data: {
+            rawText: summary,
+            extractedData: result as any,
+            agentEmail: user?.email || "",
+            clientName: resolvedClientName || undefined,
+            requestCount: result?.requests?.length ?? 0,
+          },
+        });
+      } catch (_) {
+        // silent
+      }
 
       // Case 1: Pre-selected clientId from URL
       if (clientId) {
@@ -175,6 +206,13 @@ export default function MeetingSummary() {
             onContinue={handleClientSelectionContinue}
           />
         )}
+
+        <Separator />
+
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">היסטוריית סיכומים</h2>
+          <SummaryHistoryList />
+        </div>
       </div>
     </div>
   );

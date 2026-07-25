@@ -652,6 +652,34 @@ export const MeetingsEntity = {
 } as const;
 
 /**
+ * The structured data extracted by AI from the raw text, including requests array, client info, meeting date, and notes
+ */
+export interface IMeetingSummariesEntityExtractedDataObject {}
+
+/**
+ * Each record represents one meeting summary processing session. Stores the original raw text pasted by the agent, the AI-extracted structured data (requests, client info, etc.), the agent's email, an optional client name if identified, an optional link to the created meeting, and the number of requests extracted. Used to display a chronological history of processed summaries on the MeetingSummary page.
+ */
+export interface IMeetingSummariesEntity {
+  /** The original meeting summary text pasted by the agent before AI processing  */
+  rawText?: string;
+  /** Name of the client identified from the summary, if available. Used for display in the history list.  */
+  clientName?: string;
+  /** Optional ID of the meeting created from this summary, linked after the wizard completes  */
+  meetingId?: string;
+  /** Number of insurance requests extracted from the summary by the AI  */
+  requestCount?: number;
+  /** The structured data extracted by AI from the raw text, including requests array, client info, meeting date, and notes  */
+  extractedData?: IMeetingSummariesEntityExtractedDataObject;
+  /** Email of the agent who processed this summary, used to filter summaries per agent  */
+  agentEmail?: string;
+}
+
+export const MeetingSummariesEntity = {
+  tableBlockId: "6a6511563df8bb9535527019",
+  instanceType: {} as IMeetingSummariesEntity,
+} as const;
+
+/**
  * Lookup table that stores the email address to use when sending documents to a provider for a specific request type. Each row represents a unique combination of provider and request type with the corresponding recipient email.
  */
 export interface IProviderEmailsEntity {
