@@ -275,7 +275,11 @@ export default function MeetingSummary() {
 
         <div className="flex flex-col gap-4">
           <h2 className="text-lg font-semibold">היסטוריית סיכומים</h2>
-          <SummaryHistoryList />
+          <SummaryHistoryList
+            providers={(providers || []).map(p => ({ ...p, id: p.id }))}
+            requestSchemes={(requestSchemes || []).map(s => ({ ...s, id: s.id }))}
+            clients={(clients || []).map(c => ({ ...c, id: c.id }))}
+          />
         </div>
       </div>
     </div>
