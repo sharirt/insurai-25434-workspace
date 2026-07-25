@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { Sparkles, Loader2, User } from "lucide-react";
+import { Sparkles, Loader2, User, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,6 +41,24 @@ export default function MeetingSummary() {
   const [summary, setSummary] = useState("");
   const [processedResult, setProcessedResult] = useState<any>(null);
   const [isExistingClient, setIsExistingClient] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Restore draft from localStorage on mount
+  useEffect(() => {
+    const draft = localStorage.getItem("meetingSummary_draft");
+    if (draft) {
+      setSummary(draft);
+    }
+  }, []);
+
+  // Persist to localStorage on every change
+  useEffect(() => {
+    if (summary) {
+      localStorage.setItem("meetingSummary_draft", summary);
+    } else {
+      localStorage.removeItem("meetingSummary_draft");
+    }
+  }, [summary]);
 
   const { data: clientRecord } = useEntityGetOne(ClientsEntity, { id: clientId || "" }, { enabled: !!clientId });
   const { createFunction: createSummaryRecord } = useEntityCreate(MeetingSummariesEntity);
@@ -92,6 +110,9 @@ export default function MeetingSummary() {
         })),
       });
 
+      // Clear localStorage on successful AI processing
+      localStorage.removeItem("meetingSummary_draft");
+
       // Auto-save summary record (fire-and-forget)
       try {
         let resolvedClientName = "";
@@ -132,6 +153,29 @@ export default function MeetingSummary() {
       setProcessedResult(result);
     } catch (err: any) {
       toast.error(err?.message || "שגיאה בעיבוד הסיכום. נסה שוב.");
+    }
+  };
+
+  const handleSaveAsSummary = async () => {
+    if (!summary.trim()) return;
+    setIsSaving(true);
+    try {
+      await createSummaryRecord({
+        data: {
+          rawText: summary,
+          agentEmail: user?.email || "",
+          requestCount: 0,
+          clientName: undefined,
+          extractedData: undefined,
+        },
+      });
+      toast.success("הסיכום נשמר בהצלחה");
+      localStorage.removeItem("meetingSummary_draft");
+      setSummary("");
+    } catch (err: any) {
+      toast.error(err?.message || "שגיאה בשמירת הסיכום");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -181,21 +225,41 @@ export default function MeetingSummary() {
               הסיכום יכול לכלול: שם לקוח, תאריך פגישה, פרטי בקשות ביטוח,
               יצרנים, מסלולים ועוד
             </p>
-            {!processedResult && (
-              <Button
-                onClick={handleProcess}
-                disabled={!summary.trim() || isLoading}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="animate-spin" data-icon="inline-start" />
-                    מעבד...
-                  </>
-                ) : (
-                  "עבד סיכום"
-                )}
-              </Button>
+            {!processedResult && summary.trim() && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleSaveAsSummary}
+                  disabled={isSaving || isLoading}
+                  className="flex-1"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="animate-spin" data-icon="inline-start" />
+                      שומר...
+                    </>
+                  ) : (
+                    <>
+                      <Save data-icon="inline-start" />
+                      שמור כסיכום
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleProcess}
+                  disabled={isLoading || isSaving}
+                  className="flex-1"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="animate-spin" data-icon="inline-start" />
+                      מעבד...
+                    </>
+                  ) : (
+                    "עבד סיכום"
+                  )}
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
