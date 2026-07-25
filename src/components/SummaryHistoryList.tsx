@@ -33,6 +33,8 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
   const [editedClientName, setEditedClientName] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [originalRawText, setOriginalRawText] = useState<string>("");
+  const [originalClientName, setOriginalClientName] = useState<string>("");
 
   const sorted = (summaries || [])
     .slice()
@@ -50,6 +52,8 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
       setExpandedId(record.id);
       setEditedRawText(record.rawText || "");
       setEditedClientName(record.clientName || "");
+      setOriginalRawText(record.rawText || "");
+      setOriginalClientName(record.clientName || "");
       setIsEditingName(false);
       setShowDeleteConfirm(false);
     }
@@ -181,9 +185,18 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
               <div className="flex flex-col gap-1 flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-medium text-sm">{clientName}</span>
-                  {requestCount > 0 && (
-                    <Badge variant="secondary">{requestCount} בקשות</Badge>
-                  )}
+                  {(() => {
+                    if (record.signedAt) {
+                      return <Badge variant="outline" className="text-purple-700 border-purple-300 bg-purple-50">נחתמו טפסים</Badge>;
+                    }
+                    if (record.meetingLink) {
+                      return <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">נשלחו טפסים</Badge>;
+                    }
+                    if (hasExtracted && requestCount > 0) {
+                      return <Badge variant="default">נוצרו בקשות</Badge>;
+                    }
+                    return <Badge variant="outline">חדש</Badge>;
+                  })()}
                 </div>
                 {rawPreview && (
                   <p className="text-xs text-muted-foreground truncate">
@@ -252,64 +265,65 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
 
                     {/* Action buttons */}
                     <div className="flex flex-col gap-2">
-                      <Button
-                        className="w-full"
-                        onClick={handleSaveChanges}
-                        disabled={isUpdating}
-                      >
-                        {isUpdating ? (
-                          <>
-                            <Loader2 className="animate-spin" data-icon="inline-start" />
-                            שומר...
-                          </>
-                        ) : (
-                          "שמור שינויים"
-                        )}
-                      </Button>
-
-                      {!hasExtracted && (
+                      <div className="flex flex-row gap-2">
                         <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleProcess}
-                          disabled={isProcessing || !editedRawText.trim()}
+                          className="flex-1"
+                          onClick={handleSaveChanges}
+                          disabled={isUpdating || (editedRawText === originalRawText && editedClientName === originalClientName)}
                         >
-                          {isProcessing ? (
+                          {isUpdating ? (
                             <>
                               <Loader2 className="animate-spin" data-icon="inline-start" />
-                              מעבד...
+                              שומר...
                             </>
                           ) : (
-                            <>
-                              <Sparkles data-icon="inline-start" />
-                              עבד סיכום
-                            </>
+                            "שמור שינויים"
                           )}
                         </Button>
-                      )}
 
-                      {hasExtracted && (
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleReopen}
-                        >
-                          <ExternalLink data-icon="inline-start" />
-                          פתח שוב
-                        </Button>
-                      )}
+                        {!hasExtracted ? (
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={handleProcess}
+                            disabled={isProcessing || !editedRawText.trim()}
+                          >
+                            {isProcessing ? (
+                              <>
+                                <Loader2 className="animate-spin" data-icon="inline-start" />
+                                מעבד...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles data-icon="inline-start" />
+                                עבד סיכום
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="flex-1"
+                            onClick={handleReopen}
+                          >
+                            <ExternalLink data-icon="inline-start" />
+                            פתח שוב
+                          </Button>
+                        )}
 
-                      {/* Delete with inline confirmation */}
-                      {!showDeleteConfirm ? (
-                        <Button
-                          variant="destructive"
-                          className="w-full"
-                          onClick={() => setShowDeleteConfirm(true)}
-                        >
-                          <Trash2 data-icon="inline-start" />
-                          מחק
-                        </Button>
-                      ) : (
+                        {!showDeleteConfirm && (
+                          <Button
+                            variant="destructive"
+                            className="flex-1"
+                            onClick={() => setShowDeleteConfirm(true)}
+                          >
+                            <Trash2 data-icon="inline-start" />
+                            מחק
+                          </Button>
+                        )}
+                      </div>
+
+                      {showDeleteConfirm && (
                         <div className="flex flex-col gap-2 rounded-md border border-destructive p-3">
                           <p className="text-sm text-destructive font-medium">האם אתה בטוח?</p>
                           <div className="flex gap-2">
