@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { Clock, ChevronLeft, Pencil, Sparkles, ExternalLink, Trash2, Loader2 } from "lucide-react";
+import { Clock, ChevronLeft, Sparkles, ExternalLink, Trash2, Loader2, Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useEntityGetAll, useEntityUpdate, useEntityDelete, useExecuteAction, useUser } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { MeetingSummariesEntity, NewMeetingWizardPage, ParseMeetingSummaryActionAction, IProvidersEntity, IRequestSchemesEntity, IClientsEntity } from "@/product-types";
+import { MeetingSummariesEntity, NewMeetingWizardPage, ParseMeetingSummaryActionAction, IProvidersEntity, IRequestSchemesEntity, IClientsEntity, ClientsEntity } from "@/product-types";
 import { STATIC_TRACK_KEYS } from "@/utils/fieldTranslations";
 import { getPageUrl, cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { ClientFormDialog } from "@/components/ClientFormDialog";
 import { toast } from "sonner";
 
 interface SummaryHistoryListProps {
@@ -28,13 +30,36 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
   const { deleteFunction, isLoading: isDeleting } = useEntityDelete(MeetingSummariesEntity);
   const { executeFunction, isLoading: isProcessing } = useExecuteAction(ParseMeetingSummaryActionAction);
 
+  const { data: internalClients } = useEntityGetAll(ClientsEntity);
+
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editedRawText, setEditedRawText] = useState("");
-  const [editedClientName, setEditedClientName] = useState("");
-  const [isEditingName, setIsEditingName] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [originalClientId, setOriginalClientId] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [originalRawText, setOriginalRawText] = useState<string>("");
-  const [originalClientName, setOriginalClientName] = useState<string>("");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [showClientDialog, setShowClientDialog] = useState(false);
+  const [justCreatedClient, setJustCreatedClient] = useState(false);
+  const prevClientsLengthRef = useRef(0);
+
+  // Prefer internal clients (auto-refreshes after create) over props
+  const allClients = (internalClients as (IClientsEntity & { id: string })[] | undefined) ?? clients;
+
+  // Auto-select newest client after creating one
+  useEffect(() => {
+    if (justCreatedClient && allClients && allClients.length > prevClientsLengthRef.current) {
+      const sorted2 = allClients.slice().sort((a, b) => {
+        const da = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+        const db = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
+        return db - da;
+      });
+      if (sorted2.length > 0) {
+        setSelectedClientId(sorted2[0].id);
+      }
+      setJustCreatedClient(false);
+    }
+  }, [justCreatedClient, allClients]);
 
   const sorted = (summaries || [])
     .slice()
@@ -51,11 +76,18 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
     } else {
       setExpandedId(record.id);
       setEditedRawText(record.rawText || "");
-      setEditedClientName(record.clientName || "");
       setOriginalRawText(record.rawText || "");
-      setOriginalClientName(record.clientName || "");
-      setIsEditingName(false);
+      // Try to find matching client by clientName
+      const clientName2 = record.clientName || "";
+      const matchedClient = clientName2 ? allClients?.find(c => {
+        const fullName = `${c.first_name || ""} ${c.last_name || ""}`.trim();
+        return fullName === clientName2;
+      }) : null;
+      const matchedId = matchedClient?.id ?? null;
+      setSelectedClientId(matchedId);
+      setOriginalClientId(matchedId);
       setShowDeleteConfirm(false);
+      setComboboxOpen(false);
     }
   };
 
@@ -64,11 +96,13 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
   const handleSaveChanges = async () => {
     if (!selectedRecord) return;
     try {
+      const selectedClient2 = selectedClientId ? allClients?.find(c => c.id === selectedClientId) : null;
+      const derivedClientName = selectedClient2 ? `${selectedClient2.first_name || ""} ${selectedClient2.last_name || ""}`.trim() : undefined;
       await updateFunction({
         id: selectedRecord.id,
         data: {
           rawText: editedRawText,
-          clientName: editedClientName || undefined,
+          clientName: derivedClientName || undefined,
         },
       });
       toast.success("השינויים נשמרו בהצלחה");
@@ -231,29 +265,75 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
                   >
                     <Separator />
 
-                    {/* Client name - inline edit */}
+                    {/* Client selector combobox + new client button */}
                     <div className="flex items-center gap-2">
-                      {isEditingName ? (
-                        <Input
-                          value={editedClientName}
-                          onChange={(e) => setEditedClientName(e.target.value)}
-                          onBlur={() => setIsEditingName(false)}
-                          onKeyDown={(e) => { if (e.key === "Enter") setIsEditingName(false); }}
-                          autoFocus
-                          className="text-sm"
-                          placeholder="שם לקוח"
-                        />
-                      ) : (
-                        <button
-                          type="button"
-                          className="flex items-center gap-2 text-sm font-bold hover:text-primary transition-colors"
-                          onClick={() => setIsEditingName(true)}
-                        >
-                          <span>{editedClientName || "לקוח לא ידוע"}</span>
-                          <Pencil className="size-3.5" />
-                        </button>
-                      )}
+                      <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={comboboxOpen}
+                            className="flex-1 justify-between text-sm"
+                          >
+                            {selectedClientId
+                              ? (() => {
+                                  const c = allClients?.find(cl => cl.id === selectedClientId);
+                                  return c ? `${c.first_name || ""} ${c.last_name || ""}`.trim() : "חפש לקוח...";
+                                })()
+                              : "חפש לקוח..."}
+                            <ChevronsUpDown className="shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[300px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="חפש לקוח..." />
+                            <CommandList>
+                              <CommandEmpty>לא נמצאו לקוחות</CommandEmpty>
+                              <CommandGroup>
+                                {allClients?.map(c => {
+                                  const label = `${c.first_name || ""} ${c.last_name || ""}`.trim();
+                                  const displayLabel = c.national_id ? `${label} (ת.ז. ${c.national_id})` : label;
+                                  const searchValue = `${c.first_name || ""} ${c.last_name || ""} ${c.national_id || ""}`;
+                                  return (
+                                    <CommandItem
+                                      key={c.id}
+                                      value={searchValue}
+                                      onSelect={() => {
+                                        setSelectedClientId(c.id === selectedClientId ? null : c.id);
+                                        setComboboxOpen(false);
+                                      }}
+                                    >
+                                      <Check className={cn("shrink-0", selectedClientId === c.id ? "opacity-100" : "opacity-0")} />
+                                      {displayLabel}
+                                    </CommandItem>
+                                  );
+                                })}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          prevClientsLengthRef.current = allClients?.length ?? 0;
+                          setShowClientDialog(true);
+                        }}
+                      >
+                        <Plus data-icon="inline-start" />
+                        לקוח חדש
+                      </Button>
                     </div>
+
+                    <ClientFormDialog
+                      open={showClientDialog}
+                      onClose={() => {
+                        setShowClientDialog(false);
+                        setJustCreatedClient(true);
+                      }}
+                      client={null}
+                    />
 
                     {/* Raw text textarea */}
                     <Textarea
@@ -269,7 +349,7 @@ export const SummaryHistoryList = ({ providers, requestSchemes, clients }: Summa
                         <Button
                           className="flex-1"
                           onClick={handleSaveChanges}
-                          disabled={isUpdating || (editedRawText === originalRawText && editedClientName === originalClientName)}
+                          disabled={isUpdating || (editedRawText === originalRawText && selectedClientId === originalClientId)}
                         >
                           {isUpdating ? (
                             <>
