@@ -1,3 +1,4 @@
+// Checkpoint: 2026-07-28
 import { useEntityGetAll, useEntityCreate, useEntityUpdate, useEntityDelete } from "@blocksdiy/blocks-client-sdk/reactSdk";
 import { ClientsEntity, ClientsManagerPage } from "@/product-types";
 import { ClientCard } from "@/components/ClientCard";
