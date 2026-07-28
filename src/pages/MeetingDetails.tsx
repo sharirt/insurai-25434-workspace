@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router";
+import { getPageUrl } from "@/lib/utils";
 import { useEntityGetOne, useEntityUpdate, useExecuteAction, useEntityGetAll } from "@blocksdiy/blocks-client-sdk/reactSdk";
-import { MeetingsEntity, SendMeetingFormsForSignatureAction, RequestsEntity } from "@/product-types";
+import { MeetingsEntity, SendMeetingFormsForSignatureAction, RequestsEntity, ClientProfilePage } from "@/product-types";
 import { MeetingInfoCard, MeetingInfoCardSkeleton } from "@/components/MeetingInfoCard";
 import { MeetingRequestCard } from "@/components/MeetingRequestCard";
 import { SignatureCountdownBadge } from "@/components/SignatureCountdownBadge";
@@ -153,7 +154,13 @@ export default function MeetingDetails() {
         {/* Header */}
         <div className="flex items-center justify-between sticky top-0 bg-background z-10 py-2">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={() => {
+                if (meeting?.clientId) {
+                  navigate(getPageUrl(ClientProfilePage, { id: meeting.clientId }));
+                } else {
+                  navigate(-1);
+                }
+              }}>
               <ArrowRight />
             </Button>
             <h1 className="text-xl font-bold">פרטי פגישה</h1>

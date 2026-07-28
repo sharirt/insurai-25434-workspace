@@ -16,10 +16,10 @@ importers:
     dependencies:
       '@blocksdiy/blocks-client-sdk':
         specifier: latest
-        version: 1.12.0(@types/react@19.2.14)(react@19.2.4)
+        version: 1.12.1(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.4.3)
       '@blocksdiy/react-common':
         specifier: latest
-        version: 1.35.2(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)
+        version: 1.36.0(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)
       '@cyntler/react-doc-viewer':
         specifier: 1.17.1
         version: 1.17.1(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -375,8 +375,8 @@ importers:
 
 packages:
 
-  '@0no-co/graphql.web@1.3.2':
-    resolution: {integrity: sha512-Q1+pRlLhE31GOY/2c9BAEnFTNxO7Awtc6fhhEDlxyCBQ2N0IhD32cPVvPChrK9mwBNSgRdW/sF1kd2e0ojHj1Q==}
+  '@0no-co/graphql.web@1.3.3':
+    resolution: {integrity: sha512-4gFGBdyaFmQ6n9euhp5JtIGS4ZeivwDr1tCPENUxTvy5wyv532yOtFCr9zzYAJh1s6uibgC+TRXUcay+mxzCoQ==}
     peerDependencies:
       graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     peerDependenciesMeta:
@@ -482,18 +482,12 @@ packages:
     resolution: {integrity: sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA==}
     engines: {node: '>=6.9.0'}
 
-  '@blocksdiy/blocks-client-api@1.20.0':
-    resolution: {integrity: sha512-3YxAJJEbRUZjAutB7245+t11YbsAktlmF6QNhGxKzMBw0//nX5HYuc95XlfDMLLjRNrKD3Tp6x8INWhUJhbpwA==}
-    engines: {node: '>=24.11.0'}
-    peerDependencies:
-      react: 19.2.4
-
   '@blocksdiy/blocks-client-api@1.5.0':
     resolution: {integrity: sha512-vzsgP0682zZmjrQ0yXg4EUaspQ8Vd3JhkfdIV7PzMJtuYt4fzcBJOTa8k5qQv0wu+vPnNAsROxcsRLzIkoXitA==}
     engines: {node: '>=24.11.0'}
 
-  '@blocksdiy/blocks-client-sdk@1.12.0':
-    resolution: {integrity: sha512-tDuaNpBiF/+Y5uXiU0h2uhfbcJBgG1H/vT8SpgYYa+mK2HIIGAMz4MVCMJoVu4ejCW51ZuVynMfJ8P+vT+wFFg==}
+  '@blocksdiy/blocks-client-sdk@1.12.1':
+    resolution: {integrity: sha512-xpopXXkKmx3j8YgBkNm7DFkMJOtuqYcWJmsSuOYujRJld3ouRBaQO8WXwHeUFL6fokYe5LAwKIoHxoMCz+YPpQ==}
     engines: {node: '>=24.11.0'}
     peerDependencies:
       react: 19.2.4
@@ -504,12 +498,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@blocksdiy/react-common@1.35.2':
-    resolution: {integrity: sha512-yU/FQuLURAIPW1lOJCBr3k5XW/0X57DEozCHNex9u6ZhSl8UFCDiB2FatlL+Ikc5vAqlQV1pE6mpumuNkzUU2Q==}
-    engines: {node: '>=24.11.0'}
-
-  '@blocksdiy/react-common@1.5.2':
-    resolution: {integrity: sha512-+52x75xDlD4KZMkUzX+/Fxnz5v7l+rYTRApRen/rOXdu/dYQx5sq4y4Fdk9pqJb4kM9Zd4beHjwhw6BZdIz3JA==}
+  '@blocksdiy/react-common@1.36.0':
+    resolution: {integrity: sha512-Vpa2OECWlMDI+xKP3VTnP9usg+RWqjO93gzJT/9WPT5mIWE99oJfvfQNdpKjg6k1dgPsfs/M2lk7YmGZgi5cyA==}
     engines: {node: '>=24.11.0'}
 
   '@braintree/sanitize-url@7.1.2':
@@ -3047,8 +3037,8 @@ packages:
     peerDependencies:
       acorn: ^6.0.0 || ^7.0.0 || ^8.0.0
 
-  acorn@8.17.0:
-    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
+  acorn@8.18.0:
+    resolution: {integrity: sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -3187,8 +3177,8 @@ packages:
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
-  baseline-browser-mapping@2.11.3:
-    resolution: {integrity: sha512-sbT0Ui/CZwyAyy7icT1Gw5P1LKRlFaHwaF6tDCW5YHq2X5SeeZFphBuIagopSfwSSZq3sQcbmEL072yphxm7ew==}
+  baseline-browser-mapping@2.11.5:
+    resolution: {integrity: sha512-xJo6a6YZnwZfnyGmQKWMbVOcii7XRibjOskRh+WJ9UHQoX16xrQrcIgAMQOzfvs8XiLMx6ih/fsLPF73iY2D1A==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -3695,8 +3685,8 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
-  electron-to-chromium@1.5.396:
-    resolution: {integrity: sha512-yHiw2Y3C3H9U6TMbOfoWK/BPreiOPXRfTWPBwQBoZG6/8TB6eOPnsy5oaRYuatR7Fw2SJ4kKforgufeo7fq0EQ==}
+  electron-to-chromium@1.5.397:
+    resolution: {integrity: sha512-khGTy9U9x02KEtsKM8vx5A62BsRmcOsIgDpWr1ImE32Ax8GxHGPHZf+Eu9H8zOOyHJnB0jTbseyTHbq2XCT8yw==}
 
   embla-carousel-react@8.6.0:
     resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
@@ -5059,8 +5049,8 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
-  minimatch@10.2.5:
-    resolution: {integrity: sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg==}
+  minimatch@10.2.6:
+    resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
     engines: {node: 18 || 20 || >=22}
 
   minimatch@3.1.5:
@@ -6668,7 +6658,7 @@ packages:
 
 snapshots:
 
-  '@0no-co/graphql.web@1.3.2(graphql@16.14.2)':
+  '@0no-co/graphql.web@1.3.3(graphql@16.14.2)':
     optionalDependencies:
       graphql: 16.14.2
 
@@ -6826,25 +6816,28 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@blocksdiy/blocks-client-api@1.20.0(react@19.2.4)':
-    dependencies:
-      lodash: 4.18.1
-      pusher-js: 8.4.0-rc2
-      react: 19.2.4
-
   '@blocksdiy/blocks-client-api@1.5.0':
     dependencies:
       lodash: 4.18.1
       pusher-js: 8.4.0-rc2
 
-  '@blocksdiy/blocks-client-sdk@1.12.0(@types/react@19.2.14)(react@19.2.4)':
+  '@blocksdiy/blocks-client-sdk@1.12.1(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.4.3)':
     dependencies:
       '@blocksdiy/blocks-client-api': 1.5.0
-      '@blocksdiy/react-common': 1.5.2(@types/react@19.2.14)
+      '@blocksdiy/react-common': 1.36.0(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)
       '@tanstack/react-query': 5.101.4(react@19.2.4)
       react: 19.2.4
     transitivePeerDependencies:
+      - '@types/mdast'
       - '@types/react'
+      - '@types/react-dom'
+      - encoding
+      - graphql
+      - micromark
+      - micromark-util-types
+      - react-dom
+      - supports-color
+      - zod
 
   '@blocksdiy/eslint-plugin-auto-import@1.1.1(eslint@9.39.2(jiti@2.7.0))':
     dependencies:
@@ -6855,10 +6848,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@blocksdiy/react-common@1.35.2(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)':
+  '@blocksdiy/react-common@1.36.0(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(zod@4.4.3)':
     dependencies:
       '@ag-ui/client': 0.0.57
-      '@blocksdiy/blocks-client-api': 1.20.0(react@19.2.4)
+      '@blocksdiy/blocks-client-api': 1.5.0
       '@copilotkit/react-core': 1.60.1(@types/mdast@4.0.4)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(graphql@16.14.2)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod@4.4.3)
       '@radix-ui/react-slot': 1.3.3(@types/react@19.2.14)(react@19.2.4)
       '@vapi-ai/web': 2.6.1
@@ -6876,16 +6869,6 @@ snapshots:
       - react-dom
       - supports-color
       - zod
-
-  '@blocksdiy/react-common@1.5.2(@types/react@19.2.14)':
-    dependencies:
-      '@blocksdiy/blocks-client-api': 1.5.0
-      '@radix-ui/react-slot': 1.3.3(@types/react@19.2.14)(react@19.2.4)
-      '@vapi-ai/web': 2.6.1
-      penpal: 7.0.6
-      react: 19.2.4
-    transitivePeerDependencies:
-      - '@types/react'
 
   '@braintree/sanitize-url@7.1.2': {}
 
@@ -9390,7 +9373,7 @@ snapshots:
       '@typescript-eslint/types': 8.57.1
       '@typescript-eslint/visitor-keys': 8.57.1
       debug: 4.4.3
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
@@ -9405,7 +9388,7 @@ snapshots:
       '@typescript-eslint/types': 8.65.0
       '@typescript-eslint/visitor-keys': 8.65.0
       debug: 4.4.3
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
@@ -9454,7 +9437,7 @@ snapshots:
 
   '@urql/core@5.2.0(graphql@16.14.2)':
     dependencies:
-      '@0no-co/graphql.web': 1.3.2(graphql@16.14.2)
+      '@0no-co/graphql.web': 1.3.3(graphql@16.14.2)
       wonka: 6.3.6
     transitivePeerDependencies:
       - graphql
@@ -9513,11 +9496,11 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  acorn-jsx@5.3.2(acorn@8.17.0):
+  acorn-jsx@5.3.2(acorn@8.18.0):
     dependencies:
-      acorn: 8.17.0
+      acorn: 8.18.0
 
-  acorn@8.17.0: {}
+  acorn@8.18.0: {}
 
   adler-32@1.3.1: {}
 
@@ -9674,7 +9657,7 @@ snapshots:
 
   base64-js@1.5.1: {}
 
-  baseline-browser-mapping@2.11.3: {}
+  baseline-browser-mapping@2.11.5: {}
 
   binary-extensions@2.3.0: {}
 
@@ -9702,9 +9685,9 @@ snapshots:
 
   browserslist@4.28.7:
     dependencies:
-      baseline-browser-mapping: 2.11.3
+      baseline-browser-mapping: 2.11.5
       caniuse-lite: 1.0.30001806
-      electron-to-chromium: 1.5.396
+      electron-to-chromium: 1.5.397
       node-releases: 2.0.51
       update-browserslist-db: 1.2.3(browserslist@4.28.7)
 
@@ -10199,7 +10182,7 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
-  electron-to-chromium@1.5.396: {}
+  electron-to-chromium@1.5.397: {}
 
   embla-carousel-react@8.6.0(react@19.2.4):
     dependencies:
@@ -10446,8 +10429,8 @@ snapshots:
 
   espree@10.4.0:
     dependencies:
-      acorn: 8.17.0
-      acorn-jsx: 5.3.2(acorn@8.17.0)
+      acorn: 8.18.0
+      acorn-jsx: 5.3.2(acorn@8.18.0)
       eslint-visitor-keys: 4.2.1
 
   esquery@1.7.0:
@@ -10662,7 +10645,7 @@ snapshots:
     dependencies:
       foreground-child: 3.3.1
       jackspeak: 4.2.3
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       minipass: 7.1.3
       package-json-from-dist: 1.0.1
       path-scurry: 2.0.2
@@ -12010,7 +11993,7 @@ snapshots:
 
   min-indent@1.0.1: {}
 
-  minimatch@10.2.5:
+  minimatch@10.2.6:
     dependencies:
       brace-expansion: 5.0.8
 
@@ -13737,7 +13720,7 @@ snapshots:
       '@babel/parser': 7.29.7
       estree-walker: 3.0.3
       magic-string: 0.30.21
-      minimatch: 10.2.5
+      minimatch: 10.2.6
       vite: 8.0.16(@types/node@24.9.2)(jiti@2.7.0)(sass@1.86.3)(yaml@2.9.0)
 
   vite@8.0.16(@types/node@24.9.2)(jiti@2.7.0)(sass@1.86.3)(yaml@2.9.0):

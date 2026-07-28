@@ -1624,7 +1624,7 @@ export interface IAutoProcessNewRequestActionOutput {
 
 /**
  * AutoProcessNewRequestAction
- * Automatically processes a new insurance request end-to-end. Triggered when a new request is created. Fetches the request, then in parallel builds the clientContext (via createClientContext) and finds all matching forms (by providerId and requestTypeId). Then loops through each matching form calling FillSingleFormWithMapping with the clientContext. Finally stores all filled PDF results in the request's forms column.
+ * Automatically processes a new insurance request end-to-end. Triggered when a new request is created. Fetches the request, then in parallel builds the clientContext (via createClientContext) and finds all matching forms using FetchMatchingFormsForRequest code action (which filters server-side by providerId and requestTypeId, returning only the small matching subset). Then loops through each matching form calling FillSingleFormWithMapping with the clientContext. Finally stores all filled PDF results in the request's forms column.
  */
 export const AutoProcessNewRequestAction = {
   actionBlockId: "69db99aa7d23f0bc9a294f9a",
