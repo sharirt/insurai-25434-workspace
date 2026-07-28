@@ -45,7 +45,6 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
               <TableHead className="text-right">סוג קרן</TableHead>
               <TableHead className="text-right">מספר קופה ראשית</TableHead>
               <TableHead className="text-right">שם קופה ראשית</TableHead>
-              <TableHead className="text-right">קידוד אחיד</TableHead>
               <TableHead className="text-right">שם יצרן</TableHead>
               <TableHead className="text-right">סטטוס</TableHead>
               <TableHead className="text-right">יתרה כוללת</TableHead>
@@ -83,9 +82,6 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
                     {fund.primaryKupaNumber || "—"}
                   </TableCell>
                   <TableCell>{fund.primaryKupaName || "—"}</TableCell>
-                  <TableCell className="font-mono">
-                    {fund.kidodAchid || "—"}
-                  </TableCell>
                   <TableCell>{fund.providerName || "—"}</TableCell>
                   <TableCell>
                     <Badge variant={isActive ? "default" : "secondary"}>
@@ -169,7 +165,6 @@ export const FundsTableSkeleton = ({ rows = 5 }: FundsTableSkeletonProps) => {
             <TableHead className="text-right">סוג קרן</TableHead>
             <TableHead className="text-right">מספר קופה ראשית</TableHead>
             <TableHead className="text-right">שם קופה ראשית</TableHead>
-            <TableHead className="text-right">קידוד אחיד</TableHead>
             <TableHead className="text-right">שם יצרן</TableHead>
             <TableHead className="text-right">סטטוס</TableHead>
             <TableHead className="text-right">יתרה כוללת</TableHead>
@@ -194,7 +189,6 @@ export const FundsTableSkeleton = ({ rows = 5 }: FundsTableSkeletonProps) => {
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-5 w-12" /></TableCell>
               <TableCell><Skeleton className="h-4 w-16" /></TableCell>
