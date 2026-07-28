@@ -482,6 +482,14 @@ export type FundsEntityPlanStatusEnum = "שכיר" | "עצמאי" | "פרט";
  * Stores comprehensive insurance fund information including policy details, financial balances, contribution tracking, and agent/provider relationships for insurance portfolio management
  */
 export interface IFundsEntity {
+  /** Type of fund/keren (סוג קרן) as a text value  */
+  kerenType?: string;
+  /** Primary kupa number (מספר קופה ראשית) stored as text to preserve leading zeros and numeric formatting  */
+  primaryKupaNumber?: string;
+  /** Primary kupa name (שם קופה ראשית) as a text value  */
+  primaryKupaName?: string;
+  /** Kidod Achid identifier (קידוד אחיד) stored as text to preserve formatting  */
+  kidodAchid?: string;
   /** The type of insurance product (e.g., pension, life insurance, provident fund)  */
   productType?: string;
   /** The name of the insurance plan or fund  */
@@ -522,6 +530,8 @@ export interface IFundsEntity {
   providerName?: string;
   /** Agent number (מספר סוכן) as imported from Excel - stored as string to support formats like '2-5000'  */
   agentNumber?: string;
+  /** Reference to the provider in the Providers table (many-to-one relationship)  */
+  providerId?: string;
 }
 
 export const FundsEntity = {
@@ -576,6 +586,8 @@ export const IGemelFundsEntity = {
  * Stores investment track records that can be associated with insurance funds, including track name, type, risk level, and other relevant investment track details.
  */
 export interface IInvestmentTracksEntity {
+  /** Reference to the parent Fund record. Links each investment track to its associated fund in the Funds table.  */
+  fundId?: string;
   /** מספר מ.ה - The internal track ID number used by the provider  */
   trackIdNumber?: string;
   /** תשואה חודשית - Monthly return rate of the investment track (as a decimal, e.g., 0.0138 = 1.38%)  */
@@ -677,6 +689,33 @@ export interface IMeetingSummariesEntity {
 export const MeetingSummariesEntity = {
   tableBlockId: "6a6511563df8bb9535527019",
   instanceType: {} as IMeetingSummariesEntity,
+} as const;
+
+/**
+ * Stores raw XML clearinghouse files downloaded from the Mislaka system. Each record represents one file per client, identified uniquely by clientNationalId + fileName. Used for audit trails and reprocessing of pension/insurance data. The rawXml column holds full XML content (35–210 KB). Upsert key is clientNationalId + fileName.
+ */
+export interface IMislakaFilesEntity {
+  /** The client's Israeli national ID (ת"ז). Stored as text to preserve leading zeros (e.g. 040149726).  */
+  clientNationalId?: string;
+  /** The ID of the corresponding Clients table row. Stored as plain text (same pattern as Funds.clientId) to reference the client record.  */
+  clientId?: string;
+  /** The name of the downloaded clearinghouse file. Together with clientNationalId forms the unique upsert key.  */
+  fileName?: string;
+  /** The name of the producing company (יצרן) associated with this clearinghouse file.  */
+  producerName?: string;
+  /** The producing company's legal entity number (ח"פ) as a text string, to preserve any leading zeros or formatting.  */
+  providerIdCode?: string;
+  /** The date of the data snapshot represented in this clearinghouse file.. ISO 8601 date string, format: YYYY-MM-DD, e.g. 2025-09-30  */
+  snapshotDate?: string;
+  /** The exact date and time when this file was downloaded/fetched from the clearinghouse.. ISO 8601 datetime string, format: YYYY-MM-DDTHH:MM:SS, e.g. 2025-09-30T18:45:00Z, 2025-09-30T18:45:00+05:30  */
+  fetchedAt?: string;
+  /** The full raw XML content of the clearinghouse file. Can be 35–210 KB of text. Must accept large/long text values.  */
+  rawXml?: string;
+}
+
+export const MislakaFilesEntity = {
+  tableBlockId: "6a68c18cf822399116772639",
+  instanceType: {} as IMislakaFilesEntity,
 } as const;
 
 /**
@@ -2956,6 +2995,43 @@ export const SubmitClientIntakeFormAction = {
 
   inputInstanceType: {} as ISubmitClientIntakeFormActionInput,
   outputInstanceType: {} as ISubmitClientIntakeFormActionOutput,
+} as const;
+
+/**
+ * SyncMislakaData input payload
+ */
+export interface ISyncMislakaDataActionInput {
+  /** The client's 9-digit Israeli national ID number (ת"ז). May have a leading zero.  */
+  userID: string;
+}
+
+/**
+ * SyncMislakaData output payload
+ */
+export interface ISyncMislakaDataActionOutput {
+  /** success or error  */
+  status?: string;
+  /** Summary message  */
+  message?: string;
+  /** Number of raw XML files archived to MislakaFiles  */
+  filesArchived?: number;
+  /** Number of Fund records created or updated  */
+  fundsUpserted?: number;
+  /** Number of InvestmentTrack records created or updated  */
+  tracksUpserted?: number;
+  /** List of non-fatal error messages encountered during processing  */
+  errors?: string[];
+}
+
+/**
+ * SyncMislakaDataAction
+ * Execute code action
+ */
+export const SyncMislakaDataAction = {
+  actionBlockId: "6a68c22420bd721f5d1569c0",
+
+  inputInstanceType: {} as ISyncMislakaDataActionInput,
+  outputInstanceType: {} as ISyncMislakaDataActionOutput,
 } as const;
 
 export type SyncRoetoClientsActionInputSyncModeEnum =

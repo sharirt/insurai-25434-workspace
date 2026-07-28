@@ -42,6 +42,10 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
               <TableHead className="text-right">שם תוכנית</TableHead>
               <TableHead className="text-right">סוג מוצר</TableHead>
               <TableHead className="text-right">מספר פוליסה</TableHead>
+              <TableHead className="text-right">סוג קרן</TableHead>
+              <TableHead className="text-right">מספר קופה ראשית</TableHead>
+              <TableHead className="text-right">שם קופה ראשית</TableHead>
+              <TableHead className="text-right">קידוד אחיד</TableHead>
               <TableHead className="text-right">שם יצרן</TableHead>
               <TableHead className="text-right">סטטוס</TableHead>
               <TableHead className="text-right">יתרה כוללת</TableHead>
@@ -73,6 +77,14 @@ export const FundsTable = ({ funds }: FundsTableProps) => {
                   <TableCell>{fund.productType || "—"}</TableCell>
                   <TableCell className="font-mono">
                     {fund.policyNumber || "—"}
+                  </TableCell>
+                  <TableCell>{fund.kerenType || "—"}</TableCell>
+                  <TableCell className="font-mono">
+                    {fund.primaryKupaNumber || "—"}
+                  </TableCell>
+                  <TableCell>{fund.primaryKupaName || "—"}</TableCell>
+                  <TableCell className="font-mono">
+                    {fund.kidodAchid || "—"}
                   </TableCell>
                   <TableCell>{fund.providerName || "—"}</TableCell>
                   <TableCell>
@@ -154,6 +166,10 @@ export const FundsTableSkeleton = ({ rows = 5 }: FundsTableSkeletonProps) => {
             <TableHead className="text-right">שם תוכנית</TableHead>
             <TableHead className="text-right">סוג מוצר</TableHead>
             <TableHead className="text-right">מספר פוליסה</TableHead>
+            <TableHead className="text-right">סוג קרן</TableHead>
+            <TableHead className="text-right">מספר קופה ראשית</TableHead>
+            <TableHead className="text-right">שם קופה ראשית</TableHead>
+            <TableHead className="text-right">קידוד אחיד</TableHead>
             <TableHead className="text-right">שם יצרן</TableHead>
             <TableHead className="text-right">סטטוס</TableHead>
             <TableHead className="text-right">יתרה כוללת</TableHead>
@@ -174,6 +190,10 @@ export const FundsTableSkeleton = ({ rows = 5 }: FundsTableSkeletonProps) => {
             <TableRow key={i}>
               <TableCell><Skeleton className="h-4 w-24" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-24" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-4 w-20" /></TableCell>
               <TableCell><Skeleton className="h-5 w-12" /></TableCell>
