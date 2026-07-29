@@ -131,6 +131,8 @@ export const DATA_TABLES: DataTableConfig[] = [
       { value: "lastDepositAmount", label: "הפקדה אחרונה" },
       { value: "lastDepositDate", label: "תאריך הפקדה אחרונה" },
       { value: "dataValidityDate", label: "תאריך נכונות" },
+      { value: "primaryKupaNumber", label: "מספר קופה ראשית" },
+      { value: "primaryKupaName", label: "שם קופה ראשית" },
     ],
   },
   {
